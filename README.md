@@ -1,2 +1,3 @@
 # krakn
-graph-layer on top of MySQL
+
+graph-layer on top of SQL databases
