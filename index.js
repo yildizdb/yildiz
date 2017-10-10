@@ -19,11 +19,11 @@ const krakn = new Krakn("kn1", {});
 
     const nodeHandler = await krakn.getNodeHandler();
 
-    const romeo = await nodeHandler.createNode("romeo", {someKey: "someValue"}, {name: "Romeo"});
-    const juliet = await nodeHandler.createNode("juliet", {someKey: "someValue"}, {name: "Juliet"});
+    const romeo = await nodeHandler.createNode("romeo", {someKey: "someValue1"}, {name: "Romeo"});
+    const juliet = await nodeHandler.createNode("juliet", {someKey: "someValue2"}, {name: "Juliet"});
 
-    const edge1 = await nodeHandler.createEdge(romeo, juliet, "love", {someKey: "someValue"}, {as: "loves"});
-    const edge2 = await nodeHandler.createEdge(juliet, romeo, "hate", {someKey: "someValue"}, {as: "hates"});
+    const edge1 = await nodeHandler.createEdge(romeo, juliet, "love", {someKey: "someValue3"}, {as: "loves"});
+    const edge2 = await nodeHandler.createEdge(juliet, romeo, "hate", {someKey: "someValue4"}, {as: "hates"});
 
     const rromeo = await nodeHandler.getNodeByIdentifier("romeo");
     await nodeHandler.getNodeByPropertyField("name", "Romeo");
@@ -36,6 +36,11 @@ const krakn = new Krakn("kn1", {});
 
     const nodex = await rromeo.getEdgedNodes();
     console.log(nodex[0].getAttributes(), nodex[0].getEdge());
+
+    const redge1 = await nodeHandler.edgeExistsId(romeo.getKraknID(), juliet.getKraknID(), "%love%");
+    const redge2 = await nodeHandler.edgeExists("juliet", "romeo", "hate");
+
+    console.log(redge1, redge2);
 
     krakn.close();
 })();
