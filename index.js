@@ -39,8 +39,10 @@ const krakn = new Krakn("kn1", {});
 
     const redge1 = await nodeHandler.edgeExistsId(romeo.getKraknID(), juliet.getKraknID(), "%love%");
     const redge2 = await nodeHandler.edgeExists("juliet", "romeo", "hate");
-
     console.log(redge1, redge2);
+
+    const redge3 = await nodeHandler.edgeTest("juliet", "romeo", "hate");
+    console.log(redge3);
 
     krakn.close();
 })();
