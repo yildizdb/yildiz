@@ -18,14 +18,25 @@ const krakn = new Krakn("kn1", {});
     }, true);
 
     const nodeHandler = await krakn.getNodeHandler();
+    const translator = await krakn.getTranslator();
 
-    const romeo = await nodeHandler.createNode("romeo", {someKey: "someValue1"}, {name: "Romeo"});
-    const juliet = await nodeHandler.createNode("juliet", {someKey: "someValue2"}, {name: "Juliet"});
+    const loveRelation = "love";
+    const hateRelation = "hate";
+    const otherRelation = "other";
+    const julietIdentifier = translator.strToInt("juliet");
 
-    const edge1 = await nodeHandler.createEdge(romeo, juliet, "love", {someKey: "someValue3"}, {as: "loves"});
-    const edge2 = await nodeHandler.createEdge(juliet, romeo, "hate", {someKey: "someValue4"}, {as: "hates"});
+    const romeoIdentifier = translator.strToInt("romeo");
+    await translator.storeTranslation(romeoIdentifier, "romeo", {someKey: "someValue0"});
+    const transRes = await translator.getTranslation(romeoIdentifier);
+    console.log(transRes);
 
-    const rromeo = await nodeHandler.getNodeByIdentifier("romeo");
+    const romeo = await nodeHandler.createNode(romeoIdentifier, {someKey: "someValue1"}, {name: "Romeo"});
+    const juliet = await nodeHandler.createNode(julietIdentifier, {someKey: "someValue2"}, {name: "Juliet"});
+
+    const edge1 = await nodeHandler.createEdge(romeo, juliet, loveRelation, {someKey: "someValue3"}, {as: "loves"});
+    const edge2 = await nodeHandler.createEdge(juliet, romeo, hateRelation, {someKey: "someValue4"}, {as: "hates"});
+
+    const rromeo = await nodeHandler.getNodeByIdentifier(romeoIdentifier);
     await nodeHandler.getNodeByPropertyField("name", "Romeo");
     console.log(rromeo.getExtend());
 
@@ -37,12 +48,25 @@ const krakn = new Krakn("kn1", {});
     const nodex = await rromeo.getEdgedNodes();
     console.log(nodex[0].getAttributes(), nodex[0].getEdge());
 
-    const redge1 = await nodeHandler.edgeExistsId(romeo.getKraknID(), juliet.getKraknID(), "%love%");
-    const redge2 = await nodeHandler.edgeExists("juliet", "romeo", "hate");
+    const redge1 = await nodeHandler.edgeExistsId(romeo.getKraknID(), juliet.getKraknID(), `%${loveRelation}%`);
+    const redge2 = await nodeHandler.edgeExists(julietIdentifier, romeoIdentifier, hateRelation);
     console.log(redge1, redge2);
 
-    const redge3 = await nodeHandler.edgeTest("juliet", "romeo", "hate");
+    const redge3 = await nodeHandler.edgeExistsViaJoin(julietIdentifier, romeoIdentifier, hateRelation);
     console.log(redge3);
+
+    const incRes = await nodeHandler.increaseEdgeDepthById(romeo.getKraknID(), juliet.getKraknID(), loveRelation);
+    console.log(incRes);
+
+    const decRes = await nodeHandler.decreaseEdgeDepthById(romeo.getKraknID(), juliet.getKraknID(), loveRelation);
+    console.log(decRes);
+
+    const updRes = await nodeHandler.updateEdgeByIds(romeo.getKraknID(), juliet.getKraknID(), loveRelation,
+        {}, {}, otherRelation);
+    console.log(updRes);
+
+    const delRes = await nodeHandler.removeEdgeByIds(romeo.getKraknID(), juliet.getKraknID(), otherRelation);
+    console.log(delRes);
 
     krakn.close();
 })();
