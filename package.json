@@ -1,6 +1,6 @@
 {
   "name": "krakn",
-  "version": "0.1.0",
+  "version": "1.0.0",
   "description": "graph-layer on top of SQL databases",
   "main": "index.js",
   "repository": "git@github.com:krystianity/krakn.git",
@@ -10,11 +10,15 @@
     "start": "DEBUG=krakn:* node example/krakn-sample.js",
     "test": "DEBUG=krakn:*,sql:* _mocha -R spec --exit --timeout 5000 test/int/*",
     "db:start": "cd db-setup && docker-compose up -d",
-    "db:stop": "cd db-setup && docker-compose down"
+    "db:stop": "cd db-setup && docker-compose down",
+    "http": "DEBUG=krakn:* node example/krakn-http.js"
   },
   "dependencies": {
     "bluebird": "^3.5.1",
+    "cors": "^2.8.4",
     "debug": "^3.1.0",
+    "fastify": "^0.30.3",
+    "log4bro": "^3.3.0",
     "memory-cache": "^0.2.0",
     "mysql2": "^1.4.2",
     "sequelize": "^4.19.0",
