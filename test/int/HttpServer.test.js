@@ -239,7 +239,7 @@ describe("HttpServer INT", () => {
     });
 
     it("should be able to decrease edge depth", async() => {
-        
+
         const {
             status,
             body
@@ -268,7 +268,29 @@ describe("HttpServer INT", () => {
         assert.equal(body.depth, 1);
     });
 
-    
+    it("should be able to get translated edge info for nodes", async() => {
+
+        const {
+            status,
+            body
+        } = await reqProm("/access/translated-edge-info", {
+            method: "POST",
+            headers: {
+                "content-type": "application/json"
+            },
+            body: JSON.stringify({
+                values: [
+                    transValue,
+                    transValue2
+                ]
+            })
+        });
+
+        assert.equal(status, 200);
+        assert.ok(body.edges);
+        assert.ok(body.edges.length);
+        assert.ok(body.edges[0].depth);
+    });
 });
 
 const reqProm = (path = "/", options = {}) => {
