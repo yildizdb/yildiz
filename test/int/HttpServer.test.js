@@ -16,7 +16,11 @@ const prefix = "http_test";
 describe("HttpServer INT", () => {
 
     let transValue = uuid.v4();
+    let transValue2 = uuid.v4();
     let transIdentifier = null;
+    let transIdentifier2 = null;
+    let leftId = null;
+    let rightId = null;
 
     before(async() => {
         await server.listen();
@@ -69,7 +73,7 @@ describe("HttpServer INT", () => {
             })
         });
 
-        assert.equal(status, 200);
+        assert.equal(status, 201);
         assert.ok(body.identifier);
         transIdentifier = body.identifier;
     });
@@ -82,6 +86,189 @@ describe("HttpServer INT", () => {
         assert.equal(status, 200);
         assert.equal(body.value, transValue);
     });
+
+    it("should be able to create another translation", async() => {
+
+        const {
+            status,
+            body
+        } = await reqProm("/translator/translate-and-store", {
+            method: "POST",
+            headers: {
+                "content-type": "application/json"
+            },
+            body: JSON.stringify({
+                value: transValue2,
+                data: {
+                    bla: "blup 2"
+                }
+            })
+        });
+
+        assert.equal(status, 201);
+        assert.ok(body.identifier);
+        transIdentifier2 = body.identifier;
+    });
+
+    it("should be able to create node", async() => {
+
+        const {
+            status,
+            body
+        } = await reqProm("/node", {
+            method: "POST",
+            headers: {
+                "content-type": "application/json"
+            },
+            body: JSON.stringify({
+                identifier: transIdentifier,
+                data: {
+                    bla: "blup"
+                }
+            })
+        });
+
+        assert.equal(status, 201);
+        assert.ok(body.identifier);
+        leftId = body.id;
+    });
+
+    it("should be able to get node", async() => {
+        const {
+            status,
+            body
+        } = await reqProm(`/node/${transIdentifier}`);
+        assert.equal(status, 200);
+        assert.ok(body.data);
+    });
+
+    it("should be able to create another node", async() => {
+
+        const {
+            status,
+            body
+        } = await reqProm("/node", {
+            method: "POST",
+            headers: {
+                "content-type": "application/json"
+            },
+            body: JSON.stringify({
+                identifier: transIdentifier2,
+                data: {
+                    bla: "blup 2"
+                }
+            })
+        });
+
+        assert.equal(status, 201);
+        assert.ok(body.identifier);
+        rightId = body.id;
+    });
+
+    it("should be able to check if edge exists", async() => {
+        const {
+            status,
+            body
+        } = await reqProm(`/edge/${leftId}/${rightId}/test`);
+        assert.equal(status, 404);
+    });
+
+    it("should be able to create edge", async() => {
+
+        const {
+            status,
+            body
+        } = await reqProm("/edge", {
+            method: "POST",
+            headers: {
+                "content-type": "application/json"
+            },
+            body: JSON.stringify({
+                leftId,
+                rightId,
+                relation: "test",
+                attributes: {
+                    taschen: "voller lila"
+                },
+                _extend: {}
+            })
+        });
+
+        assert.equal(status, 201);
+        assert.equal(body.relation, "test");
+        assert.ok(body.data);
+    });
+
+    it("should be able to check if edge exists again", async() => {
+        const {
+            status,
+            body
+        } = await reqProm(`/edge/${leftId}/${rightId}/test`);
+        assert.equal(status, 200);
+        assert.ok(body.data);
+    });
+
+    it("should be able to increase edge depth", async() => {
+
+        const {
+            status,
+            body
+        } = await reqProm("/edge/depth/increase", {
+            method: "PUT",
+            headers: {
+                "content-type": "application/json"
+            },
+            body: JSON.stringify({
+                leftId,
+                rightId,
+                relation: "test"
+            })
+        });
+
+        assert.equal(status, 200);
+        assert.ok(body.success);
+    });
+
+    it("should be able to see increased edge depth", async() => {
+        const {
+            status,
+            body
+        } = await reqProm(`/edge/${leftId}/${rightId}/test`);
+        assert.equal(status, 200);
+        assert.equal(body.depth, 2);
+    });
+
+    it("should be able to decrease edge depth", async() => {
+        
+        const {
+            status,
+            body
+        } = await reqProm("/edge/depth/decrease", {
+            method: "PUT",
+            headers: {
+                "content-type": "application/json"
+            },
+            body: JSON.stringify({
+                leftId,
+                rightId,
+                relation: "test"
+            })
+        });
+
+        assert.equal(status, 200);
+        assert.ok(body.success);
+    });
+
+    it("should be able to see decreased edge depth", async() => {
+        const {
+            status,
+            body
+        } = await reqProm(`/edge/${leftId}/${rightId}/test`);
+        assert.equal(status, 200);
+        assert.equal(body.depth, 1);
+    });
+
+    
 });
 
 const reqProm = (path = "/", options = {}) => {
