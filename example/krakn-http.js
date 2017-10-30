@@ -7,9 +7,8 @@ const {
 (async() => {
     
     const server = new HttpServer(3333, {
-        accessLog: false
+        accessLog: true
     });
 
-    await server.init();
     await server.listen();
 })();
