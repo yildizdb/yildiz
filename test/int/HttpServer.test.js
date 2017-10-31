@@ -3,11 +3,22 @@
 const assert = require("assert");
 const request = require("request");
 const uuid = require("uuid");
+const fs = require("fs");
+const path = require("path");
 
 const {
     HttpServer
 } = require("./../../index.js");
 const pjson = require("./../../package.json");
+
+const PATH_TO_CURL_DOC = "../../docs/curl.md";
+let CURL_OUTPUT = `# KRAKN ${pjson.version} HttpServer CURL Examples\n
+[This file is auto-generated via **'yarn curl'**.]\n`;
+
+const CURLOUT = !!process.env.CURLOUT;
+if(CURLOUT){
+    require("request-to-curl");
+}
 
 const port = 45456;
 const server = new HttpServer(port);
@@ -34,7 +45,7 @@ describe("HttpServer INT", () => {
         const {
             status,
             body
-        } = await reqProm();
+        } = await reqProm(undefined, undefined, true, "Index request.");
         assert.equal(status, 200);
         assert.equal(body.version, pjson.version);
     });
@@ -43,7 +54,7 @@ describe("HttpServer INT", () => {
         const {
             status,
             body
-        } = await reqProm("/admin/health");
+        } = await reqProm("/admin/health", undefined, true, "Healthcheck with status information.");
         assert.equal(status, 200);
         assert.equal(body.status, "UP");
     });
@@ -51,7 +62,7 @@ describe("HttpServer INT", () => {
     it("should be able to make health check 2", async() => {
         const {
             status
-        } = await reqProm("/admin/healthcheck");
+        } = await reqProm("/admin/healthcheck", undefined, true, "Quick healthcheck.");
         assert.equal(status, 200);
     });
 
@@ -71,7 +82,7 @@ describe("HttpServer INT", () => {
                     bla: "blup"
                 }
             })
-        });
+        }, true, "Store translation information. (value is automatically translated into hash.)");
 
         assert.equal(status, 201);
         assert.ok(body.identifier);
@@ -82,7 +93,7 @@ describe("HttpServer INT", () => {
         const {
             status,
             body
-        } = await reqProm(`/translator/${transIdentifier}`);
+        } = await reqProm(`/translator/${transIdentifier}`, undefined, true, "Get translation information.");
         assert.equal(status, 200);
         assert.equal(body.value, transValue);
     });
@@ -126,7 +137,7 @@ describe("HttpServer INT", () => {
                     bla: "blup"
                 }
             })
-        });
+        }, true, "Create a node.");
 
         assert.equal(status, 201);
         assert.ok(body.identifier);
@@ -137,7 +148,7 @@ describe("HttpServer INT", () => {
         const {
             status,
             body
-        } = await reqProm(`/node/${transIdentifier}`);
+        } = await reqProm(`/node/${transIdentifier}`, undefined, true, "Get information about node.");
         assert.equal(status, 200);
         assert.ok(body.data);
     });
@@ -158,7 +169,7 @@ describe("HttpServer INT", () => {
                     bla: "blup 2"
                 }
             })
-        });
+        }, true, "Create a second node.");
 
         assert.equal(status, 201);
         assert.ok(body.identifier);
@@ -169,7 +180,7 @@ describe("HttpServer INT", () => {
         const {
             status,
             body
-        } = await reqProm(`/edge/${leftId}/${rightId}/test`);
+        } = await reqProm(`/edge/${leftId}/${rightId}/test`, undefined, true, "Check whether an edge exists.");
         assert.equal(status, 404);
     });
 
@@ -192,7 +203,7 @@ describe("HttpServer INT", () => {
                 },
                 _extend: {}
             })
-        });
+        }, true, "Create an edge between two nodes.");
 
         assert.equal(status, 201);
         assert.equal(body.relation, "test");
@@ -203,7 +214,7 @@ describe("HttpServer INT", () => {
         const {
             status,
             body
-        } = await reqProm(`/edge/${leftId}/${rightId}/test`);
+        } = await reqProm(`/edge/${leftId}/${rightId}/test`, undefined, true, "Get existing edge.");
         assert.equal(status, 200);
         assert.ok(body.data);
     });
@@ -223,7 +234,7 @@ describe("HttpServer INT", () => {
                 rightId,
                 relation: "test"
             })
-        });
+        }, true, "Increase depth of an edge.");
 
         assert.equal(status, 200);
         assert.ok(body.success);
@@ -253,7 +264,7 @@ describe("HttpServer INT", () => {
                 rightId,
                 relation: "test"
             })
-        });
+        }, true, "Decrease depth of an edge.");
 
         assert.equal(status, 200);
         assert.ok(body.success);
@@ -284,7 +295,7 @@ describe("HttpServer INT", () => {
                     transValue2
                 ]
             })
-        });
+        }, true, "Complex merged information about edges for translated nodes.");
 
         assert.equal(status, 200);
         assert.ok(body.edges);
@@ -298,7 +309,7 @@ describe("HttpServer INT", () => {
             body
         } = await reqProm(`/edge/${leftId}/${rightId}/test`, {
             method: "DELETE"
-        });
+        }, true, "Deleting an edge.");
         assert.equal(status, 200);
         assert.ok(body.success);
     });
@@ -317,7 +328,7 @@ describe("HttpServer INT", () => {
             body
         } = await reqProm(`/node/${transIdentifier}`, {
             method: "DELETE"
-        });
+        }, true, "Deleting a node.");
         assert.equal(status, 200);
         assert.ok(body.success);
     });
@@ -339,7 +350,7 @@ describe("HttpServer INT", () => {
             body
         } = await reqProm(`/translator/${transIdentifier}`, {
             method: "DELETE"
-        });
+        }, true, "Deleting a translation.");
         assert.equal(status, 200);
         assert.ok(body.success);
     });
@@ -354,9 +365,16 @@ describe("HttpServer INT", () => {
         assert.equal(status, 200);
         assert.ok(body.success);
     });
+
+    if(CURLOUT){
+        it("should be able to write curl output to file", async() => {
+            await writeCurlToFile(CURL_OUTPUT);
+            console.log("Curl-Docs updated.");
+        });
+    }
 });
 
-const reqProm = (path = "/", options = {}) => {
+const reqProm = (path = "/", options = {}, curl = false, description = "Not described") => {
 
     options.url = `http://localhost:${port}${path}`;
     if (!options.headers) {
@@ -371,6 +389,10 @@ const reqProm = (path = "/", options = {}) => {
                 return reject(error);
             }
 
+            if(CURLOUT && curl){
+                formatCurl(response.request.req.toCurl(), description, body, response.statusCode);
+            }
+
             try {
                 body = JSON.parse(body);
             } catch (error) {
@@ -382,6 +404,29 @@ const reqProm = (path = "/", options = {}) => {
                 headers: response.headers,
                 body
             });
+        });
+    });
+};
+
+const formatCurl = (curl, description, body, status) => {
+    CURL_OUTPUT += `\n* ->${description}<-\n\n\`\`\`shell
+    # Request:
+    ${curl}\n
+    # ${status}-Response:
+    ${body ? "# " : "#"}${body}\n\`\`\`\n`;
+};
+
+const writeCurlToFile = (curlOutput) => {
+    return new Promise((resolve, reject) => {
+        const filePath = path.join(__dirname, PATH_TO_CURL_DOC);
+        console.log("Storing:", filePath, curlOutput.length);
+        fs.writeFile(filePath, curlOutput, "utf8", error => {
+
+            if(error){
+                return reject(error);
+            }
+
+            resolve();
         });
     });
 };
