@@ -1,6 +1,6 @@
 {
   "name": "krakn",
-  "version": "0.12.0",
+  "version": "0.14.0",
   "description": "graph-layer on top of SQL databases",
   "main": "index.js",
   "repository": "git@github.com:krystianity/krakn.git",
@@ -13,7 +13,8 @@
     "db:stop": "cd db-setup && docker-compose down",
     "http": "DEBUG=krakn:* node example/krakn-http.js",
     "curl": "CURLOUT=true _mocha -R mocha-silent-reporter --exit --timeout 5000 test/int/HttpServer.test.js",
-    "sql": "DEBUG=krakn:*,sql:* _mocha -R spec --exit --timeout 5000 test/int/*"
+    "sql": "DEBUG=krakn:*,sql:* _mocha -R spec --exit --timeout 5000 test/int/*",
+    "swagger": "CREATE_SWAGGER=true DEBUG=krakn:* node example/_gen-swagger.js"
   },
   "dependencies": {
     "bluebird": "^3.5.1",
@@ -31,6 +32,7 @@
     "mocha": "~4.0.0",
     "mocha-silent-reporter": "^1.0.0",
     "request": "^2.83.0",
-    "request-to-curl": "^0.1.1"
+    "request-to-curl": "^0.1.1",
+    "fastify-swagger": "micro-tools/fastify-swagger#d1bc7ac192bc29fa54f84eca717ebf606283b29a"
   }
 }

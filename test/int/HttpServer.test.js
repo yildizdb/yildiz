@@ -79,7 +79,10 @@ describe("HttpServer INT", () => {
             body: JSON.stringify({
                 value: transValue,
                 data: {
-                    bla: "blup"
+                    bla: "blup",
+                    xd: 123,
+                    derp: 1.2,
+                    hihi: false
                 }
             })
         }, true, "Store translation information. (value is automatically translated into hash.)");
