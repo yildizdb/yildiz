@@ -291,6 +291,69 @@ describe("HttpServer INT", () => {
         assert.ok(body.edges.length);
         assert.ok(body.edges[0].depth);
     });
+
+    it("should be able to delete edge", async() => {
+        const {
+            status,
+            body
+        } = await reqProm(`/edge/${leftId}/${rightId}/test`, {
+            method: "DELETE"
+        });
+        assert.equal(status, 200);
+        assert.ok(body.success);
+    });
+
+    it("should not be able to see edge", async() => {
+        const {
+            status,
+            body
+        } = await reqProm(`/edge/${leftId}/${rightId}/test`);
+        assert.equal(status, 404);
+    });
+
+    it("should be able to delete node", async() => {
+        const {
+            status,
+            body
+        } = await reqProm(`/node/${transIdentifier}`, {
+            method: "DELETE"
+        });
+        assert.equal(status, 200);
+        assert.ok(body.success);
+    });
+
+    it("should be able to delete other node", async() => {
+        const {
+            status,
+            body
+        } = await reqProm(`/node/${transIdentifier2}`, {
+            method: "DELETE"
+        });
+        assert.equal(status, 200);
+        assert.ok(body.success);
+    });
+
+    it("should be able to delete translation", async() => {
+        const {
+            status,
+            body
+        } = await reqProm(`/translator/${transIdentifier}`, {
+            method: "DELETE"
+        });
+        assert.equal(status, 200);
+        assert.ok(body.success);
+    });
+
+    it("should be able to delete other translation", async() => {
+        const {
+            status,
+            body
+        } = await reqProm(`/translator/${transIdentifier2}`, {
+            method: "DELETE"
+        });
+        assert.equal(status, 200);
+        assert.ok(body.success);
+    });
 });
 
 const reqProm = (path = "/", options = {}) => {
