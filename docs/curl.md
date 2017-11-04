@@ -1,4 +1,4 @@
-# KRAKN 0.14.0 HttpServer CURL Examples
+# KRAKN 0.15.0 HttpServer CURL Examples
 
 [This file is auto-generated via **'yarn curl'**.]
 
@@ -9,7 +9,7 @@
     curl 'http://localhost:45456/' -H 'x-krakn-prefix: http_test' --compressed
 
     # 200-Response:
-    # {"version":"0.14.0"}
+    # {"version":"0.15.0"}
 ```
 
 * ->Healthcheck with status information.<-
@@ -36,57 +36,57 @@
 
 ```shell
     # Request:
-    curl 'http://localhost:45456/translator/translate-and-store' -H 'content-type: application/json' -H 'x-krakn-prefix: http_test' --data-binary '{"value":"685946f0-972d-47b9-90ef-315442300aad","data":{"bla":"blup","xd":123,"derp":1.2,"hihi":false}}' --compressed
+    curl 'http://localhost:45456/translator/translate-and-store' -H 'content-type: application/json' -H 'x-krakn-prefix: http_test' --data-binary '{"value":"72f75719-6df5-44cc-a925-c46630718f41","data":{"bla":"blup","xd":123,"derp":1.2,"hihi":false}}' --compressed
 
     # 201-Response:
-    # {"identifier":3978838496,"value":"685946f0-972d-47b9-90ef-315442300aad","data":{"bla":"blup","xd":123,"derp":1.2,"hihi":false}}
+    # {"identifier":2653703943,"value":"72f75719-6df5-44cc-a925-c46630718f41","data":{"bla":"blup","xd":123,"derp":1.2,"hihi":false}}
 ```
 
 * ->Get translation information.<-
 
 ```shell
     # Request:
-    curl 'http://localhost:45456/translator/3978838496' -H 'x-krakn-prefix: http_test' --compressed
+    curl 'http://localhost:45456/translator/2653703943' -H 'x-krakn-prefix: http_test' --compressed
 
     # 200-Response:
-    # {"identifier":3978838496,"value":"685946f0-972d-47b9-90ef-315442300aad","data":{"xd":123,"bla":"blup","derp":1.2,"hihi":false}}
+    # {"identifier":2653703943,"value":"72f75719-6df5-44cc-a925-c46630718f41","data":{"xd":123,"bla":"blup","derp":1.2,"hihi":false}}
 ```
 
 * ->Create a node.<-
 
 ```shell
     # Request:
-    curl 'http://localhost:45456/node' -H 'content-type: application/json' -H 'x-krakn-prefix: http_test' --data-binary '{"identifier":3978838496,"data":{"bla":"blup"}}' --compressed
+    curl 'http://localhost:45456/node' -H 'content-type: application/json' -H 'x-krakn-prefix: http_test' --data-binary '{"identifier":2653703943,"data":{"bla":"blup"}}' --compressed
 
     # 201-Response:
-    # {"identifier":"3978838496","id":109,"data":{"bla":"blup"}}
+    # {"identifier":"2653703943","id":147,"data":{"bla":"blup"}}
 ```
 
 * ->Get information about node.<-
 
 ```shell
     # Request:
-    curl 'http://localhost:45456/node/3978838496' -H 'x-krakn-prefix: http_test' --compressed
+    curl 'http://localhost:45456/node/2653703943' -H 'x-krakn-prefix: http_test' --compressed
 
     # 200-Response:
-    # {"identifier":"3978838496","id":109,"data":{"bla":"blup"}}
+    # {"identifier":"2653703943","id":147,"data":{"bla":"blup"}}
 ```
 
 * ->Create a second node.<-
 
 ```shell
     # Request:
-    curl 'http://localhost:45456/node' -H 'content-type: application/json' -H 'x-krakn-prefix: http_test' --data-binary '{"identifier":101406049,"data":{"bla":"blup 2"}}' --compressed
+    curl 'http://localhost:45456/node' -H 'content-type: application/json' -H 'x-krakn-prefix: http_test' --data-binary '{"identifier":3615208461,"data":{"bla":"blup 2"}}' --compressed
 
     # 201-Response:
-    # {"identifier":"101406049","id":110,"data":{"bla":"blup 2"}}
+    # {"identifier":"3615208461","id":148,"data":{"bla":"blup 2"}}
 ```
 
 * ->Check whether an edge exists.<-
 
 ```shell
     # Request:
-    curl 'http://localhost:45456/edge/109/110/test' -H 'x-krakn-prefix: http_test' --compressed
+    curl 'http://localhost:45456/edge/147/148/test' -H 'x-krakn-prefix: http_test' --compressed
 
     # 404-Response:
     # {"error":"Edge with these ids and relation does not exist.","code":404}
@@ -96,7 +96,7 @@
 
 ```shell
     # Request:
-    curl 'http://localhost:45456/edge' -H 'content-type: application/json' -H 'x-krakn-prefix: http_test' --data-binary '{"leftId":109,"rightId":110,"relation":"test","attributes":{"taschen":"voller lila"},"_extend":{}}' --compressed
+    curl 'http://localhost:45456/edge' -H 'content-type: application/json' -H 'x-krakn-prefix: http_test' --data-binary '{"leftId":147,"rightId":148,"relation":"test","attributes":{"taschen":"voller lila"},"_extend":{}}' --compressed
 
     # 201-Response:
     # {"depth":1,"relation":"test","data":{"taschen":"voller lila"}}
@@ -106,7 +106,7 @@
 
 ```shell
     # Request:
-    curl 'http://localhost:45456/edge/109/110/test' -H 'x-krakn-prefix: http_test' --compressed
+    curl 'http://localhost:45456/edge/147/148/test' -H 'x-krakn-prefix: http_test' --compressed
 
     # 200-Response:
     # {"depth":1,"relation":"test","data":{"taschen":"voller lila"}}
@@ -116,7 +116,7 @@
 
 ```shell
     # Request:
-    curl 'http://localhost:45456/edge/depth/increase' -X PUT -H 'content-type: application/json' -H 'x-krakn-prefix: http_test' --data-binary '{"leftId":109,"rightId":110,"relation":"test"}' --compressed
+    curl 'http://localhost:45456/edge/depth/increase' -X PUT -H 'content-type: application/json' -H 'x-krakn-prefix: http_test' --data-binary '{"leftId":147,"rightId":148,"relation":"test"}' --compressed
 
     # 200-Response:
     # {"success":true}
@@ -126,7 +126,7 @@
 
 ```shell
     # Request:
-    curl 'http://localhost:45456/edge/depth/decrease' -X PUT -H 'content-type: application/json' -H 'x-krakn-prefix: http_test' --data-binary '{"leftId":109,"rightId":110,"relation":"test"}' --compressed
+    curl 'http://localhost:45456/edge/depth/decrease' -X PUT -H 'content-type: application/json' -H 'x-krakn-prefix: http_test' --data-binary '{"leftId":147,"rightId":148,"relation":"test"}' --compressed
 
     # 200-Response:
     # {"success":true}
@@ -136,17 +136,17 @@
 
 ```shell
     # Request:
-    curl 'http://localhost:45456/access/translated-edge-info' -H 'content-type: application/json' -H 'x-krakn-prefix: http_test' --data-binary '{"values":["685946f0-972d-47b9-90ef-315442300aad","bcf3a1cf-a429-41a8-b027-993c13443db8"]}' --compressed
+    curl 'http://localhost:45456/access/translated-edge-info' -H 'content-type: application/json' -H 'x-krakn-prefix: http_test' --data-binary '{"values":["72f75719-6df5-44cc-a925-c46630718f41","635d4f1c-d902-418e-bbd3-a336e55a729b"]}' --compressed
 
     # 200-Response:
-    # {"edges":[{"other_node_id":110,"relation":"test","depth":1,"edata":{},"value":"bcf3a1cf-a429-41a8-b027-993c13443db8","tdata":{}}]}
+    # {"edges":[{"other_node_id":148,"relation":"test","depth":1,"edata":{"taschen":"voller lila"},"value":"635d4f1c-d902-418e-bbd3-a336e55a729b","tdata":{"bla":"blup 2"}}]}
 ```
 
 * ->Deleting an edge.<-
 
 ```shell
     # Request:
-    curl 'http://localhost:45456/edge/109/110/test' -X DELETE -H 'x-krakn-prefix: http_test' -H 'content-length: 0' --compressed
+    curl 'http://localhost:45456/edge/147/148/test' -X DELETE -H 'x-krakn-prefix: http_test' -H 'content-length: 0' --compressed
 
     # 200-Response:
     # {"success":true}
@@ -156,7 +156,7 @@
 
 ```shell
     # Request:
-    curl 'http://localhost:45456/node/3978838496' -X DELETE -H 'x-krakn-prefix: http_test' -H 'content-length: 0' --compressed
+    curl 'http://localhost:45456/node/2653703943' -X DELETE -H 'x-krakn-prefix: http_test' -H 'content-length: 0' --compressed
 
     # 200-Response:
     # {"success":true}
@@ -166,7 +166,7 @@
 
 ```shell
     # Request:
-    curl 'http://localhost:45456/translator/3978838496' -X DELETE -H 'x-krakn-prefix: http_test' -H 'content-length: 0' --compressed
+    curl 'http://localhost:45456/translator/2653703943' -X DELETE -H 'x-krakn-prefix: http_test' -H 'content-length: 0' --compressed
 
     # 200-Response:
     # {"success":true}
