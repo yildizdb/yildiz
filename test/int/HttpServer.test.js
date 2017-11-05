@@ -33,6 +33,9 @@ describe("HttpServer INT", () => {
     let leftId = null;
     let rightId = null;
 
+    const relationVal = "test";
+    const relationHash = 3127628307;
+
     before(async() => {
         await server.listen();
     });
@@ -200,7 +203,7 @@ describe("HttpServer INT", () => {
             body: JSON.stringify({
                 leftId,
                 rightId,
-                relation: "test",
+                relation: relationVal,
                 attributes: {
                     taschen: "voller lila"
                 },
@@ -209,7 +212,7 @@ describe("HttpServer INT", () => {
         }, true, "Create an edge between two nodes.");
 
         assert.equal(status, 201);
-        assert.equal(body.relation, "test");
+        assert.equal(body.relation, relationHash); //expect hash convert
         assert.ok(body.data);
     });
 
@@ -235,7 +238,7 @@ describe("HttpServer INT", () => {
             body: JSON.stringify({
                 leftId,
                 rightId,
-                relation: "test"
+                relation: relationHash
             })
         }, true, "Increase depth of an edge.");
 

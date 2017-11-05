@@ -60,3 +60,5 @@ typings/
 test.js
 .vscode/
 logs/
+
+*.tgz

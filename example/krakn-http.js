@@ -4,11 +4,7 @@ const {
     HttpServer
 } = require("./../index.js");
 
-(async() => {
-    
-    const server = new HttpServer(3333, {
-        accessLog: true
-    });
+const options = require("./../config/default.json");
 
-    await server.listen();
-})();
+const server = new HttpServer(3333, options);
+server.listen();

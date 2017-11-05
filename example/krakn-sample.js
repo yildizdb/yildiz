@@ -20,9 +20,12 @@ const krakn = new Krakn("kn1", {});
     const nodeHandler = await krakn.getNodeHandler();
     const translator = await krakn.getTranslator();
 
-    const loveRelation = "love";
-    const hateRelation = "hate";
-    const otherRelation = "other";
+    const loveRelationValue = "love";
+    const hateRelationValue = "hate";
+    const otherRelationValue = "other";
+    const loveRelation = translator.strToInt(loveRelationValue);
+    const hateRelation = translator.strToInt(hateRelationValue);
+    const otherRelation = translator.strToInt(otherRelationValue);
     const julietIdentifier = translator.strToInt("juliet");
 
     const romeoIdentifier = translator.strToInt("romeo");
@@ -35,6 +38,10 @@ const krakn = new Krakn("kn1", {});
 
     const edge1 = await nodeHandler.createEdge(romeo, juliet, loveRelation, {someKey: "someValue3"}, {as: "loves"});
     const edge2 = await nodeHandler.createEdge(juliet, romeo, hateRelation, {someKey: "someValue4"}, {as: "hates"});
+    const edge3 = await nodeHandler.createEdge(romeo, juliet, loveRelation, {someKey: "someValue5"}, {as: "loves"});
+
+
+    console.log(edge1, edge2, edge3);
 
     const rromeo = await nodeHandler.getNodeByIdentifier(romeoIdentifier);
     await nodeHandler.getNodeByPropertyField("name", "Romeo");
@@ -48,7 +55,7 @@ const krakn = new Krakn("kn1", {});
     const nodex = await rromeo.getEdgedNodes();
     console.log(nodex[0].getAttributes(), nodex[0].getEdge());
 
-    const redge1 = await nodeHandler.edgeExistsId(romeo.getKraknID(), juliet.getKraknID(), `%${loveRelation}%`);
+    const redge1 = await nodeHandler.edgeExistsId(romeo.getKraknID(), juliet.getKraknID(), loveRelation);
     const redge2 = await nodeHandler.edgeExists(julietIdentifier, romeoIdentifier, hateRelation);
     console.log(redge1, redge2);
 
@@ -65,8 +72,8 @@ const krakn = new Krakn("kn1", {});
         {}, {}, otherRelation);
     console.log(updRes);
 
-    const delRes = await nodeHandler.removeEdgeByIds(romeo.getKraknID(), juliet.getKraknID(), otherRelation);
-    console.log(delRes);
+    //const delRes = await nodeHandler.removeEdgeByIds(romeo.getKraknID(), juliet.getKraknID(), otherRelation);
+    //console.log(delRes);
 
     krakn.close();
 })();
