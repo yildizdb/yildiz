@@ -23,7 +23,7 @@ if(CURLOUT){
 const port = 45456;
 const server = new HttpServer(port, {
     accessLog: false,
-    enableRaw: true
+    enableRaw: true //be aware that this might be a security issue
 });
 
 const prefix = "http_test";
@@ -90,12 +90,14 @@ describe("HttpServer INT", () => {
                     xd: 123,
                     derp: 1.2,
                     hihi: false
-                }
+                },
+                ttld: true
             })
         }, true, "Store translation information. (value is automatically translated into hash.)");
 
         assert.equal(status, 201);
         assert.ok(body.identifier);
+        assert.ok(body.ttld);
         transIdentifier = body.identifier;
     });
 
@@ -128,6 +130,7 @@ describe("HttpServer INT", () => {
 
         assert.equal(status, 201);
         assert.ok(body.identifier);
+        assert.ok(!body.ttld);
         transIdentifier2 = body.identifier;
     });
 
@@ -145,12 +148,15 @@ describe("HttpServer INT", () => {
                 identifier: transIdentifier,
                 data: {
                     bla: "blup"
-                }
+                },
+                ttld: true
             })
         }, true, "Create a node.");
 
         assert.equal(status, 201);
         assert.ok(body.identifier);
+        assert.ok(body.ttld);
+        assert.ok(body.created_at);
         leftId = body.id;
     });
 
@@ -161,6 +167,8 @@ describe("HttpServer INT", () => {
         } = await reqProm(`/node/${transIdentifier}`, undefined, true, "Get information about node.");
         assert.equal(status, 200);
         assert.ok(body.data);
+        assert.ok(body.ttld);
+        assert.ok(body.created_at);
     });
 
     it("should be able to create another node", async() => {
@@ -183,6 +191,7 @@ describe("HttpServer INT", () => {
 
         assert.equal(status, 201);
         assert.ok(body.identifier);
+        assert.ok(!body.ttld);
         rightId = body.id;
     });
 
@@ -211,7 +220,8 @@ describe("HttpServer INT", () => {
                 attributes: {
                     taschen: "voller lila"
                 },
-                _extend: {}
+                _extend: {},
+                ttld: true
             })
         }, true, "Create an edge between two nodes.");
 
@@ -226,6 +236,8 @@ describe("HttpServer INT", () => {
         } = await reqProm(`/edge/${leftId}/${rightId}/test`, undefined, true, "Get existing edge.");
         assert.equal(status, 200);
         assert.ok(body.data);
+        assert.ok(body.ttld);
+        assert.ok(body.created_at);
     });
 
     it("should be able to create another similar edge for the same id pair", async() => {
@@ -248,7 +260,6 @@ describe("HttpServer INT", () => {
                 _extend: {}
             })
         }, true, "Create another edge between two nodes.");
-
         assert.equal(status, 201);
         assert.ok(body.success);
     });
@@ -273,7 +284,6 @@ describe("HttpServer INT", () => {
                 _extend: {}
             })
         }, true, "Create an edge between two nodes (swapped ids).");
-
         assert.equal(status, 201);
         assert.ok(body.success);
     });
@@ -336,6 +346,8 @@ describe("HttpServer INT", () => {
         } = await reqProm(`/edge/${leftId}/${rightId}/test`);
         assert.equal(status, 200);
         assert.equal(body.depth, 2);
+        assert.ok(body.ttld);
+        assert.ok(body.created_at);
     });
 
     it("should be able to decrease edge depth", async() => {
@@ -354,7 +366,6 @@ describe("HttpServer INT", () => {
                 relation: "test"
             })
         }, true, "Decrease depth of an edge.");
-
         assert.equal(status, 200);
         assert.ok(body.success);
     });
