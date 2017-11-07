@@ -88,7 +88,7 @@ MMMMMMMMMMMMMMMMMMMNMMMMMNohMMMMMMMMMMMMMMMMMMMMMM
 - [x] rewrite createEdge to raw query (ignore existing id combos)
 - [x] write raw getEdges method
 - [x] add ttls to functions and eps
-- [ ] add ttl job + time to config file
+- [x] add ttl job + time to config file
 - [ ] finish use-case.md
 - [x] add raw query + ep for select and execute
 - [ ] add new eps to client
