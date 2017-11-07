@@ -21,7 +21,11 @@ if(CURLOUT){
 }
 
 const port = 45456;
-const server = new HttpServer(port);
+const server = new HttpServer(port, {
+    accessLog: false,
+    enableRaw: true
+});
+
 const prefix = "http_test";
 
 describe("HttpServer INT", () => {
@@ -405,10 +409,13 @@ describe("HttpServer INT", () => {
             body
         } = await reqProm(`/raw/spread`, {
             method: "POST",
+            headers: {
+                "content-type": "application/json"
+            },
             body: JSON.stringify({
                 query: "DELETE FROM http_test_edges WHERE 1 = 1"
             })
-        }, true, "Executing raw spread.");
+        }, true, "Executing raw spread (queries with metadata result).");
         assert.equal(status, 200);
         assert.ok(body.metadata);
     });
@@ -419,13 +426,16 @@ describe("HttpServer INT", () => {
             body
         } = await reqProm(`/raw/query`, {
             method: "POST",
+            headers: {
+                "content-type": "application/json"
+            },
             body: JSON.stringify({
                 query: "SELECT COUNT(*) AS count FROM http_test_edges"
             })
-        }, true, "Executing raw spread.");
+        }, true, "Executing raw spread (queries with result set).");
         assert.equal(status, 200);
         assert.ok(body.results);
-        assert.ok(!!body.results[0].count);
+        assert.ok(!body.results[0].count);
     });
 
     it("should not be able to see edge", async() => {

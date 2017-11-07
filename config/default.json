@@ -1,5 +1,6 @@
 {
     "accessLog": false,
+    "enableRaw": false,
     "cache": {
         "nodeCacheTime": 6000,
         "edgeCacheTime": 12000
