@@ -87,13 +87,14 @@ MMMMMMMMMMMMMMMMMMMNMMMMMNohMMMMMMMMMMMMMMMMMMMMMM
 - [x] change relation to integer
 - [x] rewrite createEdge to raw query (ignore existing id combos)
 - [x] write raw getEdges method
-- [ ] add ttls to functions and eps
+- [x] add ttls to functions and eps
 - [ ] add ttl job + time to config file
 - [ ] finish use-case.md
 - [x] add raw query + ep for select and execute
 - [ ] add new eps to client
 - [ ] add ttl to client
 - [x] add id field to response of edge
-- [ ] add ttld and created_at fields to responses
+- [x] add ttld and created_at fields to responses
+- [ ] mysql escape the prefix
 - [ ] regenerate curl and swagger
 - [ ] publish to npm repo

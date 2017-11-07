@@ -1,6 +1,11 @@
 {
     "accessLog": false,
     "enableRaw": false,
+    "ttl": {
+        "active": true,
+        "lifeTimeInSec": 86400,
+        "jobIntervalInSec": 120
+    },
     "cache": {
         "nodeCacheTime": 6000,
         "edgeCacheTime": 12000
