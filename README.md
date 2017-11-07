@@ -85,15 +85,15 @@ MMMMMMMMMMMMMMMMMMMNMMMMMNohMMMMMMMMMMMMMMMMMMMMMM
 
 - [x] exchange prefix names with new static ones
 - [x] change relation to integer
-- [ ] rewrite createEdge to raw query (ignore existing id combos)
-- [ ] write raw getEdges method
+- [x] rewrite createEdge to raw query (ignore existing id combos)
+- [x] write raw getEdges method
 - [ ] add ttls to functions and eps
 - [ ] add ttl job + time to config file
 - [ ] finish use-case.md
-- [ ] add raw query + ep for select and execute
+- [x] add raw query + ep for select and execute
 - [ ] add new eps to client
 - [ ] add ttl to client
-- [ ] add id field to response of edge
+- [x] add id field to response of edge
 - [ ] add ttld and created_at fields to responses
 - [ ] regenerate curl and swagger
 - [ ] publish to npm repo
