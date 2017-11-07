@@ -212,8 +212,7 @@ describe("HttpServer INT", () => {
         }, true, "Create an edge between two nodes.");
 
         assert.equal(status, 201);
-        assert.equal(body.relation, relationHash); //expect hash convert
-        assert.ok(body.data);
+        assert.ok(body.success);
     });
 
     it("should be able to check if edge exists again", async() => {
@@ -223,6 +222,86 @@ describe("HttpServer INT", () => {
         } = await reqProm(`/edge/${leftId}/${rightId}/test`, undefined, true, "Get existing edge.");
         assert.equal(status, 200);
         assert.ok(body.data);
+    });
+
+    it("should be able to create another similar edge for the same id pair", async() => {
+        
+        const {
+            status,
+            body
+        } = await reqProm("/edge", {
+            method: "POST",
+            headers: {
+                "content-type": "application/json"
+            },
+            body: JSON.stringify({
+                leftId,
+                rightId,
+                relation: relationVal,
+                attributes: {
+                    taschen: "voller lila zum quadrat"
+                },
+                _extend: {}
+            })
+        }, true, "Create another edge between two nodes.");
+
+        assert.equal(status, 201);
+        assert.ok(body.success);
+    });
+
+    it("should be able to create a swapped edge for the same id pair", async() => {
+        
+        const {
+            status,
+            body
+        } = await reqProm("/edge", {
+            method: "POST",
+            headers: {
+                "content-type": "application/json"
+            },
+            body: JSON.stringify({
+                leftId: rightId, //swap
+                rightId: leftId, //swap
+                relation: relationVal,
+                attributes: {
+                    taschen: "voller lila zum quadrat swapped"
+                },
+                _extend: {}
+            })
+        }, true, "Create an edge between two nodes (swapped ids).");
+
+        assert.equal(status, 201);
+        assert.ok(body.success);
+    });
+
+    it("should be able to see a two lefted edges", async() => {
+        const {
+            status,
+            body
+        } = await reqProm(`/edge/left/${leftId}/${relationVal}`, undefined, true, "Get all edges with left node id and relation.");
+        assert.equal(status, 200);
+        assert.ok(body.edges);
+        assert.equal(body.edges.length, 2);
+    });
+
+    it("should be able to see a single righted edges", async() => {
+        const {
+            status,
+            body
+        } = await reqProm(`/edge/right/${leftId}/${relationVal}`, undefined, true, "Get all edges with right node id and relation");
+        assert.equal(status, 200);
+        assert.ok(body.edges);
+        assert.equal(body.edges.length, 1);
+    });
+
+    it("should be able to see a all edges", async() => {
+        const {
+            status,
+            body
+        } = await reqProm(`/edge/both/${leftId}/${relationVal}`, undefined, true, "Get all edges with left or right node id and relation");
+        assert.equal(status, 200);
+        assert.ok(body.edges);
+        assert.equal(body.edges.length, 3);
     });
 
     it("should be able to increase edge depth", async() => {
@@ -309,7 +388,7 @@ describe("HttpServer INT", () => {
         assert.ok(body.edges[0].depth);
     });
 
-    it("should be able to delete edge", async() => {
+    it("should be able to delete edges", async() => {
         const {
             status,
             body
@@ -318,6 +397,35 @@ describe("HttpServer INT", () => {
         }, true, "Deleting an edge.");
         assert.equal(status, 200);
         assert.ok(body.success);
+    });
+
+    it("should be able to delete additional swapped edge via raw command", async() => {
+        const {
+            status,
+            body
+        } = await reqProm(`/raw/spread`, {
+            method: "POST",
+            body: JSON.stringify({
+                query: "DELETE FROM http_test_edges WHERE 1 = 1"
+            })
+        }, true, "Executing raw spread.");
+        assert.equal(status, 200);
+        assert.ok(body.metadata);
+    });
+
+    it("should be able to query edge count via raw command", async() => {
+        const {
+            status,
+            body
+        } = await reqProm(`/raw/query`, {
+            method: "POST",
+            body: JSON.stringify({
+                query: "SELECT COUNT(*) AS count FROM http_test_edges"
+            })
+        }, true, "Executing raw spread.");
+        assert.equal(status, 200);
+        assert.ok(body.results);
+        assert.ok(!!body.results[0].count);
     });
 
     it("should not be able to see edge", async() => {

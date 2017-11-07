@@ -36,11 +36,9 @@ const krakn = new Krakn("kn1", {});
     const romeo = await nodeHandler.createNode(romeoIdentifier, {someKey: "someValue1"}, {name: "Romeo"});
     const juliet = await nodeHandler.createNode(julietIdentifier, {someKey: "someValue2"}, {name: "Juliet"});
 
-    const edge1 = await nodeHandler.createEdge(romeo, juliet, loveRelation, {someKey: "someValue3"}, {as: "loves"});
-    const edge2 = await nodeHandler.createEdge(juliet, romeo, hateRelation, {someKey: "someValue4"}, {as: "hates"});
-    const edge3 = await nodeHandler.createEdge(romeo, juliet, loveRelation, {someKey: "someValue5"}, {as: "loves"});
-
-
+    const edge1 = await nodeHandler.createEdgeWithId(romeo.getKraknID(), juliet.getKraknID(), loveRelation, {someKey: "someValue3"}, {as: "loves"});
+    const edge2 = await nodeHandler.createEdgeWithId(juliet.getKraknID(), romeo.getKraknID(), hateRelation, {someKey: "someValue4"}, {as: "hates"});
+    const edge3 = await nodeHandler.createEdgeWithId(romeo.getKraknID(), juliet.getKraknID(), loveRelation, {someKey: "someValue5"}, {as: "loves"});
     console.log(edge1, edge2, edge3);
 
     const rromeo = await nodeHandler.getNodeByIdentifier(romeoIdentifier);
