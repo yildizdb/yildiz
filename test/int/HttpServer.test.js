@@ -418,6 +418,7 @@ describe("HttpServer INT", () => {
         }, true, "Executing raw spread (queries with metadata result).");
         assert.equal(status, 200);
         assert.ok(body.metadata);
+        assert.ok(body.metadata.affectedRows);
     });
 
     it("should be able to query edge count via raw command", async() => {
