@@ -403,7 +403,7 @@ describe("HttpServer INT", () => {
         assert.ok(body.edges[0].depth);
     });
 
-    it("should be able to delete edges", async() => {
+    xit("should be able to delete edges", async() => {
         const {
             status,
             body
@@ -414,7 +414,7 @@ describe("HttpServer INT", () => {
         assert.ok(body.success);
     });
 
-    it("should be able to delete additional swapped edge via raw command", async() => {
+    xit("should be able to delete additional swapped edge via raw command", async() => {
         const {
             status,
             body
@@ -432,7 +432,7 @@ describe("HttpServer INT", () => {
         assert.ok(body.metadata.affectedRows);
     });
 
-    it("should be able to query edge count via raw command", async() => {
+    xit("should be able to query edge count via raw command", async() => {
         const {
             status,
             body
@@ -450,7 +450,7 @@ describe("HttpServer INT", () => {
         assert.ok(!body.results[0].count);
     });
 
-    it("should not be able to see edge", async() => {
+    xit("should not be able to see edge", async() => {
         const {
             status,
             body
@@ -458,7 +458,7 @@ describe("HttpServer INT", () => {
         assert.equal(status, 404);
     });
 
-    it("should be able to delete node", async() => {
+    xit("should be able to delete node", async() => {
         const {
             status,
             body
@@ -469,7 +469,7 @@ describe("HttpServer INT", () => {
         assert.ok(body.success);
     });
 
-    it("should be able to delete other node", async() => {
+    xit("should be able to delete other node", async() => {
         const {
             status,
             body
