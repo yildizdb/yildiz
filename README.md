@@ -11,6 +11,7 @@ high performance relations (Graph) database on top of MySQL
 * lightweight deployments (small Node.js footprint) + scales easily
 * sits on top of any MySQL database (easy to adapt to Postgres, MSSQL or SQLite3)
 * able to handle billions of edges and nodes
+* ttl feature for all resources
 * attach **dynamic data** to edges and nodes (as JSON columns)
 * extend the existing table schema through `_extend` options
 
