@@ -96,5 +96,6 @@ MMMMMMMMMMMMMMMMMMMNMMMMMNohMMMMMMMMMMMMMMMMMMMMMM
 - [x] add id field to response of edge
 - [x] add ttld and created_at fields to responses
 - [ ] mysql escape the prefix
+- [ ] implement dijkstra
 - [ ] regenerate curl and swagger
 - [ ] publish to npm repo

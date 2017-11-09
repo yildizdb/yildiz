@@ -23,7 +23,12 @@ if(CURLOUT){
 const port = 45456;
 const server = new HttpServer(port, {
     accessLog: false,
-    enableRaw: true //be aware that this might be a security issue
+    enableRaw: true, //be aware that this might be a security issue
+    ttl: {
+        active: true,
+        lifeTimeInSec: 2,
+        jobIntervalInSec: 1
+    }
 });
 
 const prefix = "http_test";
@@ -403,7 +408,7 @@ describe("HttpServer INT", () => {
         assert.ok(body.edges[0].depth);
     });
 
-    xit("should be able to delete edges", async() => {
+    it("should be able to delete edges", async() => {
         const {
             status,
             body
@@ -414,7 +419,7 @@ describe("HttpServer INT", () => {
         assert.ok(body.success);
     });
 
-    xit("should be able to delete additional swapped edge via raw command", async() => {
+    it("should be able to delete additional swapped edge via raw command", async() => {
         const {
             status,
             body
@@ -432,7 +437,7 @@ describe("HttpServer INT", () => {
         assert.ok(body.metadata.affectedRows);
     });
 
-    xit("should be able to query edge count via raw command", async() => {
+    it("should be able to query edge count via raw command", async() => {
         const {
             status,
             body
@@ -450,7 +455,7 @@ describe("HttpServer INT", () => {
         assert.ok(!body.results[0].count);
     });
 
-    xit("should not be able to see edge", async() => {
+    it("should not be able to see edge", async() => {
         const {
             status,
             body
@@ -458,7 +463,7 @@ describe("HttpServer INT", () => {
         assert.equal(status, 404);
     });
 
-    xit("should be able to delete node", async() => {
+    it("should be able to delete node", async() => {
         const {
             status,
             body
@@ -469,7 +474,7 @@ describe("HttpServer INT", () => {
         assert.ok(body.success);
     });
 
-    xit("should be able to delete other node", async() => {
+    it("should be able to delete other node", async() => {
         const {
             status,
             body
@@ -508,6 +513,99 @@ describe("HttpServer INT", () => {
             console.log("Curl-Docs updated.");
         });
     }
+
+    it("should be able to create a few ttld resources", async() => {
+
+        let nodeId1 = null;
+        let nodeId2 = null;
+
+        await reqProm("/translator/translate-and-store", {
+            method: "POST",
+            headers: {
+                "content-type": "application/json"
+            },
+            body: JSON.stringify({
+                value: "who will watch over you",
+                data: {},
+                ttld: true
+            })
+        });
+
+        await reqProm("/node", {
+            method: "POST",
+            headers: {
+                "content-type": "application/json"
+            },
+            body: JSON.stringify({
+                identifier: "now1",
+                data: {},
+                ttld: true
+            })
+        }).then(({body}) => nodeId1 = body.id);
+
+        await reqProm("/node", {
+            method: "POST",
+            headers: {
+                "content-type": "application/json"
+            },
+            body: JSON.stringify({
+                identifier: "now2",
+                data: {},
+                ttld: true
+            })
+        }).then(({body}) => nodeId2 = body.id);
+
+        const {
+            status,
+            body
+        } = await reqProm("/edge", {
+            method: "POST",
+            headers: {
+                "content-type": "application/json"
+            },
+            body: JSON.stringify({
+                leftId: nodeId1, 
+                rightId: nodeId2,
+                relation: "blllaaaaa",
+                attributes: {},
+                _extend: {},
+                ttld: true
+            })
+        });
+        assert.equal(status, 201);
+        assert.ok(body.success);
+    });
+
+    it("should be able to await next ttl job execution", function(done){
+        this.timeout(2505);
+        setTimeout(done, 2500);
+    });
+
+    it("should be not see any of the created ttl flagged resources", async() => {
+
+        const transQuery = "SELECT COUNT(*) as count FROM http_test_translates";
+        const nodesQuery = "SELECT COUNT(*) as count FROM http_test_nodes";
+        const edgesQuery = "SELECT COUNT(*) as count FROM http_test_edges";
+
+        const {
+            status,
+            body
+        } = await reqProm(`/raw/query`, {
+            method: "POST",
+            headers: {
+                "content-type": "application/json"
+            },
+            body: JSON.stringify({
+                query: `SELECT (${transQuery}) as tcount, (${nodesQuery}) as ncount, (${edgesQuery}) as ecount`
+            })
+        });
+        assert.equal(status, 200);
+        assert.ok(body.results);
+        assert.ok(body.results[0]);
+        assert.equal(body.results[0].tcount, 0);
+        assert.equal(body.results[0].ncount, 0);
+        assert.equal(body.results[0].ecount, 0);
+    });
 });
 
 const reqProm = (path = "/", options = {}, curl = false, description = "Not described") => {
