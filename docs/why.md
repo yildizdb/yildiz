@@ -1,9 +1,8 @@
-# Why develop another "graph" database?
+# Why develop another "graph" database
 
 TL;DR: easy setup, simple scaling, maintainability, heavy write throughput, http API, ttl feature
 
-
-In detail:
+## In detail
 
 * graph databases like **neo4j** have do not give access to their scaling features in the community versions
 * graph databases like **janusgraph** have require complicated setups

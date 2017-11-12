@@ -78,6 +78,20 @@ describe("HttpServer INT", () => {
         assert.equal(status, 200);
     });
 
+    it("should be able to get rejected for missing prefix", async() => {
+        const {
+            status
+        } = await reqProm("/translator/123", {}, null, null, null);
+        assert.equal(status, 400);
+    });
+
+    it("should be able to get rejected for missing prefix", async() => {
+        const {
+            status
+        } = await reqProm("/translator/123", {}, null, null, "!-Ä:");
+        assert.equal(status, 400);
+    });
+
     it("should be able to create translation", async() => {
 
         const {
@@ -608,13 +622,17 @@ describe("HttpServer INT", () => {
     });
 });
 
-const reqProm = (path = "/", options = {}, curl = false, description = "Not described") => {
+const reqProm = (path = "/", options = {}, curl = false, description = "Not described", _prefix = undefined) => {
 
     options.url = `http://localhost:${port}${path}`;
     if (!options.headers) {
         options.headers = {};
     }
-    options.headers["x-krakn-prefix"] = prefix;
+    
+    options.headers["x-krakn-prefix"] = _prefix !== undefined ? _prefix : prefix;
+    if(!options.headers["x-krakn-prefix"]){
+        delete options.headers["x-krakn-prefix"];
+    }
 
     return new Promise((resolve, reject) => {
         request(options, (error, response, body) => {
