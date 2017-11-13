@@ -28,7 +28,7 @@ MMMMMMMMMMMMMMMMMMM+hMMMM+-:NMMMMMMMMMMMMMMMMMMMMM
 MMMMMMMMMMMMMMMMMMMNMMMMMNohMMMMMMMMMMMMMMMMMMMMMM
 ```
 
-# krakn - Graph Database on top of MySQL
+# krakn - HTTP Hyper Relations on MySQL
 
 high performance relations (Graph) database on top of MySQL
 
