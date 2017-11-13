@@ -1,34 +1,6 @@
-```
-MMMMMMMMMMMMMNdyo+/:::::::/+sdMMMMMMMMMMMMMMMMMMMM
-MMMMMMMMMMMd+-----------------:sNMMMMMMMMMMMMMMMMM
-MMMMMMMMMN+---------------------:mMMMMMMMMMMMMMMMM
-MMMMMMMMN:-----------------------:NMMMMMMMMMMMMMMM
-MMMMMMMMo-------------------------oMMMMMMMMMMMMMMM
-MMMMMMMM:---------:-----------..--:NMMMMMMMMMMMMMM
-MMMMMMMM/--------.----------:ss:---dMMMMMMMMMMMMMM
-MMMMMMMMy-------::dh+:------oNmy---sMMMMMMMMMMMMMM
-MMMMMMMMMo-------/mNd:::::::/yh/----yMMMMMMMMMMMMM
-MMMMMMMMMMo-------/o/-----------::--/MMMMMMMMMMMMM
-MMMMMMMMMMN------:---:------::------oMMMMMMMMMMMMM
-MMMMMMNMMMMs----------:+o/+s/------+NMMMMMMMMMMMMM
-MMMMMM/odMMMy:----------:::------/hMMMMMMddMMMMMMM
-MMMMMM+--:+ydmhs+---------------omNMNmy+:/NMMMMMMM
-MMMMMMs---::::::-----------------::----:sNMMMMMMmm
-MMMMMMN+::-------------------------:::odmmdhys+:/N
-MMMMMMmo-----:--------------------------------.:NM
-mhhhs/-----::----:-----------------:-------.`.sMMM
-N/---------:-----/-----/-------:-------..-:+hNMMMM
-MN+..---.`------/------+-------:-------+ydmNMMMMMM
-MMMms+/+/-------------:o:-------.------------:+sdM
-MMMMMMmo-------`------/d:-----::``----------.:ohNM
-MMNhs:-------..om:---:hN------hMh:```..``./ymMMMMM
-MMNmhso+///+sdMMMh---oMM/----oMMMMNysoshmMMMMMMMMM
-MMMMMMMMMMMMMMMMMMs-/NMMy---+MMMMMMMMMMMMMMMMMMMMM
-MMMMMMMMMMMMMMMMMMM+hMMMM+-:NMMMMMMMMMMMMMMMMMMMMM
-MMMMMMMMMMMMMMMMMMMNMMMMMNohMMMMMMMMMMMMMMMMMMMMMM
-```
-
 # krakn - HTTP Hyper Relations on MySQL
+
+<center><img src="https://cdn1.teamhellfall.de/contentdelivery/02051803-7e0d-4279-937b-cf5aeb2bed1e.1a6b4e86-4e57-456d-ad8b-cd49a1c30748.png?dim=86x92" /></center><br/>
 
 high performance relations (Graph) database on top of MySQL
 
@@ -98,4 +70,32 @@ high performance relations (Graph) database on top of MySQL
 - [ ] add new eps to client
 - [ ] add ttl to client
 
-<center><img src="https://cdn1.teamhellfall.de/contentdelivery/02051803-7e0d-4279-937b-cf5aeb2bed1e.1a6b4e86-4e57-456d-ad8b-cd49a1c30748.png?dim=86x92" /></center><br/>
+```
+MMMMMMMMMMMMMNdyo+/:::::::/+sdMMMMMMMMMMMMMMMMMMMM
+MMMMMMMMMMMd+-----------------:sNMMMMMMMMMMMMMMMMM
+MMMMMMMMMN+---------------------:mMMMMMMMMMMMMMMMM
+MMMMMMMMN:-----------------------:NMMMMMMMMMMMMMMM
+MMMMMMMMo-------------------------oMMMMMMMMMMMMMMM
+MMMMMMMM:---------:-----------..--:NMMMMMMMMMMMMMM
+MMMMMMMM/--------.----------:ss:---dMMMMMMMMMMMMMM
+MMMMMMMMy-------::dh+:------oNmy---sMMMMMMMMMMMMMM
+MMMMMMMMMo-------/mNd:::::::/yh/----yMMMMMMMMMMMMM
+MMMMMMMMMMo-------/o/-----------::--/MMMMMMMMMMMMM
+MMMMMMMMMMN------:---:------::------oMMMMMMMMMMMMM
+MMMMMMNMMMMs----------:+o/+s/------+NMMMMMMMMMMMMM
+MMMMMM/odMMMy:----------:::------/hMMMMMMddMMMMMMM
+MMMMMM+--:+ydmhs+---------------omNMNmy+:/NMMMMMMM
+MMMMMMs---::::::-----------------::----:sNMMMMMMmm
+MMMMMMN+::-------------------------:::odmmdhys+:/N
+MMMMMMmo-----:--------------------------------.:NM
+mhhhs/-----::----:-----------------:-------.`.sMMM
+N/---------:-----/-----/-------:-------..-:+hNMMMM
+MN+..---.`------/------+-------:-------+ydmNMMMMMM
+MMMms+/+/-------------:o:-------.------------:+sdM
+MMMMMMmo-------`------/d:-----::``----------.:ohNM
+MMNhs:-------..om:---:hN------hMh:```..``./ymMMMMM
+MMNmhso+///+sdMMMh---oMM/----oMMMMNysoshmMMMMMMMMM
+MMMMMMMMMMMMMMMMMMs-/NMMy---+MMMMMMMMMMMMMMMMMMMMM
+MMMMMMMMMMMMMMMMMMM+hMMMM+-:NMMMMMMMMMMMMMMMMMMMMM
+MMMMMMMMMMMMMMMMMMMNMMMMMNohMMMMMMMMMMMMMMMMMMMMMM
+```
