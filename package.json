@@ -32,7 +32,7 @@
     "swagger": "CREATE_SWAGGER=true DEBUG=krakn:* node example/_gen-swagger.js",
     "i:self": "./scripts/self-install.sh",
     "i:update": "./scripts/self-update.sh",
-    "docker:up": "docker-compose up --build -d",
+    "docker:up": "docker-compose build --no-cache && docker-compose up -d",
     "docker:logs": "docker logs krakn_krakn_1",
     "docker:down": "docker-compose down"
   },
