@@ -16,8 +16,6 @@ program
     .option("-l, --logs", "Log to stdout (optional)")
     .parse(process.argv);
 
-debug(`Initialising krakndb-${pjson.version}.`);
-
 let port = 3058;
 if(program.port){
     port = program.port;
@@ -54,6 +52,7 @@ try {
     process.exit(2);
 }
 
+debug(`krakndb in version`, pjson.version);
 options = Object.assign(defaultOptions, options);
 debug("Starting http interface..");
 const server = new HttpServer(port, options);
