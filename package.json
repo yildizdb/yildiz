@@ -1,6 +1,6 @@
 {
   "name": "krakn",
-  "version": "1.15.0",
+  "version": "1.16.0",
   "description": "graph database layer on top of SQL with http interface",
   "main": "index.js",
   "repository": "git@github.com:krystianity/krakn.git",
@@ -31,7 +31,10 @@
     "sql": "DEBUG=krakn:*,sql:* _mocha -R spec --exit --timeout 5000 test/int/*",
     "swagger": "CREATE_SWAGGER=true DEBUG=krakn:* node example/_gen-swagger.js",
     "i:self": "./scripts/self-install.sh",
-    "i:update": "./scripts/self-update.sh"
+    "i:update": "./scripts/self-update.sh",
+    "docker:up": "docker-compose up --build -d",
+    "docker:logs": "docker logs krakn_krakn_1",
+    "docker:down": "docker-compose down"
   },
   "dependencies": {
     "bluebird": "^3.5.1",

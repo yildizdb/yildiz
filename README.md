@@ -31,7 +31,7 @@ high performance relations (Graph) database on top of MySQL
 * if you have docker and docker-compose installed you can setup krakn locally super easy:
 * `git clone https://github.com/krakndb/krakn`
 * `cd krakn`
-* `docker-compose up`
+* `docker-compose up --build`
 * this will start a MySQL Database, Adminer Admin UI @ `http://localhost:8080` and krakn @ `http://localhost:3058`
 * it will pull its config from `config/docker.json`
 
