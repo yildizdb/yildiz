@@ -1,0 +1,25 @@
+version: "3.1"
+services:
+  db:
+    image: percona:5.7
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: toor
+      MYSQL_DATABASE: krakn
+  ui:
+    image: adminer
+    restart: always
+    ports:
+      - 8080:8080
+    links:
+     - db:db
+    depends_on:
+     - db
+  krakn:
+    build: .
+    ports:
+      - 3058:3058
+    links:
+     - db:db
+    depdends_on:
+     - db

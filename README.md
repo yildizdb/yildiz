@@ -28,6 +28,15 @@ high performance relations (Graph) database on top of MySQL
 * Use right [alongside your code](example/krakn-sample.js)
 * Spawn server via [http interface](example/krakn-http.js)
 
+## Easy Setup with Docker & Docker-Compose
+
+* if you have docker and docker-compose installed you can setup krakn locally super easy:
+* `git clone https://github.com/krakndb/krakn`
+* `cd krakn`
+* `docker-compose up`
+* this will start a MySQL Database, Adminer Admin UI @ `http://localhost:8080` and krakn @ `http://localhost:3058`
+* it will pull its config from `config/docker.json`
+
 ## Available Clients
 
 * [Node.js](https://github.com/krystianity/krakn-js)
@@ -51,20 +60,9 @@ high performance relations (Graph) database on top of MySQL
 * **generate CURL examples** via `yarn curl`
 * stop database via `yarn db:stop`
 
-## TODO
+## In Development
 
-- [x] exchange prefix names with new static ones
-- [x] change relation to integer
-- [x] rewrite createEdge to raw query (ignore existing id combos)
-- [x] write raw getEdges method
-- [x] add ttls to functions and eps
-- [x] add ttl job + time to config file
-- [x] finish use-case.md
-- [x] add raw query + ep for select and execute
-- [x] add id field to response of edge
-- [x] add ttld and created_at fields to responses
-- [x] mysql escape the prefix
-- [ ] implement dijkstra
+- [ ] implement dijkstra for MySQL 8
 - [ ] regenerate curl and swagger
 - [ ] publish to npm repo
 - [ ] add new eps to client

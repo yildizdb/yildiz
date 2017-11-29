@@ -1,0 +1,26 @@
+{
+    "accessLog": true,
+    "enableRaw": true,
+    "ttl": {
+        "active": true,
+        "lifeTimeInSec": 86400,
+        "jobIntervalInSec": 120
+    },
+    "cache": {
+        "nodeCacheTime": 6000,
+        "edgeCacheTime": 12000
+    },
+    "database": {
+        "database": "krakn",
+        "username": "root",
+        "password": "toor",
+        "host": "db",
+        "port": 3306,
+        "dialect": "mysql",
+        "pool": {
+            "max": 20,
+            "min": 0,
+            "idle": 15000
+        }
+    }
+}
