@@ -1,7 +1,5 @@
 # krakn - HTTP Hyper Relations on MySQL
 
-<center><img src="https://cdn1.teamhellfall.de/contentdelivery/02051803-7e0d-4279-937b-cf5aeb2bed1e.1a6b4e86-4e57-456d-ad8b-cd49a1c30748.png?dim=86x92" /></center><br/>
-
 high performance relations (Graph) database on top of MySQL
 
 ## Features
@@ -62,11 +60,7 @@ high performance relations (Graph) database on top of MySQL
 
 ## In Development
 
-- [ ] implement dijkstra for MySQL 8
-- [ ] regenerate curl and swagger
-- [ ] publish to npm repo
-- [ ] add new eps to client
-- [ ] add ttl to client
+* [ ] implement dijkstra for MySQL 8
 
 ```
 MMMMMMMMMMMMMNdyo+/:::::::/+sdMMMMMMMMMMMMMMMMMMMM
