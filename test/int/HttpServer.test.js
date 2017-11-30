@@ -521,6 +521,28 @@ describe("HttpServer INT", () => {
         assert.ok(body.success);
     });
 
+    it("should be able to see stats", async() => {
+        const {
+            status,
+            body
+        } = await reqProm("/admin/stats", undefined, true, "Statistics for all running prefix krakn instances in factory.");
+        assert.equal(status, 200);
+        assert.ok(body.http_test);
+        assert.equal(typeof body.http_test, "object");
+        assert.ok(body.http_test.internCalls.queries);
+    });
+
+    it("should be able to see metrics", async() => {
+        const {
+            status,
+            headers,
+            body
+        } = await reqProm("/admin/metrics", undefined, true, "Get Prometheus Metrics.");
+        assert.equal(status, 200);
+        assert.equal(headers["content-type"], "text/plain; version=0.0.4; charset=utf-8");
+        assert.ok(body);
+    });
+
     if(CURLOUT){
         it("should be able to write curl output to file", async() => {
             await writeCurlToFile(CURL_OUTPUT);
@@ -588,28 +610,6 @@ describe("HttpServer INT", () => {
         });
         assert.equal(status, 201);
         assert.ok(body.success);
-    });
-
-    it("should be able to see stats", async() => {
-        const {
-            status,
-            body
-        } = await reqProm("/admin/stats", undefined, true, "Statistics for all running prefix krakn instances in factory.");
-        assert.equal(status, 200);
-        assert.ok(body.http_test);
-        assert.equal(typeof body.http_test, "object");
-        assert.ok(body.http_test.internCalls.queries);
-    });
-
-    it("should be able to see metrics", async() => {
-        const {
-            status,
-            headers,
-            body
-        } = await reqProm("/admin/metrics", undefined, true, "Get Prometheus Metrics.");
-        assert.equal(status, 200);
-        assert.equal(headers["content-type"], "text/plain; version=0.0.4; charset=utf-8");
-        assert.ok(body);
     });
 
     it("should be able to await next ttl job execution", function(done){
