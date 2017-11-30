@@ -601,6 +601,17 @@ describe("HttpServer INT", () => {
         assert.ok(body.http_test.internCalls.queries);
     });
 
+    it("should be able to see metrics", async() => {
+        const {
+            status,
+            headers,
+            body
+        } = await reqProm("/admin/metrics", undefined, true, "Get Prometheus Metrics.");
+        assert.equal(status, 200);
+        assert.equal(headers["content-type"], "text/plain; version=0.0.4; charset=utf-8");
+        assert.ok(body);
+    });
+
     it("should be able to await next ttl job execution", function(done){
         this.timeout(2505);
         setTimeout(done, 2500);

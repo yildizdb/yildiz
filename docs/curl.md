@@ -36,57 +36,57 @@
 
 ```shell
     # Request:
-    curl 'http://localhost:45456/translator/translate-and-store' -H 'content-type: application/json' -H 'x-krakn-prefix: http_test' --data-binary '{"value":"011b4679-6c91-4111-911a-788d3aed1176","data":{"bla":"blup","xd":123,"derp":1.2,"hihi":false},"ttld":true}' --compressed
+    curl 'http://localhost:45456/translator/translate-and-store' -H 'content-type: application/json' -H 'x-krakn-prefix: http_test' --data-binary '{"value":"e1694aad-b3c1-4779-8a7f-674ff20005e6","data":{"bla":"blup","xd":123,"derp":1.2,"hihi":false},"ttld":true}' --compressed
 
     # 201-Response:
-    # {"identifier":11,"value":"011b4679-6c91-4111-911a-788d3aed1176","data":{"bla":"blup","xd":123,"derp":1.2,"hihi":false},"ttld":true}
+    # {"identifier":1084946395,"value":"e1694aad-b3c1-4779-8a7f-674ff20005e6","data":{"bla":"blup","xd":123,"derp":1.2,"hihi":false},"ttld":true}
 ```
 
 * ->Get translation information.<-
 
 ```shell
     # Request:
-    curl 'http://localhost:45456/translator/11' -H 'x-krakn-prefix: http_test' --compressed
+    curl 'http://localhost:45456/translator/1084946395' -H 'x-krakn-prefix: http_test' --compressed
 
     # 200-Response:
-    # {"identifier":11,"value":"011b4679-6c91-4111-911a-788d3aed1176","data":{"xd":123,"bla":"blup","derp":1.2,"hihi":false},"ttld":true,"created_at":"2017-11-30T14:26:16.000Z"}
+    # {"identifier":1084946395,"value":"e1694aad-b3c1-4779-8a7f-674ff20005e6","data":{"xd":123,"bla":"blup","derp":1.2,"hihi":false},"ttld":true,"created_at":"2017-11-30T15:37:33.000Z"}
 ```
 
 * ->Create a node.<-
 
 ```shell
     # Request:
-    curl 'http://localhost:45456/node' -H 'content-type: application/json' -H 'x-krakn-prefix: http_test' --data-binary '{"identifier":11,"data":{"bla":"blup"},"ttld":true}' --compressed
+    curl 'http://localhost:45456/node' -H 'content-type: application/json' -H 'x-krakn-prefix: http_test' --data-binary '{"identifier":1084946395,"data":{"bla":"blup"},"ttld":true}' --compressed
 
     # 201-Response:
-    # {"id":17,"identifier":"11","data":{"bla":"blup"},"ttld":true,"created_at":"2017-11-30T14:26:16.000Z"}
+    # {"id":13,"identifier":"1084946395","data":{"bla":"blup"},"ttld":true,"created_at":"2017-11-30T15:37:33.000Z"}
 ```
 
 * ->Get information about node.<-
 
 ```shell
     # Request:
-    curl 'http://localhost:45456/node/11' -H 'x-krakn-prefix: http_test' --compressed
+    curl 'http://localhost:45456/node/1084946395' -H 'x-krakn-prefix: http_test' --compressed
 
     # 200-Response:
-    # {"id":17,"identifier":"11","data":{"bla":"blup"},"ttld":true,"created_at":"2017-11-30T14:26:16.000Z"}
+    # {"id":13,"identifier":"1084946395","data":{"bla":"blup"},"ttld":true,"created_at":"2017-11-30T15:37:33.000Z"}
 ```
 
 * ->Create a second node.<-
 
 ```shell
     # Request:
-    curl 'http://localhost:45456/node' -H 'content-type: application/json' -H 'x-krakn-prefix: http_test' --data-binary '{"identifier":407460311,"data":{"bla":"blup 2"}}' --compressed
+    curl 'http://localhost:45456/node' -H 'content-type: application/json' -H 'x-krakn-prefix: http_test' --data-binary '{"identifier":6790,"data":{"bla":"blup 2"}}' --compressed
 
     # 201-Response:
-    # {"id":18,"identifier":"407460311","data":{"bla":"blup 2"},"ttld":false,"created_at":"2017-11-30T14:26:16.000Z"}
+    # {"id":14,"identifier":"6790","data":{"bla":"blup 2"},"ttld":false,"created_at":"2017-11-30T15:37:33.000Z"}
 ```
 
 * ->Check whether an edge exists.<-
 
 ```shell
     # Request:
-    curl 'http://localhost:45456/edge/17/18/test' -H 'x-krakn-prefix: http_test' --compressed
+    curl 'http://localhost:45456/edge/13/14/test' -H 'x-krakn-prefix: http_test' --compressed
 
     # 404-Response:
     # {"error":"Edge with these ids and relation does not exist.","code":404}
@@ -96,7 +96,7 @@
 
 ```shell
     # Request:
-    curl 'http://localhost:45456/edge' -H 'content-type: application/json' -H 'x-krakn-prefix: http_test' --data-binary '{"leftId":17,"rightId":18,"relation":"test","attributes":{"taschen":"voller lila"},"_extend":{},"ttld":true}' --compressed
+    curl 'http://localhost:45456/edge' -H 'content-type: application/json' -H 'x-krakn-prefix: http_test' --data-binary '{"leftId":13,"rightId":14,"relation":"test","attributes":{"taschen":"voller lila"},"_extend":{},"ttld":true}' --compressed
 
     # 201-Response:
     # {"success":true}
@@ -106,17 +106,17 @@
 
 ```shell
     # Request:
-    curl 'http://localhost:45456/edge/17/18/test' -H 'x-krakn-prefix: http_test' --compressed
+    curl 'http://localhost:45456/edge/13/14/test' -H 'x-krakn-prefix: http_test' --compressed
 
     # 200-Response:
-    # {"id":17,"depth":1,"data":{"taschen":"voller lila"},"ttld":true,"created_at":"2017-11-30T14:26:16.000Z"}
+    # {"id":13,"depth":1,"data":{"taschen":"voller lila"},"ttld":true,"created_at":"2017-11-30T15:37:33.000Z"}
 ```
 
 * ->Create another edge between two nodes.<-
 
 ```shell
     # Request:
-    curl 'http://localhost:45456/edge' -H 'content-type: application/json' -H 'x-krakn-prefix: http_test' --data-binary '{"leftId":17,"rightId":18,"relation":"test","attributes":{"taschen":"voller lila zum quadrat"},"_extend":{}}' --compressed
+    curl 'http://localhost:45456/edge' -H 'content-type: application/json' -H 'x-krakn-prefix: http_test' --data-binary '{"leftId":13,"rightId":14,"relation":"test","attributes":{"taschen":"voller lila zum quadrat"},"_extend":{}}' --compressed
 
     # 201-Response:
     # {"success":true}
@@ -126,7 +126,7 @@
 
 ```shell
     # Request:
-    curl 'http://localhost:45456/edge' -H 'content-type: application/json' -H 'x-krakn-prefix: http_test' --data-binary '{"leftId":18,"rightId":17,"relation":"test","attributes":{"taschen":"voller lila zum quadrat swapped"},"_extend":{}}' --compressed
+    curl 'http://localhost:45456/edge' -H 'content-type: application/json' -H 'x-krakn-prefix: http_test' --data-binary '{"leftId":14,"rightId":13,"relation":"test","attributes":{"taschen":"voller lila zum quadrat swapped"},"_extend":{}}' --compressed
 
     # 201-Response:
     # {"success":true}
@@ -136,37 +136,37 @@
 
 ```shell
     # Request:
-    curl 'http://localhost:45456/edge/left/17/test' -H 'x-krakn-prefix: http_test' --compressed
+    curl 'http://localhost:45456/edge/left/13/test' -H 'x-krakn-prefix: http_test' --compressed
 
     # 200-Response:
-    # {"edges":[{"depth":1,"data":{"taschen":"voller lila"},"ttld":true,"created_at":"2017-11-30T14:26:16.000Z","right_node_id":18},{"depth":1,"data":{"taschen":"voller lila zum quadrat"},"ttld":false,"created_at":"2017-11-30T14:26:16.000Z","right_node_id":18}]}
+    # {"edges":[{"depth":1,"data":{"taschen":"voller lila"},"ttld":true,"created_at":"2017-11-30T15:37:33.000Z","right_node_id":14},{"depth":1,"data":{"taschen":"voller lila zum quadrat"},"ttld":false,"created_at":"2017-11-30T15:37:33.000Z","right_node_id":14}]}
 ```
 
 * ->Get all edges with right node id and relation<-
 
 ```shell
     # Request:
-    curl 'http://localhost:45456/edge/right/17/test' -H 'x-krakn-prefix: http_test' --compressed
+    curl 'http://localhost:45456/edge/right/13/test' -H 'x-krakn-prefix: http_test' --compressed
 
     # 200-Response:
-    # {"edges":[{"depth":1,"data":{"taschen":"voller lila zum quadrat swapped"},"ttld":false,"created_at":"2017-11-30T14:26:16.000Z","left_node_id":18}]}
+    # {"edges":[{"depth":1,"data":{"taschen":"voller lila zum quadrat swapped"},"ttld":false,"created_at":"2017-11-30T15:37:33.000Z","left_node_id":14}]}
 ```
 
 * ->Get all edges with left or right node id and relation<-
 
 ```shell
     # Request:
-    curl 'http://localhost:45456/edge/both/17/test' -H 'x-krakn-prefix: http_test' --compressed
+    curl 'http://localhost:45456/edge/both/13/test' -H 'x-krakn-prefix: http_test' --compressed
 
     # 200-Response:
-    # {"edges":[{"depth":1,"data":{"taschen":"voller lila"},"ttld":true,"created_at":"2017-11-30T14:26:16.000Z","right_node_id":18,"left_node_id":17},{"depth":1,"data":{"taschen":"voller lila zum quadrat"},"ttld":false,"created_at":"2017-11-30T14:26:16.000Z","right_node_id":18,"left_node_id":17},{"depth":1,"data":{"taschen":"voller lila zum quadrat swapped"},"ttld":false,"created_at":"2017-11-30T14:26:16.000Z","right_node_id":17,"left_node_id":18}]}
+    # {"edges":[{"depth":1,"data":{"taschen":"voller lila"},"ttld":true,"created_at":"2017-11-30T15:37:33.000Z","right_node_id":14,"left_node_id":13},{"depth":1,"data":{"taschen":"voller lila zum quadrat"},"ttld":false,"created_at":"2017-11-30T15:37:33.000Z","right_node_id":14,"left_node_id":13},{"depth":1,"data":{"taschen":"voller lila zum quadrat swapped"},"ttld":false,"created_at":"2017-11-30T15:37:33.000Z","right_node_id":13,"left_node_id":14}]}
 ```
 
 * ->Increase depth of an edge.<-
 
 ```shell
     # Request:
-    curl 'http://localhost:45456/edge/depth/increase' -X PUT -H 'content-type: application/json' -H 'x-krakn-prefix: http_test' --data-binary '{"leftId":17,"rightId":18,"relation":3127628307}' --compressed
+    curl 'http://localhost:45456/edge/depth/increase' -X PUT -H 'content-type: application/json' -H 'x-krakn-prefix: http_test' --data-binary '{"leftId":13,"rightId":14,"relation":3127628307}' --compressed
 
     # 200-Response:
     # {"success":true}
@@ -176,7 +176,7 @@
 
 ```shell
     # Request:
-    curl 'http://localhost:45456/edge/depth/decrease' -X PUT -H 'content-type: application/json' -H 'x-krakn-prefix: http_test' --data-binary '{"leftId":17,"rightId":18,"relation":"test"}' --compressed
+    curl 'http://localhost:45456/edge/depth/decrease' -X PUT -H 'content-type: application/json' -H 'x-krakn-prefix: http_test' --data-binary '{"leftId":13,"rightId":14,"relation":"test"}' --compressed
 
     # 200-Response:
     # {"success":true}
@@ -186,17 +186,17 @@
 
 ```shell
     # Request:
-    curl 'http://localhost:45456/access/translated-edge-info' -H 'content-type: application/json' -H 'x-krakn-prefix: http_test' --data-binary '{"values":["011b4679-6c91-4111-911a-788d3aed1176","c2f10b80-4f9b-4a82-b3f7-57e30caca5e1"]}' --compressed
+    curl 'http://localhost:45456/access/translated-edge-info' -H 'content-type: application/json' -H 'x-krakn-prefix: http_test' --data-binary '{"values":["e1694aad-b3c1-4779-8a7f-674ff20005e6","6790cb0e-4394-4127-9433-b785da27b26b"]}' --compressed
 
     # 200-Response:
-    # {"edges":[{"relation":"3127628307","depth":1,"edata":{"taschen":"voller lila"},"value":"c2f10b80-4f9b-4a82-b3f7-57e30caca5e1","tdata":{"bla":"blup 2"}},{"relation":"3127628307","depth":1,"edata":{"taschen":"voller lila zum quadrat"},"value":"c2f10b80-4f9b-4a82-b3f7-57e30caca5e1","tdata":{"bla":"blup 2"}},{"relation":"3127628307","depth":1,"edata":{"taschen":"voller lila zum quadrat swapped"},"value":"011b4679-6c91-4111-911a-788d3aed1176","tdata":{"xd":123,"bla":"blup","derp":1.2,"hihi":false}}]}
+    # {"edges":[{"relation":"3127628307","depth":1,"edata":{"taschen":"voller lila"},"value":"6790cb0e-4394-4127-9433-b785da27b26b","tdata":{"bla":"blup 2"}},{"relation":"3127628307","depth":1,"edata":{"taschen":"voller lila zum quadrat"},"value":"6790cb0e-4394-4127-9433-b785da27b26b","tdata":{"bla":"blup 2"}},{"relation":"3127628307","depth":1,"edata":{"taschen":"voller lila zum quadrat swapped"},"value":"e1694aad-b3c1-4779-8a7f-674ff20005e6","tdata":{"xd":123,"bla":"blup","derp":1.2,"hihi":false}}]}
 ```
 
 * ->Deleting an edge.<-
 
 ```shell
     # Request:
-    curl 'http://localhost:45456/edge/17/18/test' -X DELETE -H 'x-krakn-prefix: http_test' -H 'content-length: 0' --compressed
+    curl 'http://localhost:45456/edge/13/14/test' -X DELETE -H 'x-krakn-prefix: http_test' -H 'content-length: 0' --compressed
 
     # 200-Response:
     # {"success":true}
@@ -226,7 +226,7 @@
 
 ```shell
     # Request:
-    curl 'http://localhost:45456/node/11' -X DELETE -H 'x-krakn-prefix: http_test' -H 'content-length: 0' --compressed
+    curl 'http://localhost:45456/node/1084946395' -X DELETE -H 'x-krakn-prefix: http_test' -H 'content-length: 0' --compressed
 
     # 200-Response:
     # {"success":true}
@@ -236,7 +236,7 @@
 
 ```shell
     # Request:
-    curl 'http://localhost:45456/translator/11' -X DELETE -H 'x-krakn-prefix: http_test' -H 'content-length: 0' --compressed
+    curl 'http://localhost:45456/translator/1084946395' -X DELETE -H 'x-krakn-prefix: http_test' -H 'content-length: 0' --compressed
 
     # 200-Response:
     # {"success":true}

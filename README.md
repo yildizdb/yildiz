@@ -58,9 +58,15 @@ high performance relations (Graph) database on top of MySQL
 * **generate CURL examples** via `yarn curl`
 * stop database via `yarn db:stop`
 
+## Misc
+
+* kraken exposes Prometheus Metrics @ `/admin/metrics`
+* kraken exposes JSON stats @ `/admin/stats`
+
 ## In Development
 
 * [ ] implement dijkstra for MySQL 8
+* [ ] security concept for prefixes
 
 ```
 MMMMMMMMMMMMMNdyo+/:::::::/+sdMMMMMMMMMMMMMMMMMMMM
