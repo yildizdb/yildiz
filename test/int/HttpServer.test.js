@@ -590,6 +590,17 @@ describe("HttpServer INT", () => {
         assert.ok(body.success);
     });
 
+    it("should be able to see stats", async() => {
+        const {
+            status,
+            body
+        } = await reqProm("/admin/stats", undefined, true, "Statistics for all running prefix krakn instances in factory.");
+        assert.equal(status, 200);
+        assert.ok(body.http_test);
+        assert.equal(typeof body.http_test, "object");
+        assert.ok(body.http_test.internCalls.queries);
+    });
+
     it("should be able to await next ttl job execution", function(done){
         this.timeout(2505);
         setTimeout(done, 2500);

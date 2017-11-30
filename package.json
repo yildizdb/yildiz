@@ -46,6 +46,7 @@
     "memory-cache": "^0.2.0",
     "murmurhash": "^0.0.2",
     "mysql2": "^1.4.2",
+    "prom-client": "^10.2.2",
     "sequelize": "^4.22.4",
     "uuid": "^3.1.0"
   },
@@ -58,6 +59,6 @@
   },
   "preferGlobal": true,
   "bin": {
-      "krakndb": "bin/krakndb.js"
+    "krakndb": "bin/krakndb.js"
   }
 }
