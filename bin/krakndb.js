@@ -77,9 +77,13 @@ const readAndDisplayBanner = () => {
 
 debug(`krakndb in version`, pjson.version);
 options = Object.assign(defaultOptions, options);
+
+//overwrite secrets via env variables (easier for kubernetes setups)
+
 if(process.env["KRAKN_DATABASE_USERNAME"]){
     options.database.username = process.env["KRAKN_DATABASE_USERNAME"];
 }
+
 if(process.env["KRAKN_DATABASE_PASSWORD"]){
     options.database.password = process.env["KRAKN_DATABASE_PASSWORD"];
 }
