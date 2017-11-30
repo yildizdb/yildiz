@@ -1,6 +1,7 @@
 {
     "accessLog": true,
     "enableRaw": true,
+    "noBanner": false,
     "ttl": {
         "active": true,
         "lifeTimeInSec": 86400,

@@ -1,5 +1,6 @@
 #!/usr/bin/env node
 
+const Promise = require("bluebird");
 const program = require("commander");
 const path = require("path");
 const fs = require("fs");
@@ -52,18 +53,36 @@ try {
     process.exit(2);
 }
 
+const readAndDisplayBanner = () => {
+
+    if(options.noBanner === true){
+        debug("skipping banner.");
+        return Promise.resolve();
+    }
+
+    return new Promise((resolve, _) => {
+        fs.readFile(path.join(__dirname, "./banner.txt"), "utf8", (error, banner) => {
+            if(error || !banner){
+                debug("failed to display banner :(.");
+            } else {
+                //allow console
+                console.log(banner);
+                console.log("r3l453 7h3 kr4k3n!");
+                //forbid console
+            }
+            resolve();
+        });
+    });
+};
+
 debug(`krakndb in version`, pjson.version);
 options = Object.assign(defaultOptions, options);
 debug("Starting http interface..");
 const server = new HttpServer(port, options);
 server.listen().then(() => {
-    fs.readFile(path.join(__dirname, "./banner.txt"), "utf8", (error, banner) => {
-        if(error || !banner){
-            debug("failed to display banner :(.");
-        } else {
-            console.log(banner);
-        }
-        debug(`http interface running @ ${port}.`);
+    debug(`http interface running @ ${port}.`);
+    readAndDisplayBanner().then(() => {
+        debug(`krakn is ready to accept connections.`);
     });
 }, error => {
     debug(`exception during start-up: ${error.message}.`);

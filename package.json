@@ -1,6 +1,6 @@
 {
   "name": "krakn",
-  "version": "1.17.0",
+  "version": "1.18.0",
   "description": "graph database layer on top of SQL with http interface",
   "main": "index.js",
   "repository": "git@github.com:krystianity/krakn.git",
