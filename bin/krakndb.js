@@ -54,6 +54,13 @@ try {
 
 debug(`krakndb in version`, pjson.version);
 options = Object.assign(defaultOptions, options);
+if(process.env["KRAKN_DATABASE_USERNAME"]){
+    options.database.username = process.env["KRAKN_DATABASE_USERNAME"];
+}
+if(process.env["KRAKN_DATABASE_PASSWORD"]){
+    options.database.password = process.env["KRAKN_DATABASE_PASSWORD"];
+}
+
 debug("Starting http interface..");
 const server = new HttpServer(port, options);
 server.listen().then(() => {
