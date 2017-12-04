@@ -5,7 +5,7 @@ const program = require("commander");
 const path = require("path");
 const fs = require("fs");
 const debugBase = require("debug");
-const debug = debugBase("krakn:bin");
+const debug = debugBase("yildiz:bin");
 
 const { HttpServer } = require("./../index.js");
 const pjson = require("./../package.json");
@@ -23,9 +23,9 @@ if(program.port){
 }
 
 if(program.logs){
-    debugBase.enable("krakn:*");
+    debugBase.enable("yildiz:*");
 } else {
-    debugBase.enable("krakn:bin");
+    debugBase.enable("yildiz:bin");
 }
 
 const defaultOptions = require("./../config/default.json");
@@ -75,17 +75,17 @@ const readAndDisplayBanner = () => {
     });
 };
 
-debug(`krakndb in version`, pjson.version);
+debug(`yildizdb in version`, pjson.version);
 options = Object.assign(defaultOptions, options);
 
 //overwrite secrets via env variables (easier for kubernetes setups)
 
-if(process.env["KRAKN_DATABASE_USERNAME"]){
-    options.database.username = process.env["KRAKN_DATABASE_USERNAME"];
+if(process.env["yildiz_DATABASE_USERNAME"]){
+    options.database.username = process.env["yildiz_DATABASE_USERNAME"];
 }
 
-if(process.env["KRAKN_DATABASE_PASSWORD"]){
-    options.database.password = process.env["KRAKN_DATABASE_PASSWORD"];
+if(process.env["yildiz_DATABASE_PASSWORD"]){
+    options.database.password = process.env["yildiz_DATABASE_PASSWORD"];
 }
 
 debug("Starting http interface..");
@@ -93,7 +93,7 @@ const server = new HttpServer(port, options);
 server.listen().then(() => {
     debug(`http interface running @ ${port}.`);
     readAndDisplayBanner().then(() => {
-        debug(`krakn is ready to accept connections.`);
+        debug(`yildiz is ready to accept connections.`);
     });
 }, error => {
     debug(`exception during start-up: ${error.message}.`);

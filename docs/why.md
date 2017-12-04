@@ -11,5 +11,5 @@ TL;DR: easy setup, simple scaling, maintainability, heavy write throughput, http
 * graph databases like **titan** or **FlockDB** are not maintained anymore
 * most existing graph databases miss "exists" features that result in the execution of
     multiple queries
-* krakn does not re-invent the wheel too much, as it just sits on top of MySQL as http or application-layer.
+* yildiz does not re-invent the wheel too much, as it just sits on top of MySQL as http or application-layer.
 * graph databases like **neo4j** do not have a ttl feature, nodes and edges cannot expire automatically

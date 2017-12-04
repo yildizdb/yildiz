@@ -12,7 +12,7 @@
         "edgeCacheTime": 12000
     },
     "database": {
-        "database": "krakn",
+        "database": "yildiz",
         "username": "root",
         "password": "toor",
         "host": "db",

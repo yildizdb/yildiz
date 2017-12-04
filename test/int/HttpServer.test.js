@@ -12,7 +12,7 @@ const {
 const pjson = require("./../../package.json");
 
 const PATH_TO_CURL_DOC = "../../docs/curl.md";
-let CURL_OUTPUT = `# KRAKN ${pjson.version} HttpServer CURL Examples\n
+let CURL_OUTPUT = `# yildiz ${pjson.version} HttpServer CURL Examples\n
 [This file is auto-generated via **'yarn curl'**.]\n`;
 
 const CURLOUT = !!process.env.CURLOUT;
@@ -525,7 +525,7 @@ describe("HttpServer INT", () => {
         const {
             status,
             body
-        } = await reqProm("/admin/stats", undefined, true, "Statistics for all running prefix krakn instances in factory.");
+        } = await reqProm("/admin/stats", undefined, true, "Statistics for all running prefix yildiz instances in factory.");
         assert.equal(status, 200);
         assert.ok(body.http_test);
         assert.equal(typeof body.http_test, "object");
@@ -651,9 +651,9 @@ const reqProm = (path = "/", options = {}, curl = false, description = "Not desc
         options.headers = {};
     }
     
-    options.headers["x-krakn-prefix"] = _prefix !== undefined ? _prefix : prefix;
-    if(!options.headers["x-krakn-prefix"]){
-        delete options.headers["x-krakn-prefix"];
+    options.headers["x-yildiz-prefix"] = _prefix !== undefined ? _prefix : prefix;
+    if(!options.headers["x-yildiz-prefix"]){
+        delete options.headers["x-yildiz-prefix"];
     }
 
     return new Promise((resolve, reject) => {

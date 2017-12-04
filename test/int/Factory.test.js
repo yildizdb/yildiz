@@ -2,19 +2,19 @@
 
 const assert = require("assert");
 
-const {KraknFactory} = require("./../../index.js");
+const {YildizFactory} = require("./../../index.js");
 
 describe("Factory INT", () => {
 
-    const factory = new KraknFactory();
+    const factory = new YildizFactory();
     const prefix = "derp_test";
 
     it("should be able to get an instance for a prefix", async () => {
 
-        const krakn = await factory.get(prefix);
-        assert.ok(krakn);
+        const yildiz = await factory.get(prefix);
+        assert.ok(yildiz);
 
-        const stats = await krakn.getStats();
+        const stats = await yildiz.getStats();
         assert.ok(stats);
     });
 
@@ -23,7 +23,7 @@ describe("Factory INT", () => {
         assert.ok(factory._cache.size());
         assert.equal(factory._cache.keys().length, 1);
 
-        const krakn = await factory.get(prefix);
-        assert.ok(krakn);
+        const yildiz = await factory.get(prefix);
+        assert.ok(yildiz);
     }); 
 });
