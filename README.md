@@ -37,7 +37,7 @@ high performance relations (Graph) database on top of MySQL
 
 ## Available Clients
 
-* [Node.js](https://github.com/krystianity/yildiz-js)
+* [Node.js](https://github.com/yildizdb/yildiz-js)
 * **Any Http Client** can be used to access the HTTP-Interface
 
 ## Documentation
