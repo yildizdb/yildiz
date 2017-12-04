@@ -42,6 +42,7 @@ high performance relations (Graph) database on top of MySQL
 
 ## Documentation
 
+* `yildiz` means :star: in turkish
 * [Http Interface Curl Examples](docs/curl.md)
 * [Open API/Swagger JSON](docs/swagger.json)
 * [Why develop another graph database?](docs/why.md)
@@ -69,31 +70,34 @@ high performance relations (Graph) database on top of MySQL
 * [ ] security concept for prefixes
 
 ```
-MMMMMMMMMMMMMNdyo+/:::::::/+sdMMMMMMMMMMMMMMMMMMMM
-MMMMMMMMMMMd+-----------------:sNMMMMMMMMMMMMMMMMM
-MMMMMMMMMN+---------------------:mMMMMMMMMMMMMMMMM
-MMMMMMMMN:-----------------------:NMMMMMMMMMMMMMMM
-MMMMMMMMo-------------------------oMMMMMMMMMMMMMMM
-MMMMMMMM:---------:-----------..--:NMMMMMMMMMMMMMM
-MMMMMMMM/--------.----------:ss:---dMMMMMMMMMMMMMM
-MMMMMMMMy-------::dh+:------oNmy---sMMMMMMMMMMMMMM
-MMMMMMMMMo-------/mNd:::::::/yh/----yMMMMMMMMMMMMM
-MMMMMMMMMMo-------/o/-----------::--/MMMMMMMMMMMMM
-MMMMMMMMMMN------:---:------::------oMMMMMMMMMMMMM
-MMMMMMNMMMMs----------:+o/+s/------+NMMMMMMMMMMMMM
-MMMMMM/odMMMy:----------:::------/hMMMMMMddMMMMMMM
-MMMMMM+--:+ydmhs+---------------omNMNmy+:/NMMMMMMM
-MMMMMMs---::::::-----------------::----:sNMMMMMMmm
-MMMMMMN+::-------------------------:::odmmdhys+:/N
-MMMMMMmo-----:--------------------------------.:NM
-mhhhs/-----::----:-----------------:-------.`.sMMM
-N/---------:-----/-----/-------:-------..-:+hNMMMM
-MN+..---.`------/------+-------:-------+ydmNMMMMMM
-MMMms+/+/-------------:o:-------.------------:+sdM
-MMMMMMmo-------`------/d:-----::``----------.:ohNM
-MMNhs:-------..om:---:hN------hMh:```..``./ymMMMMM
-MMNmhso+///+sdMMMh---oMM/----oMMMMNysoshmMMMMMMMMM
-MMMMMMMMMMMMMMMMMMs-/NMMy---+MMMMMMMMMMMMMMMMMMMMM
-MMMMMMMMMMMMMMMMMMM+hMMMM+-:NMMMMMMMMMMMMMMMMMMMMM
-MMMMMMMMMMMMMMMMMMMNMMMMMNohMMMMMMMMMMMMMMMMMMMMMM
+                              *                            
+                             %                             
+                            %  @                           
+                                @                          
+                           @                               
+                          *      ,                         
+                          .       @                        
+                         @         #                       
+                                                           
+                        (           %                      
+                       @             &                     
+ ..,/(%%&@@@@@@@@@&&%(/%             &        ,*(&@@@@@@&%(
+  * #@                  &          ,                 @# ., 
+    @      @(             .       @           .@/     @    
+       %         %@        @    /       ,@.         ,      
+         /              @%     #  &@             @         
+            @               @@@@              .,           
+               ,      %@    @  #    .@,     @              
+                 @         .     #        #                
+                         @    .   #        &               
+                @       &     *     #                      
+                      .       #      @      @              
+               &     @        &        .                   
+                    /       @   @       @    #             
+              %   *      /.        #      .   &            
+             *   @     &             (     @               
+             *      @                   #      @           
+            % %  (                         @  @ ,          
+             @ %                              @.*          
+           @@                                    @         
 ```
