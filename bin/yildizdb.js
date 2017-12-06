@@ -67,7 +67,7 @@ const readAndDisplayBanner = () => {
             } else {
                 //allow console
                 console.log(banner);
-                console.log("r3l453 7h3 kr4k3n!");
+                console.log("l37 7h3 574r5 5h1n3 1n 7h3 5ky!");
                 //forbid console
             }
             resolve();

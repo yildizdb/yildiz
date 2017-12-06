@@ -527,9 +527,9 @@ describe("HttpServer INT", () => {
             body
         } = await reqProm("/admin/stats", undefined, true, "Statistics for all running prefix yildiz instances in factory.");
         assert.equal(status, 200);
-        assert.ok(body.http_test);
-        assert.equal(typeof body.http_test, "object");
-        assert.ok(body.http_test.internCalls.queries);
+        assert.ok(body.factory.http_test);
+        assert.equal(typeof body.factory.http_test, "object");
+        assert.ok(body.factory.http_test.internCalls.queries);
     });
 
     it("should be able to create a few ttld resources", async() => {
