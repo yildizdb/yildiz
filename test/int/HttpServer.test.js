@@ -532,24 +532,6 @@ describe("HttpServer INT", () => {
         assert.ok(body.http_test.internCalls.queries);
     });
 
-    it("should be able to see metrics", async() => {
-        const {
-            status,
-            headers,
-            body
-        } = await reqProm("/admin/metrics", undefined, true, "Get Prometheus Metrics.");
-        assert.equal(status, 200);
-        assert.equal(headers["content-type"], "text/plain; version=0.0.4; charset=utf-8");
-        assert.ok(body);
-    });
-
-    if(CURLOUT){
-        it("should be able to write curl output to file", async() => {
-            await writeCurlToFile(CURL_OUTPUT);
-            console.log("Curl-Docs updated.");
-        });
-    }
-
     it("should be able to create a few ttld resources", async() => {
 
         let nodeId1 = null;
@@ -642,6 +624,24 @@ describe("HttpServer INT", () => {
         assert.equal(body.results[0].ncount, 0);
         assert.equal(body.results[0].ecount, 0);
     });
+
+    it("should be able to see metrics", async() => {
+        const {
+            status,
+            headers,
+            body
+        } = await reqProm("/admin/metrics", undefined, true, "Get Prometheus Metrics.");
+        assert.equal(status, 200);
+        assert.equal(headers["content-type"], "text/plain; version=0.0.4; charset=utf-8");
+        assert.ok(body);
+    });
+
+    if(CURLOUT){
+        it("should be able to write curl output to file", async() => {
+            await writeCurlToFile(CURL_OUTPUT);
+            console.log("Curl-Docs updated.");
+        });
+    }
 });
 
 const reqProm = (path = "/", options = {}, curl = false, description = "Not described", _prefix = undefined) => {
