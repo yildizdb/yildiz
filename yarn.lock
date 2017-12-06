@@ -304,7 +304,7 @@ block-stream@*:
   dependencies:
     inherits "~2.0.0"
 
-bluebird@^3.4.6, bluebird@^3.5.1:
+bluebird@^3.4.6, bluebird@~3.5.1:
   version "3.5.1"
   resolved "https://registry.yarnpkg.com/bluebird/-/bluebird-3.5.1.tgz#d9551f9de98f1fcda1e683d17ee91a0602ee2eb9"
 
@@ -466,7 +466,7 @@ combined-stream@^1.0.5, combined-stream@~1.0.5:
   dependencies:
     delayed-stream "~1.0.0"
 
-commander@2.11.0, commander@^2.11.0:
+commander@2.11.0, commander@~2.11.0:
   version "2.11.0"
   resolved "https://registry.yarnpkg.com/commander/-/commander-2.11.0.tgz#157152fd1e7a6c8d98a5b715cf376df928004563"
 
@@ -501,7 +501,7 @@ core-util-is@1.0.2, core-util-is@~1.0.0:
   version "1.0.2"
   resolved "https://registry.yarnpkg.com/core-util-is/-/core-util-is-1.0.2.tgz#b5fd54220aa2bc5ab57aab7140c940754503c1a7"
 
-cors@^2.8.4:
+cors@~2.8.4:
   version "2.8.4"
   resolved "https://registry.yarnpkg.com/cors/-/cors-2.8.4.tgz#2bd381f2eb201020105cd50ea59da63090694686"
   dependencies:
@@ -554,7 +554,7 @@ debug@2.6.8:
   dependencies:
     ms "2.0.0"
 
-debug@3.1.0, debug@^3.0.0, debug@^3.1.0:
+debug@3.1.0, debug@^3.0.0, debug@^3.1.0, debug@~3.1.0:
   version "3.1.0"
   resolved "https://registry.yarnpkg.com/debug/-/debug-3.1.0.tgz#5bb5a0672628b64149566ba16819e61518c67261"
   dependencies:
@@ -747,7 +747,7 @@ fastify-swagger@micro-tools/fastify-swagger#d1bc7ac192bc29fa54f84eca717ebf606283
     fastify-plugin "^0.1.1"
     js-yaml "^3.10.0"
 
-fastify@^0.33.0:
+fastify@~0.33.0:
   version "0.33.0"
   resolved "https://registry.yarnpkg.com/fastify/-/fastify-0.33.0.tgz#d3247e35431e8be9274608ac8031c4fd9ecdfe89"
   dependencies:
@@ -1284,7 +1284,7 @@ log-driver@^1.2.5:
   version "1.2.5"
   resolved "https://registry.yarnpkg.com/log-driver/-/log-driver-1.2.5.tgz#7ae4ec257302fd790d557cb10c97100d857b0056"
 
-log4bro@^3.3.1:
+log4bro@~3.3.1:
   version "3.3.1"
   resolved "https://registry.yarnpkg.com/log4bro/-/log4bro-3.3.1.tgz#745d347b075a10318ab7f01e4cd15316e8dcb911"
   dependencies:
@@ -1325,7 +1325,7 @@ map-obj@~2.0.0:
   version "2.0.0"
   resolved "https://registry.yarnpkg.com/map-obj/-/map-obj-2.0.0.tgz#a65cd29087a92598b8791257a523e021222ac1f9"
 
-memory-cache@^0.2.0:
+memory-cache@~0.2.0:
   version "0.2.0"
   resolved "https://registry.yarnpkg.com/memory-cache/-/memory-cache-0.2.0.tgz#7890b01d52c00c8ebc9d533e1f8eb17e3034871a"
 
@@ -1378,7 +1378,7 @@ mkdirp@0.5.1, "mkdirp@>=0.5 0", mkdirp@^0.5.1, mkdirp@~0.5.1:
   dependencies:
     minimist "0.0.8"
 
-mocha-silent-reporter@^1.0.0:
+mocha-silent-reporter@~1.0.0:
   version "1.0.0"
   resolved "https://registry.yarnpkg.com/mocha-silent-reporter/-/mocha-silent-reporter-1.0.0.tgz#f1f2fcafa4e2eaee989ac6cd00b76b8204f890bb"
   dependencies:
@@ -1427,7 +1427,7 @@ ms@2.0.0:
   version "2.0.0"
   resolved "https://registry.yarnpkg.com/ms/-/ms-2.0.0.tgz#5608aeadfc00be6c2901df5f9861788de0d597c8"
 
-murmurhash@^0.0.2:
+murmurhash@~0.0.2:
   version "0.0.2"
   resolved "https://registry.yarnpkg.com/murmurhash/-/murmurhash-0.0.2.tgz#6f07bd8a1105e709c26fc89420cb5930c24585fe"
 
@@ -1439,7 +1439,7 @@ mv@~2:
     ncp "~2.0.0"
     rimraf "~2.4.0"
 
-mysql2@^1.4.2:
+mysql2@~1.4.2:
   version "1.4.2"
   resolved "https://registry.yarnpkg.com/mysql2/-/mysql2-1.4.2.tgz#b5e04009fd6d63f00755253df88540a2532640b2"
   dependencies:
@@ -1683,7 +1683,7 @@ process-nextick-args@^1.0.7, process-nextick-args@~1.0.6:
   version "1.0.7"
   resolved "https://registry.yarnpkg.com/process-nextick-args/-/process-nextick-args-1.0.7.tgz#150e20b756590ad3f91093f25a4f2ad8bff30ba3"
 
-prom-client@^10.2.2:
+prom-client@~10.2.2:
   version "10.2.2"
   resolved "https://registry.yarnpkg.com/prom-client/-/prom-client-10.2.2.tgz#76b39720710ec10796d7ce60135b5d5dafbff615"
   dependencies:
@@ -1797,7 +1797,7 @@ repeat-string@^1.5.2, repeat-string@^1.5.4:
   version "1.6.1"
   resolved "https://registry.yarnpkg.com/repeat-string/-/repeat-string-1.6.1.tgz#8dcae470e1c88abc2d600fff4a776286da75e637"
 
-request-to-curl@^0.1.1:
+request-to-curl@~0.1.1:
   version "0.1.1"
   resolved "https://registry.yarnpkg.com/request-to-curl/-/request-to-curl-0.1.1.tgz#7e77148e8a90b0fef67849fc5e38193274789657"
 
@@ -1828,7 +1828,7 @@ request@2.81.0:
     tunnel-agent "^0.6.0"
     uuid "^3.0.0"
 
-request@^2.72.0, request@^2.74.0, request@^2.79.0, request@^2.81.0, request@^2.83.0:
+request@^2.72.0, request@^2.74.0, request@^2.79.0, request@^2.81.0, request@~2.83.0:
   version "2.83.0"
   resolved "https://registry.yarnpkg.com/request/-/request-2.83.0.tgz#ca0b65da02ed62935887808e6f510381034e3356"
   dependencies:
@@ -1907,9 +1907,9 @@ seq-queue@0.0.5:
   version "0.0.5"
   resolved "https://registry.yarnpkg.com/seq-queue/-/seq-queue-0.0.5.tgz#d56812e1c017a6e4e7c3e3a37a1da6d78dd3c93e"
 
-sequelize@^4.22.4:
-  version "4.22.4"
-  resolved "https://registry.yarnpkg.com/sequelize/-/sequelize-4.22.4.tgz#530ed78513d79d4e562fd9ac17cd65d29dab2d9a"
+sequelize@~4.22.4:
+  version "4.22.16"
+  resolved "https://registry.yarnpkg.com/sequelize/-/sequelize-4.22.16.tgz#4227f2b4c8b517d9025f5dfffe816dd5c9d4352b"
   dependencies:
     bluebird "^3.4.6"
     cls-bluebird "^2.0.1"
@@ -2234,7 +2234,7 @@ util-deprecate@~1.0.1:
   version "1.0.2"
   resolved "https://registry.yarnpkg.com/util-deprecate/-/util-deprecate-1.0.2.tgz#450d4dc9fa70de732762fbd2d4a28981419a0ccf"
 
-uuid@^3.0.0, uuid@^3.0.1, uuid@^3.1.0:
+uuid@^3.0.0, uuid@^3.0.1, uuid@^3.1.0, uuid@~3.1.0:
   version "3.1.0"
   resolved "https://registry.yarnpkg.com/uuid/-/uuid-3.1.0.tgz#3dd3d3e790abc24d7b0d3a034ffababe28ebbc04"
 
