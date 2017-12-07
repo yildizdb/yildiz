@@ -1,5 +1,11 @@
 # yilidzdb changelog
 
+## 1.23.0
+
+- added custom error handler to log events correctly
+- added http response error stat and metric
+- added average response time stats
+
 ## 1.22.0
 
 - switched env vars in bin to "YILDIZDB_" prefix
