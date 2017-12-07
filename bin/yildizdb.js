@@ -80,11 +80,11 @@ options = Object.assign(defaultOptions, options);
 
 //overwrite secrets via env variables (easier for kubernetes setups)
 
-if(process.env["yildiz_DATABASE_USERNAME"]){
+if(process.env["YILDIZDB_DATABASE_USERNAME"]){
     options.database.username = process.env["yildiz_DATABASE_USERNAME"];
 }
 
-if(process.env["yildiz_DATABASE_PASSWORD"]){
+if(process.env["YILDIZDB_DATABASE_PASSWORD"]){
     options.database.password = process.env["yildiz_DATABASE_PASSWORD"];
 }
 

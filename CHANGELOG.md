@@ -1,5 +1,13 @@
 # yilidzdb changelog
 
+## 1.22.0
+
+- switched env vars in bin to "YILDIZDB_" prefix
+
+## 1.21.0
+
+- removed metrics block if factory stats werent present
+
 ## 1.20.0
 
 - **breaking** changed schema of stats, factory related object is now a subobject of stats {factory, http}
