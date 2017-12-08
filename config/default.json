@@ -24,5 +24,6 @@
             "idle": 15000
         },
         "storage": null
-    }
+    },
+    "access": "*"
 }
