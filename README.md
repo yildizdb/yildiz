@@ -4,7 +4,7 @@ high performance relations (Graph) database on top of MySQL
 
 ## Features
 
-* multi-tenancy/table-size management through table prefixes
+* multi-tenancy/table-size management through table prefixes (with [access management](docs/access.md))
 * high read and write performance
 * lightweight deployments (small Node.js footprint) + scales easily
 * sits on top of any MySQL database (easy to adapt to Postgres, MSSQL or SQLite3)
@@ -48,6 +48,7 @@ high performance relations (Graph) database on top of MySQL
 * [Why develop another graph database?](docs/why.md)
 * [How does it work?](docs/how.md)
 * [yildiz Use Cases](docs/use-case.md)
+* [Access Management](docs/access.md)
 
 ## Developing yildiz
 
@@ -66,8 +67,8 @@ high performance relations (Graph) database on top of MySQL
 
 ## In Development
 
+* [ ] implement dijkstra for MySQL 5.x
 * [ ] implement dijkstra for MySQL 8
-* [ ] security concept for prefixes
 
 ```
                               *                            
