@@ -1,5 +1,10 @@
 # yilidzdb changelog
 
+## 1.24.0
+
+- added access management
+- added security integration test
+
 ## 1.23.0
 
 - added custom error handler to log events correctly
