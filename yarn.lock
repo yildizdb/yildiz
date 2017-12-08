@@ -304,7 +304,7 @@ block-stream@*:
   dependencies:
     inherits "~2.0.0"
 
-bluebird@^3.4.6, bluebird@~3.5.1:
+bluebird@^3.4.6, bluebird@^3.5.1, bluebird@~3.5.1:
   version "3.5.1"
   resolved "https://registry.yarnpkg.com/bluebird/-/bluebird-3.5.1.tgz#d9551f9de98f1fcda1e683d17ee91a0602ee2eb9"
 
@@ -1828,7 +1828,7 @@ request@2.81.0:
     tunnel-agent "^0.6.0"
     uuid "^3.0.0"
 
-request@^2.72.0, request@^2.74.0, request@^2.79.0, request@^2.81.0, request@~2.83.0:
+request@^2.72.0, request@^2.74.0, request@^2.79.0, request@^2.81.0, request@^2.83.0, request@~2.83.0:
   version "2.83.0"
   resolved "https://registry.yarnpkg.com/request/-/request-2.83.0.tgz#ca0b65da02ed62935887808e6f510381034e3356"
   dependencies:
@@ -2332,3 +2332,11 @@ yargs@^3.10.0:
     string-width "^1.0.1"
     window-size "^0.1.4"
     y18n "^3.2.0"
+
+yildiz-js@^2.1.0:
+  version "2.1.0"
+  resolved "https://registry.yarnpkg.com/yildiz-js/-/yildiz-js-2.1.0.tgz#631ec7b939fcfe821a49d2a8af70c2fbbfd56fa8"
+  dependencies:
+    bluebird "^3.5.1"
+    debug "^3.1.0"
+    request "^2.83.0"

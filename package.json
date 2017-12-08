@@ -49,7 +49,8 @@
     "mysql2": "~1.4.2",
     "prom-client": "~10.2.2",
     "sequelize": "~4.22.4",
-    "uuid": "~3.1.0"
+    "uuid": "~3.1.0",
+    "yildiz-js": "^2.1.0"
   },
   "devDependencies": {
     "fastify-swagger": "micro-tools/fastify-swagger#d1bc7ac192bc29fa54f84eca717ebf606283b29a",
