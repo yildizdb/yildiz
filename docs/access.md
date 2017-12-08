@@ -14,6 +14,7 @@ as well as allowed prefixes, with the help of the config's `access` field.
 * below are a few example configurations
 * bad prefixes will result in `403` http responses
 * bad tokens will result in `401` http responses
+* tokens under the `*` will always overrule other tokens (they can access all prefixes)
 
 ## Example Access Configurations
 
