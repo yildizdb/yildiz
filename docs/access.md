@@ -47,7 +47,7 @@ const config = {
 };
 ```
 
-### Prefxies, Tokens and wildcards can be combined
+### Prefixes, Tokens and wildcards can be combined
 
 ```javascript
 const config = {

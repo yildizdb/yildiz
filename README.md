@@ -1,6 +1,6 @@
-# yildiz - HTTP Hyper Relations on MySQL
+# yildiz - HTTP graph layer on top of MySQL
 
-high performance relations (Graph) database on top of MySQL
+high performance graph database on top of MySQL
 
 ## Features
 
