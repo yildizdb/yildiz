@@ -97,7 +97,7 @@ Object.keys(process.env)
         }
 
         if(!options.access[key]){
-            options.access[key] = [];
+            options.access[key] = [iter.val];
             debug("created access key for prefix", key);
         } else {
             options.access[key].push(iter.val);

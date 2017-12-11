@@ -1,6 +1,6 @@
 # yilidzdb changelog
 
-## 1.25.0
+## 1.25.0 + 1.26.0
 
 - env vars for access management
 
