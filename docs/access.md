@@ -15,6 +15,7 @@ as well as allowed prefixes, with the help of the config's `access` field.
 * bad prefixes will result in `403` http responses
 * bad tokens will result in `401` http responses
 * tokens under the `*` will always overrule other tokens (they can access all prefixes)
+* its also possible to set these via env variables, see below
 
 ## Example Access Configurations
 
@@ -55,6 +56,27 @@ const config = {
         "bla": "*",
         "blup": ["123123123", "123123"],
         "*": ["admintoken"]
+    }
+};
+```
+
+## Setting access keys and values with acces variables
+
+```sh
+YILDIZDB_ACK_MYPREFIX=123
+YILDIZDB_ACK_MYPREFIX=456
+YILDIZDB_ACK_BLABLA=xyz
+YILDIZDB_ACK_BLUP=*
+```
+
+will result in
+
+```javascript
+const config = {
+    access: {
+        myprefix: ["123", "456"],
+        blabla: ["xyz"],
+        blup: "*"
     }
 };
 ```

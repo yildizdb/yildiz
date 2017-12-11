@@ -80,13 +80,68 @@ options = Object.assign(defaultOptions, options);
 
 //overwrite secrets via env variables (easier for kubernetes setups)
 
-if(process.env["YILDIZDB_DATABASE_USERNAME"]){
-    options.database.username = process.env["YILDIZDB_DATABASE_USERNAME"];
+const PREFIX = "YILDIZDB_";
+const ACK_PREFIX = "ACK_";
+Object.keys(process.env)
+.filter(key => key.startsWith(PREFIX))
+.map(key => { return {key: key.split(PREFIX)[1], val: process.env[key]}; })
+.forEach(iter => {
+
+    // turn YILDIZDB_ACK_MYPREFIX=123 into access: { myprefix: "123" }
+    if(iter.key.startsWith(ACK_PREFIX)){
+
+        const key = iter.key.split(ACK_PREFIX)[1].toLowerCase();
+
+        if(!options.access || typeof options.access !== "object"){
+            options.access = {};
+        }
+
+        if(!options.access[key]){
+            options.access[key] = [];
+            debug("created access key for prefix", key);
+        } else {
+            options.access[key].push(iter.val);
+            debug("added token to access key for prefix", key);
+        }
+
+        return;
+    }
+
+    switch(iter.key){
+
+        case "DATABASE_USERNAME":
+            options.database.username = iter.val;
+        break;
+
+        case "DATABASE_PASSWORD":
+            options.database.password = iter.val;
+        break;
+
+        default:
+            debug("unknown env key", PREFIX + iter.key);
+        return;
+    }
+
+    debug("env var used for config overwrite", iter.key);
+});
+
+// turn ["*"] into "*"
+if(options.access && typeof options.access === "object"){
+    Object.keys(options.access).forEach(key => {
+        let wildcardPresent = false;
+        options.access[key].forEach(val => {
+            if(val === "*"){
+                wildcardPresent = true;
+            }
+        });
+        if(wildcardPresent){
+            options.access[key] = "*";
+            debug("wildcard found for access key for prefix", key);
+        }
+    });
 }
 
-if(process.env["YILDIZDB_DATABASE_PASSWORD"]){
-    options.database.password = process.env["YILDIZDB_DATABASE_PASSWORD"];
-}
+//start http server
 
 debug("Starting http interface..");
 const server = new HttpServer(port, options);
