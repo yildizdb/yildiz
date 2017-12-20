@@ -1,5 +1,10 @@
 # yilidzdb changelog
 
+## 1.27.0
+
+- fixed bug in avg response time stats
+- added gauge metric for avg response time stats
+
 ## 1.25.0 + 1.26.0
 
 - env vars for access management
