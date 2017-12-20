@@ -1,6 +1,6 @@
 {
   "name": "yildiz",
-  "version": "1.26.0",
+  "version": "1.27.0",
   "description": "graph database layer on top of SQL with http interface",
   "main": "index.js",
   "repository": "git@github.com:yildizdb/yildiz.git",
