@@ -1,13 +1,6 @@
 #!/usr/bin/env node
 
-const Promise = require("bluebird");
 const program = require("commander");
-const path = require("path");
-const fs = require("fs");
-const debugBase = require("debug");
-const debug = debugBase("yildiz:bin");
-
-const { HttpServer } = require("./../index.js");
 const pjson = require("./../package.json");
 
 program
@@ -15,7 +8,51 @@ program
     .usage("[options] <file ..>")
     .option("-p, --port <n>", "HttpServer port (optional)")
     .option("-l, --logs", "Log to stdout (optional)")
+    .option("-j, --json", "Parses log output as JSON (optional)")
     .parse(process.argv);
+
+let debugBase = null;
+if(program.json){
+
+    process.env.DEBUG_HIDE_DATE = "true";
+    process.env.DEBUG_COLORS = "false";
+    
+    debugBase = require("debug"); //overwrite
+    const oldDebug = debugBase.log;
+    debugBase.log = (arg1, arg2, arg3) => {
+        try {
+            if(arg1 && typeof arg1 !== "string"){
+                arg1 = JSON.stringify(arg1);
+            }
+        
+            if(arg1 && typeof arg2 !== "string"){
+                arg2 = JSON.stringify(arg2);
+            }
+        
+            if(arg1 && typeof arg3 !== "string"){
+                arg3 = JSON.stringify(arg3);
+            }
+    
+            const msgs = [arg1, arg2, arg3];
+            
+            oldDebug(JSON.stringify({
+                msg: msgs.filter(m => !!m).join(" ")
+            }));
+        } catch(error){
+            oldDebug("Dropped log message because of error " + error.message);
+        }
+    }
+} else {
+    debugBase = require("debug"); //overwrite
+}
+
+//require here because of potential debug usage
+const Promise = require("bluebird");
+const path = require("path");
+const fs = require("fs");
+const debug = debugBase("yildiz:bin");
+
+const { HttpServer } = require("./../index.js");
 
 let port = 3058;
 if(program.port){

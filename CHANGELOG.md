@@ -1,5 +1,12 @@
 # yilidzdb changelog
 
+## 1.28.0
+
+- fixed bug where gauge required label during initialisation
+- removed log4bro package
+- writing custom access logs now
+- added full json log modus to binary by overwriting debug module output
+
 ## 1.27.0
 
 - fixed bug in avg response time stats
