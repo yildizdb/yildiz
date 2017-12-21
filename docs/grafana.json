@@ -1,0 +1,801 @@
+{
+    "annotations": {
+      "list": [
+        {
+          "builtIn": 1,
+          "datasource": "-- Grafana --",
+          "enable": true,
+          "hide": true,
+          "iconColor": "rgba(0, 211, 255, 1)",
+          "name": "Annotations & Alerts",
+          "type": "dashboard"
+        }
+      ]
+    },
+    "editable": true,
+    "gnetId": null,
+    "graphTooltip": 0,
+    "hideControls": false,
+    "id": 72,
+    "links": [
+    ],
+    "refresh": "30s",
+    "rows": [
+      {
+        "collapse": false,
+        "height": 225,
+        "panels": [
+          {
+            "aliasColors": {},
+            "bars": false,
+            "dashLength": 10,
+            "dashes": false,
+            "datasource": null,
+            "fill": 1,
+            "id": 1,
+            "legend": {
+              "alignAsTable": true,
+              "avg": false,
+              "current": true,
+              "max": false,
+              "min": false,
+              "rightSide": true,
+              "show": false,
+              "sort": "current",
+              "sortDesc": true,
+              "total": false,
+              "values": true
+            },
+            "lines": true,
+            "linewidth": 1,
+            "links": [],
+            "nullPointMode": "null",
+            "percentage": false,
+            "pointradius": 5,
+            "points": false,
+            "renderer": "flot",
+            "seriesOverrides": [],
+            "spaceLength": 10,
+            "span": 6,
+            "stack": false,
+            "steppedLine": false,
+            "targets": [
+              {
+                "expr": "sum(rate(http_request{app=\"yildizdb-app\"}[1m]))",
+                "format": "time_series",
+                "intervalFactor": 2,
+                "legendFormat": "{{req/s}}",
+                "refId": "A"
+              }
+            ],
+            "thresholds": [],
+            "timeFrom": null,
+            "timeShift": null,
+            "title": "HTTP Requests Rate",
+            "tooltip": {
+              "shared": true,
+              "sort": 0,
+              "value_type": "individual"
+            },
+            "type": "graph",
+            "xaxis": {
+              "buckets": null,
+              "mode": "time",
+              "name": null,
+              "show": true,
+              "values": []
+            },
+            "yaxes": [
+              {
+                "format": "ops",
+                "label": null,
+                "logBase": 1,
+                "max": null,
+                "min": null,
+                "show": true
+              },
+              {
+                "format": "short",
+                "label": null,
+                "logBase": 1,
+                "max": null,
+                "min": null,
+                "show": true
+              }
+            ]
+          },
+          {
+            "aliasColors": {},
+            "bars": false,
+            "dashLength": 10,
+            "dashes": false,
+            "datasource": null,
+            "fill": 1,
+            "id": 2,
+            "legend": {
+              "avg": false,
+              "current": false,
+              "max": false,
+              "min": false,
+              "show": true,
+              "total": false,
+              "values": false
+            },
+            "lines": true,
+            "linewidth": 1,
+            "links": [],
+            "nullPointMode": "null",
+            "percentage": false,
+            "pointradius": 5,
+            "points": false,
+            "renderer": "flot",
+            "seriesOverrides": [],
+            "spaceLength": 10,
+            "span": 6,
+            "stack": false,
+            "steppedLine": false,
+            "targets": [
+              {
+                "expr": "gauge_http_avg_res_time{app=\"yildizdb-app\"}",
+                "format": "time_series",
+                "intervalFactor": 2,
+                "legendFormat": "{{app}}",
+                "refId": "A"
+              }
+            ],
+            "thresholds": [],
+            "timeFrom": null,
+            "timeShift": null,
+            "title": "Avg Response Time",
+            "tooltip": {
+              "shared": true,
+              "sort": 0,
+              "value_type": "individual"
+            },
+            "type": "graph",
+            "xaxis": {
+              "buckets": null,
+              "mode": "time",
+              "name": null,
+              "show": true,
+              "values": []
+            },
+            "yaxes": [
+              {
+                "format": "dtdurationms",
+                "label": null,
+                "logBase": 1,
+                "max": null,
+                "min": null,
+                "show": true
+              },
+              {
+                "format": "short",
+                "label": null,
+                "logBase": 1,
+                "max": null,
+                "min": null,
+                "show": true
+              }
+            ]
+          }
+        ],
+        "repeat": null,
+        "repeatIteration": null,
+        "repeatRowId": null,
+        "showTitle": false,
+        "title": "Dashboard Row",
+        "titleSize": "h6"
+      },
+      {
+        "collapse": false,
+        "height": 269,
+        "panels": [
+          {
+            "aliasColors": {},
+            "cacheTimeout": null,
+            "combine": {
+              "label": "Others",
+              "threshold": 0
+            },
+            "datasource": null,
+            "fontSize": "80%",
+            "format": "short",
+            "id": 3,
+            "interval": null,
+            "legend": {
+              "show": true,
+              "values": true
+            },
+            "legendType": "Under graph",
+            "links": [],
+            "maxDataPoints": 3,
+            "nullPointMode": "connected",
+            "pieType": "pie",
+            "span": 2,
+            "strokeWidth": 1,
+            "targets": [
+              {
+                "expr": "sum(cache_nodes_miss{prefix=\"default\", app=\"yildizdb-app\"})",
+                "format": "time_series",
+                "intervalFactor": 2,
+                "legendFormat": "cache miss",
+                "refId": "A"
+              },
+              {
+                "expr": "sum(cache_nodes_hit{prefix=\"default\", app=\"yildizdb-app\"})",
+                "format": "time_series",
+                "intervalFactor": 2,
+                "legendFormat": "cache hits",
+                "refId": "B"
+              }
+            ],
+            "title": "Node Cache",
+            "type": "grafana-piechart-panel",
+            "valueName": "current"
+          },
+          {
+            "aliasColors": {},
+            "cacheTimeout": null,
+            "combine": {
+              "label": "Others",
+              "threshold": 0
+            },
+            "datasource": null,
+            "fontSize": "80%",
+            "format": "short",
+            "id": 4,
+            "interval": null,
+            "legend": {
+              "show": true,
+              "values": true
+            },
+            "legendType": "Under graph",
+            "links": [],
+            "maxDataPoints": 3,
+            "nullPointMode": "connected",
+            "pieType": "pie",
+            "span": 2,
+            "strokeWidth": 1,
+            "targets": [
+              {
+                "expr": "sum(cache_edges_miss{prefix=\"default\", app=\"yildizdb-app\"})",
+                "format": "time_series",
+                "intervalFactor": 2,
+                "legendFormat": "cache miss",
+                "refId": "A"
+              },
+              {
+                "expr": "sum(cache_edges_hit{prefix=\"default\", app=\"yildizdb-app\"})",
+                "format": "time_series",
+                "intervalFactor": 2,
+                "legendFormat": "cache hits",
+                "refId": "B"
+              }
+            ],
+            "title": "Edge Cache",
+            "type": "grafana-piechart-panel",
+            "valueName": "current"
+          },
+          {
+            "aliasColors": {},
+            "cacheTimeout": null,
+            "combine": {
+              "label": "Others",
+              "threshold": 0
+            },
+            "datasource": null,
+            "fontSize": "80%",
+            "format": "short",
+            "id": 6,
+            "interval": null,
+            "legend": {
+              "show": true,
+              "values": true
+            },
+            "legendType": "Under graph",
+            "links": [],
+            "maxDataPoints": 3,
+            "nullPointMode": "connected",
+            "pieType": "pie",
+            "span": 2,
+            "strokeWidth": 1,
+            "targets": [
+              {
+                "expr": "sum(http_auth_good{app=\"yildizdb-app\"})",
+                "format": "time_series",
+                "intervalFactor": 2,
+                "legendFormat": "http auth good",
+                "refId": "A"
+              },
+              {
+                "expr": "sum(http_auth_failed_prefix{app=\"yildizdb-app\"})",
+                "format": "time_series",
+                "intervalFactor": 2,
+                "legendFormat": "http auth failed prefix",
+                "refId": "B"
+              },
+              {
+                "expr": "sum(http_auth_failed_token{app=\"yildizdb-app\"})",
+                "format": "time_series",
+                "intervalFactor": 2,
+                "legendFormat": "http auth failed prefix",
+                "refId": "C"
+              }
+            ],
+            "title": "HTTP Auth",
+            "type": "grafana-piechart-panel",
+            "valueName": "current"
+          },
+          {
+            "aliasColors": {},
+            "cacheTimeout": null,
+            "combine": {
+              "label": "Others",
+              "threshold": 0
+            },
+            "datasource": null,
+            "fontSize": "80%",
+            "format": "short",
+            "id": 5,
+            "interval": null,
+            "legend": {
+              "show": true,
+              "values": true
+            },
+            "legendType": "Under graph",
+            "links": [],
+            "maxDataPoints": 3,
+            "nullPointMode": "connected",
+            "pieType": "pie",
+            "span": 2,
+            "strokeWidth": 1,
+            "targets": [
+              {
+                "expr": "sum(internCalls_translates{prefix=\"default\", app=\"yildizdb-app\"})",
+                "format": "time_series",
+                "intervalFactor": 2,
+                "legendFormat": "translates",
+                "refId": "A"
+              },
+              {
+                "expr": "sum(internCalls_graphs{prefix=\"default\", app=\"yildizdb-app\"})",
+                "format": "time_series",
+                "intervalFactor": 2,
+                "legendFormat": "graphs",
+                "refId": "B"
+              },
+              {
+                "expr": "sum(internCalls_query{prefix=\"default\", app=\"yildizdb-app\"})",
+                "format": "time_series",
+                "intervalFactor": 2,
+                "legendFormat": "query",
+                "refId": "C"
+              },
+              {
+                "expr": "sum(internCalls_nodes{prefix=\"default\", app=\"yildizdb-app\"})",
+                "format": "time_series",
+                "intervalFactor": 2,
+                "legendFormat": "nodes",
+                "refId": "D"
+              },
+              {
+                "expr": "sum(internCalls_queries{prefix=\"default\", app=\"yildizdb-app\"})",
+                "format": "time_series",
+                "intervalFactor": 2,
+                "legendFormat": "queries",
+                "refId": "E"
+              }
+            ],
+            "title": "Intern Calls",
+            "type": "grafana-piechart-panel",
+            "valueName": "current"
+          },
+          {
+            "aliasColors": {},
+            "cacheTimeout": null,
+            "combine": {
+              "label": "Others",
+              "threshold": 0
+            },
+            "datasource": null,
+            "fontSize": "80%",
+            "format": "short",
+            "id": 7,
+            "interval": null,
+            "legend": {
+              "show": true,
+              "values": true
+            },
+            "legendType": "Under graph",
+            "links": [],
+            "maxDataPoints": 3,
+            "nullPointMode": "connected",
+            "pieType": "pie",
+            "span": 2,
+            "strokeWidth": 1,
+            "targets": [
+              {
+                "expr": "sum(externCalls_create_edge_id{prefix=\"default\", app=\"yildizdb-app\"})",
+                "format": "time_series",
+                "intervalFactor": 2,
+                "legendFormat": "create edge id",
+                "refId": "A"
+              },
+              {
+                "expr": "sum(externCalls_create_node{prefix=\"default\", app=\"yildizdb-app\"})",
+                "format": "time_series",
+                "intervalFactor": 2,
+                "legendFormat": "create node",
+                "refId": "B"
+              },
+              {
+                "expr": "sum(externCalls_create_trans{prefix=\"default\", app=\"yildizdb-app\"})",
+                "format": "time_series",
+                "intervalFactor": 2,
+                "legendFormat": "create trans",
+                "refId": "C"
+              }
+            ],
+            "title": "Extern Calls (Create)",
+            "type": "grafana-piechart-panel",
+            "valueName": "current"
+          },
+          {
+            "aliasColors": {},
+            "cacheTimeout": null,
+            "combine": {
+              "label": "Others",
+              "threshold": 0
+            },
+            "datasource": null,
+            "fontSize": "80%",
+            "format": "short",
+            "id": 8,
+            "interval": null,
+            "legend": {
+              "show": true,
+              "values": true
+            },
+            "legendType": "Under graph",
+            "links": [],
+            "maxDataPoints": 3,
+            "nullPointMode": "connected",
+            "pieType": "pie",
+            "span": 2,
+            "strokeWidth": 1,
+            "targets": [
+              {
+                "expr": "sum(externCalls_edge_exists_id{prefix=\"default\", app=\"yildizdb-app\"})",
+                "format": "time_series",
+                "intervalFactor": 2,
+                "legendFormat": "edge exists id",
+                "refId": "A"
+              },
+              {
+                "expr": "sum(externCalls_edge_info_nodes_translates{prefix=\"default\", app=\"yildizdb-app\"})",
+                "format": "time_series",
+                "intervalFactor": 2,
+                "legendFormat": "e.i.n. translates",
+                "refId": "B"
+              },
+              {
+                "expr": "sum(externCalls_get_node_identifier{prefix=\"default\", app=\"yildizdb-app\"})",
+                "format": "time_series",
+                "intervalFactor": 2,
+                "legendFormat": "node by identifier",
+                "refId": "C"
+              },
+              {
+                "expr": "sum(externCalls_translate{prefix=\"default\", app=\"yildizdb-app\"})",
+                "format": "time_series",
+                "intervalFactor": 2,
+                "legendFormat": "translate",
+                "refId": "D"
+              }
+            ],
+            "title": "Extern Calls (Get)",
+            "type": "grafana-piechart-panel",
+            "valueName": "current"
+          }
+        ],
+        "repeat": null,
+        "repeatIteration": null,
+        "repeatRowId": null,
+        "showTitle": false,
+        "title": "Dashboard Row",
+        "titleSize": "h6"
+      },
+      {
+        "collapse": false,
+        "height": 246,
+        "panels": [
+          {
+            "cacheTimeout": null,
+            "colorBackground": false,
+            "colorValue": false,
+            "colors": [
+              "#299c46",
+              "rgba(237, 129, 40, 0.89)",
+              "#d44a3a"
+            ],
+            "datasource": null,
+            "format": "none",
+            "gauge": {
+              "maxValue": 100,
+              "minValue": 0,
+              "show": false,
+              "thresholdLabels": false,
+              "thresholdMarkers": true
+            },
+            "id": 10,
+            "interval": null,
+            "links": [],
+            "mappingType": 1,
+            "mappingTypes": [
+              {
+                "name": "value to text",
+                "value": 1
+              },
+              {
+                "name": "range to text",
+                "value": 2
+              }
+            ],
+            "maxDataPoints": 100,
+            "nullPointMode": "connected",
+            "nullText": null,
+            "postfix": "",
+            "postfixFontSize": "50%",
+            "prefix": "",
+            "prefixFontSize": "50%",
+            "rangeMaps": [
+              {
+                "from": "null",
+                "text": "N/A",
+                "to": "null"
+              }
+            ],
+            "span": 2,
+            "sparkline": {
+              "fillColor": "rgba(31, 118, 189, 0.18)",
+              "full": false,
+              "lineColor": "rgb(31, 120, 193)",
+              "show": false
+            },
+            "tableColumn": "",
+            "targets": [
+              {
+                "expr": "sum(ttl_total_removes{prefix=\"default\", app=\"yildizdb-app\"})",
+                "format": "time_series",
+                "intervalFactor": 2,
+                "refId": "A"
+              }
+            ],
+            "thresholds": "",
+            "title": "TTL Removes",
+            "type": "singlestat",
+            "valueFontSize": "80%",
+            "valueMaps": [
+              {
+                "op": "=",
+                "text": "N/A",
+                "value": "null"
+              }
+            ],
+            "valueName": "avg"
+          },
+          {
+            "cacheTimeout": null,
+            "colorBackground": false,
+            "colorValue": false,
+            "colors": [
+              "#299c46",
+              "rgba(237, 129, 40, 0.89)",
+              "#d44a3a"
+            ],
+            "datasource": null,
+            "format": "none",
+            "gauge": {
+              "maxValue": 100,
+              "minValue": 0,
+              "show": false,
+              "thresholdLabels": false,
+              "thresholdMarkers": true
+            },
+            "id": 11,
+            "interval": null,
+            "links": [],
+            "mappingType": 1,
+            "mappingTypes": [
+              {
+                "name": "value to text",
+                "value": 1
+              },
+              {
+                "name": "range to text",
+                "value": 2
+              }
+            ],
+            "maxDataPoints": 100,
+            "nullPointMode": "connected",
+            "nullText": null,
+            "postfix": "",
+            "postfixFontSize": "50%",
+            "prefix": "",
+            "prefixFontSize": "50%",
+            "rangeMaps": [
+              {
+                "from": "null",
+                "text": "N/A",
+                "to": "null"
+              }
+            ],
+            "span": 2,
+            "sparkline": {
+              "fillColor": "rgba(31, 118, 189, 0.18)",
+              "full": false,
+              "lineColor": "rgb(31, 120, 193)",
+              "show": false
+            },
+            "tableColumn": "",
+            "targets": [
+              {
+                "expr": "sum(ttl_job_runs{prefix=\"default\", app=\"yildizdb-app\"})",
+                "format": "time_series",
+                "intervalFactor": 2,
+                "refId": "A"
+              }
+            ],
+            "thresholds": "",
+            "title": "TTL Job Runs",
+            "type": "singlestat",
+            "valueFontSize": "80%",
+            "valueMaps": [
+              {
+                "op": "=",
+                "text": "N/A",
+                "value": "null"
+              }
+            ],
+            "valueName": "avg"
+          },
+          {
+            "aliasColors": {},
+            "bars": false,
+            "dashLength": 10,
+            "dashes": false,
+            "datasource": null,
+            "fill": 1,
+            "id": 9,
+            "legend": {
+              "avg": false,
+              "current": false,
+              "max": false,
+              "min": false,
+              "show": true,
+              "total": false,
+              "values": false
+            },
+            "lines": true,
+            "linewidth": 1,
+            "links": [],
+            "nullPointMode": "null",
+            "percentage": false,
+            "pointradius": 5,
+            "points": false,
+            "renderer": "flot",
+            "seriesOverrides": [],
+            "spaceLength": 10,
+            "span": 8,
+            "stack": false,
+            "steppedLine": false,
+            "targets": [
+              {
+                "expr": "sum(rate(ttl_edge_removes{prefix=\"default\", app=\"yildizdb-app\"}[1h]))",
+                "format": "time_series",
+                "intervalFactor": 2,
+                "legendFormat": "edge removes",
+                "refId": "A"
+              },
+              {
+                "expr": "sum(rate(ttl_node_removes{prefix=\"default\", app=\"yildizdb-app\"}[1h]))",
+                "format": "time_series",
+                "intervalFactor": 2,
+                "legendFormat": "node removes",
+                "refId": "B"
+              },
+              {
+                "expr": "sum(rate(ttl_translate_removes{prefix=\"default\", app=\"yildizdb-app\"}[1h]))",
+                "format": "time_series",
+                "intervalFactor": 2,
+                "legendFormat": "translate removes",
+                "refId": "C"
+              }
+            ],
+            "thresholds": [],
+            "timeFrom": null,
+            "timeShift": null,
+            "title": "TTL Removes",
+            "tooltip": {
+              "shared": true,
+              "sort": 0,
+              "value_type": "individual"
+            },
+            "type": "graph",
+            "xaxis": {
+              "buckets": null,
+              "mode": "time",
+              "name": null,
+              "show": true,
+              "values": []
+            },
+            "yaxes": [
+              {
+                "format": "short",
+                "label": null,
+                "logBase": 1,
+                "max": null,
+                "min": null,
+                "show": true
+              },
+              {
+                "format": "short",
+                "label": null,
+                "logBase": 1,
+                "max": null,
+                "min": null,
+                "show": true
+              }
+            ]
+          }
+        ],
+        "repeat": null,
+        "repeatIteration": null,
+        "repeatRowId": null,
+        "showTitle": false,
+        "title": "Dashboard Row",
+        "titleSize": "h6"
+      }
+    ],
+    "schemaVersion": 14,
+    "style": "dark",
+    "tags": [
+      "yildizdb"
+    ],
+    "templating": {
+      "list": []
+    },
+    "time": {
+      "from": "now-5m",
+      "to": "now"
+    },
+    "timepicker": {
+      "refresh_intervals": [
+        "5s",
+        "10s",
+        "30s",
+        "1m",
+        "5m",
+        "15m",
+        "30m",
+        "1h",
+        "2h",
+        "1d"
+      ],
+      "time_options": [
+        "5m",
+        "15m",
+        "1h",
+        "6h",
+        "12h",
+        "24h",
+        "2d",
+        "7d",
+        "30d"
+      ]
+    },
+    "timezone": "",
+    "title": "Yildiz Graph Database",
+    "version": 11
+  }

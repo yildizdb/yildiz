@@ -12,6 +12,7 @@ high performance graph database on top of MySQL
 * ttl feature for all resources
 * attach **dynamic data** to edges and nodes (as JSON columns)
 * extend the existing table schema through `_extend` options
+* prometheus metrics are [exposed](docs/metrics.md)
 
 ## Build for High Throughput
 
@@ -49,6 +50,7 @@ high performance graph database on top of MySQL
 * [How does it work?](docs/how.md)
 * [yildiz Use Cases](docs/use-case.md)
 * [Access Management](docs/access.md)
+* [Stats and Metrics](docs/metrics.md)
 
 ## Developing yildiz
 
