@@ -1,5 +1,9 @@
 # yilidzdb changelog
 
+## 1.28.1
+
+- fixed bug in access-log
+
 ## 1.28.0
 
 - fixed bug where gauge required label during initialisation
