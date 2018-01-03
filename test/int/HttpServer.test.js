@@ -422,6 +422,26 @@ describe("HttpServer INT", () => {
         assert.ok(body.edges[0].depth);
     });
 
+    it.only("should be able to create relation in singularity", async () => {
+
+        const {
+            status,
+            body
+        } = await reqProm("/access/upsert-singular-relation", {
+            method: "POST",
+            headers: {
+                "content-type": "application/json"
+            },
+            body: JSON.stringify({
+                //TODO implement
+            })
+        }, true, "Complex relation creation in single request.");
+
+        //TODO implement
+        console.log(body);
+        return true;
+    });
+
     it("should be able to delete edges", async() => {
         const {
             status,
