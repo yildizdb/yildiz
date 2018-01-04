@@ -44,13 +44,14 @@ high performance graph database on top of MySQL
 ## Documentation
 
 * `yildiz` means :star: in turkish
-* [Http Interface Curl Examples](docs/curl.md)
+* [Http interface curl examples](docs/curl.md)
 * [Open API/Swagger JSON](docs/swagger.json)
 * [Why develop another graph database?](docs/why.md)
 * [How does it work?](docs/how.md)
-* [yildiz Use Cases](docs/use-case.md)
-* [Access Management](docs/access.md)
-* [Stats and Metrics](docs/metrics.md)
+* [Storing node relations even faster](docs/fast-relation-creation.md)
+* [yildiz use-cases](docs/use-case.md)
+* [Access management](docs/access.md)
+* [Stats and metrics](docs/metrics.md)
 
 ## Developing yildiz
 
@@ -64,43 +65,5 @@ high performance graph database on top of MySQL
 
 ## Misc
 
-* kraken exposes Prometheus Metrics @ `/admin/metrics`
-* kraken exposes JSON stats @ `/admin/stats`
-
-## In Development
-
-* [ ] implement dijkstra for MySQL 5.x
-* [ ] implement dijkstra for MySQL 8
-
-```
-                              *                            
-                             %                             
-                            %  @                           
-                                @                          
-                           @                               
-                          *      ,                         
-                          .       @                        
-                         @         #                       
-                                                           
-                        (           %                      
-                       @             &                     
- ..,/(%%&@@@@@@@@@&&%(/%             &        ,*(&@@@@@@&%(
-  * #@                  &          ,                 @# ., 
-    @      @(             .       @           .@/     @    
-       %         %@        @    /       ,@.         ,      
-         /              @%     #  &@             @         
-            @               @@@@              .,           
-               ,      %@    @  #    .@,     @              
-                 @         .     #        #                
-                         @    .   #        &               
-                @       &     *     #                      
-                      .       #      @      @              
-               &     @        &        .                   
-                    /       @   @       @    #             
-              %   *      /.        #      .   &            
-             *   @     &             (     @               
-             *      @                   #      @           
-            % %  (                         @  @ ,          
-             @ %                              @.*          
-           @@                                    @         
-```
+* Yildiz exposes Prometheus Metrics @ `/admin/metrics`
+* Yildiz exposes JSON stats @ `/admin/stats`

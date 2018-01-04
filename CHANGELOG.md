@@ -1,5 +1,13 @@
 # yilidzdb changelog
 
+## 1.29.0
+
+- added new http endpoint "/access/upsert-singular-relation"
+- added new procedure handling, based on ProcedureLoader
+- added new GraphAccess function "upsertSingleEdgeRelationBetweenNodes"
+- added upsert relation procedure
+- added integration test for upsert-singular-relation
+
 ## 1.28.1
 
 - fixed bug in access-log

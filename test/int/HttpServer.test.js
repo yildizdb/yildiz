@@ -422,7 +422,7 @@ describe("HttpServer INT", () => {
         assert.ok(body.edges[0].depth);
     });
 
-    it.only("should be able to create relation in singularity", async () => {
+    it("should be able to create relation in singularity", async () => {
 
         const {
             status,
@@ -433,13 +433,21 @@ describe("HttpServer INT", () => {
                 "content-type": "application/json"
             },
             body: JSON.stringify({
-                //TODO implement
+                leftNodeIdentifierVal: "bla-bla-bla",
+                rightNodeIdentifierVal: "blup-blup-blup", 
+                leftNodeData: {},
+                rightNodeData: {},
+                ttld: true,
+                relation: "1",
+                edgeData: {},
+                depthBeforeCreation: true
             })
-        }, true, "Complex relation creation in single request.");
+        }, true, "Complex 2 node, 1 edge relation creation (also creates translations) in single request.");
 
-        //TODO implement
-        console.log(body);
-        return true;
+        assert.equal(status, 200);
+        assert.ok(body.leftNodeId);
+        assert.ok(body.rightNodeId);
+        assert.ok(body.edgeId);
     });
 
     it("should be able to delete edges", async() => {
