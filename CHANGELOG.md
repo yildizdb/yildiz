@@ -1,5 +1,11 @@
 # yilidzdb changelog
 
+## 1.30.0
+
+- sequelize constraint errors on node or translation creation now return a proper 409 error code
+- not found errors are caught on logged without stack trace in error handler now
+- fixed logging of successfull creation with better timing
+
 ## 1.29.0
 
 - added new http endpoint "/access/upsert-singular-relation"

@@ -69,7 +69,7 @@ const defaultOptions = require("./../config/default.json");
 
 if(!program.args || !program.args.length){
     debug("No config JSON file path passed, exiting.");
-    process.exit(1);
+    return process.exit(1);
 }
 
 let uri = program.args[0];
@@ -87,7 +87,7 @@ try {
     }
 } catch(error){
     debug(`failed to load JSON config file ${error.message}.`);
-    process.exit(2);
+    return process.exit(2);
 }
 
 const readAndDisplayBanner = () => {
