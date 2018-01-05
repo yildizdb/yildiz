@@ -1,5 +1,10 @@
 # yilidzdb changelog
 
+## 1.31.0
+
+- added additional procedure and endpoint to run relation upsert without transaction per default
+- and via "/access/upsert-singular-relation-transaction" with transaction wrapped procedure
+
 ## 1.30.0
 
 - sequelize constraint errors on node or translation creation now return a proper 409 error code
