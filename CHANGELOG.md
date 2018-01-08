@@ -1,5 +1,12 @@
 # yilidzdb changelog
 
+## 2.0.0
+
+- **BREAKING** renamed upsert-singular-relation-transaction to upsert-singular-relation-no-transaction
+- **BREAKING** stored procedures now use the package version as part of their name
+- added SET TRANSACTION ISOLATION LEVEL READ COMMITTED; to upsert relation procedure
+- fixed edge relation in upsert relation procedure from VARCHAR to BIGINT
+
 ## 1.31.0
 
 - added additional procedure and endpoint to run relation upsert without transaction per default
