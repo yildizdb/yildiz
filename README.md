@@ -4,6 +4,7 @@ high performance graph database on top of MySQL
 
 ## Features
 
+* **DISCLAIMER**: YildizDB is still changing a lot, it is not yet recommended for production use.
 * multi-tenancy/table-size management through table prefixes (with [access management](docs/access.md))
 * high read and write performance
 * lightweight deployments (small Node.js footprint) + scales easily

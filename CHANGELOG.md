@@ -1,5 +1,10 @@
 # yilidzdb changelog
 
+## 2.1.0
+
+- removed depth increase update due to deadlock from procedure
+- fixed bug in get translation endpoint, missing await
+
 ## 2.0.1
 
 - fixed version replacement in procedure
