@@ -1,5 +1,9 @@
 # yilidzdb changelog
 
+## 2.0.1
+
+- fixed version replacement in procedure
+
 ## 2.0.0
 
 - **BREAKING** renamed upsert-singular-relation-transaction to upsert-singular-relation-no-transaction

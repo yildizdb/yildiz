@@ -422,7 +422,35 @@ describe("HttpServer INT", () => {
         assert.ok(body.edges[0].depth);
     });
 
-    it("should be able to create relation in singularity", async () => {
+    it("should be able to create relation in singularity no transaction", async () => {
+
+        const {
+            status,
+            body
+        } = await reqProm("/access/upsert-singular-relation-no-transaction", {
+            method: "POST",
+            headers: {
+                "content-type": "application/json"
+            },
+            body: JSON.stringify({
+                leftNodeIdentifierVal: "bla-bla-bla",
+                rightNodeIdentifierVal: "blup-blup-blup", 
+                leftNodeData: {},
+                rightNodeData: {},
+                ttld: true,
+                relation: "1",
+                edgeData: {},
+                depthBeforeCreation: true
+            })
+        }, true, "Complex 2 node, 1 edge relation creation (also creates translations) in single request.");
+
+        assert.equal(status, 200);
+        assert.ok(body.leftNodeId);
+        assert.ok(body.rightNodeId);
+        assert.ok(body.edgeId);
+    });
+
+    it("should be able to create relation in singularity with transaction", async () => {
 
         const {
             status,
@@ -444,6 +472,7 @@ describe("HttpServer INT", () => {
             })
         }, true, "Complex 2 node, 1 edge relation creation (also creates translations) in single request.");
 
+        console.log(body);
         assert.equal(status, 200);
         assert.ok(body.leftNodeId);
         assert.ok(body.rightNodeId);
