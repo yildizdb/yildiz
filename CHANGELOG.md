@@ -1,5 +1,11 @@
 # yilidzdb changelog
 
+## 3.0.0
+
+- changing from auto increment to self generated ids based on uuid.v4 hashes
+- refactored strToInt
+- added /lib/utils
+
 ## 2.1.0
 
 - removed depth increase update due to deadlock from procedure
