@@ -472,7 +472,6 @@ describe("HttpServer INT", () => {
             })
         }, true, "Complex 2 node, 1 edge relation creation (also creates translations) in single request.");
 
-        console.log(body);
         assert.equal(status, 200);
         assert.ok(body.leftNodeId);
         assert.ok(body.rightNodeId);
