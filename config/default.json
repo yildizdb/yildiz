@@ -1,6 +1,6 @@
 {
     "accessLog": false,
-    "enableRaw": false,
+    "enableRaw": true,
     "noBanner": false,
     "ttl": {
         "active": true,

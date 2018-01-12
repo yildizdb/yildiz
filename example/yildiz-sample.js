@@ -1,8 +1,9 @@
 "use strict";
 
 const {Yildiz} = require("./../index.js");
+const config = process.env["DIALECT"] === "postgres" ? require("../config/psql.json") : require("../config/default.json");
 
-const yildiz = new Yildiz("kn1", {});
+const yildiz = new Yildiz("kn1", config);
 
 (async () => {
 
@@ -13,7 +14,7 @@ const yildiz = new Yildiz("kn1", {});
             name: Yildiz.TYPES.STRING
         },
         attributes: {
-            as: Yildiz.TYPES.STRING
+            rel: Yildiz.TYPES.STRING
         }
     }, true);
 
@@ -36,9 +37,9 @@ const yildiz = new Yildiz("kn1", {});
     const romeo = await nodeHandler.createNode(romeoIdentifier, {someKey: "someValue1"}, {name: "Romeo"});
     const juliet = await nodeHandler.createNode(julietIdentifier, {someKey: "someValue2"}, {name: "Juliet"});
 
-    const edge1 = await nodeHandler.createEdgeWithId(romeo.getYildizID(), juliet.getYildizID(), loveRelation, {someKey: "someValue3"}, {as: "loves"});
-    const edge2 = await nodeHandler.createEdgeWithId(juliet.getYildizID(), romeo.getYildizID(), hateRelation, {someKey: "someValue4"}, {as: "hates"});
-    const edge3 = await nodeHandler.createEdgeWithId(romeo.getYildizID(), juliet.getYildizID(), loveRelation, {someKey: "someValue5"}, {as: "loves"});
+    const edge1 = await nodeHandler.createEdgeWithId(romeo.getYildizID(), juliet.getYildizID(), loveRelation, {someKey: "someValue3"}, {rel: "loves"});
+    const edge2 = await nodeHandler.createEdgeWithId(juliet.getYildizID(), romeo.getYildizID(), hateRelation, {someKey: "someValue4"}, {rel: "hates"});
+    const edge3 = await nodeHandler.createEdgeWithId(romeo.getYildizID(), juliet.getYildizID(), loveRelation, {someKey: "someValue5"}, {rel: "loves"});
     console.log(edge1, edge2, edge3);
 
     const rromeo = await nodeHandler.getNodeByIdentifier(romeoIdentifier);

@@ -1,0 +1,29 @@
+{
+  "accessLog": false,
+  "enableRaw": true,
+  "noBanner": false,
+  "ttl": {
+      "active": true,
+      "lifeTimeInSec": 86400,
+      "jobIntervalInSec": 120
+  },
+  "cache": {
+      "nodeCacheTime": 6000,
+      "edgeCacheTime": 12000
+  },
+  "database": {
+      "database": "yildiz",
+      "username": "root",
+      "password": "toor",
+      "host": "localhost",
+      "port": 5432,
+      "dialect": "postgres",
+      "pool": {
+          "max": 20,
+          "min": 0,
+          "idle": 15000
+      },
+      "storage": null
+  },
+  "access": "*"
+}
