@@ -35,7 +35,8 @@
     "i:update": "./scripts/self-update.sh",
     "docker:up": "docker-compose build --no-cache && docker-compose up -d",
     "docker:logs": "docker logs yildiz_yildiz_1",
-    "docker:down": "docker-compose down"
+    "docker:down": "docker-compose down",
+    "mysql": "mysql -u root -p"
   },
   "dependencies": {
     "bluebird": "~3.5.1",
