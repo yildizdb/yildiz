@@ -832,6 +832,10 @@ moment-timezone@^0.5.4:
   version "2.19.1"
   resolved "https://registry.yarnpkg.com/moment/-/moment-2.19.1.tgz#56da1a2d1cbf01d38b7e1afc31c10bcfa1929167"
 
+moment@^2.20.1:
+  version "2.20.1"
+  resolved "https://registry.yarnpkg.com/moment/-/moment-2.20.1.tgz#d6eb1a46cbcc14a2b2f9434112c1ff8907f313fd"
+
 ms@2.0.0:
   version "2.0.0"
   resolved "https://registry.yarnpkg.com/ms/-/ms-2.0.0.tgz#5608aeadfc00be6c2901df5f9861788de0d597c8"
@@ -1421,7 +1425,7 @@ yallist@^2.1.2:
   version "2.1.2"
   resolved "https://registry.yarnpkg.com/yallist/-/yallist-2.1.2.tgz#1c11f9218f076089a47dd512f93c6699a6a81d52"
 
-yildiz-js@^2.1.0:
+yildiz-js@~2.1.0:
   version "2.1.0"
   resolved "https://registry.yarnpkg.com/yildiz-js/-/yildiz-js-2.1.0.tgz#631ec7b939fcfe821a49d2a8af70c2fbbfd56fa8"
   dependencies:

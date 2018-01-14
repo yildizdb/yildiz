@@ -28,6 +28,16 @@ const server = new HttpServer(port, {
         active: true,
         lifeTimeInSec: 2,
         jobIntervalInSec: 1
+    },
+    procedures: {
+        depthTransfer: {
+            minAge: 1,
+            minAgeType: "SECOND"
+        }
+    },
+    walker: {
+        disable: false,
+        interval: 500
     }
 });
 
@@ -44,6 +54,9 @@ describe("HttpServer INT", () => {
 
     const relationVal = "test";
     const relationHash = 3127628307;
+
+    let idTestNode1 = null;
+    let idTestNode2 = null;
 
     before(async() => {
         await server.listen();
@@ -337,67 +350,6 @@ describe("HttpServer INT", () => {
         assert.equal(body.edges.length, 3);
     });
 
-    it("should be able to increase edge depth", async() => {
-
-        const {
-            status,
-            body
-        } = await reqProm("/edge/depth/increase", {
-            method: "PUT",
-            headers: {
-                "content-type": "application/json"
-            },
-            body: JSON.stringify({
-                leftId,
-                rightId,
-                relation: relationHash
-            })
-        }, true, "Increase depth of an edge.");
-
-        assert.equal(status, 200);
-        assert.ok(body.success);
-    });
-
-    it("should be able to see increased edge depth", async() => {
-        const {
-            status,
-            body
-        } = await reqProm(`/edge/${leftId}/${rightId}/test`);
-        assert.equal(status, 200);
-        assert.equal(body.depth, 2);
-        assert.ok(body.ttld);
-        assert.ok(body.created_at);
-    });
-
-    it("should be able to decrease edge depth", async() => {
-
-        const {
-            status,
-            body
-        } = await reqProm("/edge/depth/decrease", {
-            method: "PUT",
-            headers: {
-                "content-type": "application/json"
-            },
-            body: JSON.stringify({
-                leftId,
-                rightId,
-                relation: "test"
-            })
-        }, true, "Decrease depth of an edge.");
-        assert.equal(status, 200);
-        assert.ok(body.success);
-    });
-
-    it("should be able to see decreased edge depth", async() => {
-        const {
-            status,
-            body
-        } = await reqProm(`/edge/${leftId}/${rightId}/test`);
-        assert.equal(status, 200);
-        assert.equal(body.depth, 1);
-    });
-
     it("should be able to get translated edge info for nodes", async() => {
 
         const {
@@ -461,11 +413,11 @@ describe("HttpServer INT", () => {
                 "content-type": "application/json"
             },
             body: JSON.stringify({
-                leftNodeIdentifierVal: "bla-bla-bla",
-                rightNodeIdentifierVal: "blup-blup-blup", 
+                leftNodeIdentifierVal: "RAAAF-l",
+                rightNodeIdentifierVal: "RAAAF-r", 
                 leftNodeData: {},
                 rightNodeData: {},
-                ttld: true,
+                ttld: false, //not flagged, as needed for increase / decrease test
                 relation: "1",
                 edgeData: {},
                 depthBeforeCreation: true
@@ -476,6 +428,95 @@ describe("HttpServer INT", () => {
         assert.ok(body.leftNodeId);
         assert.ok(body.rightNodeId);
         assert.ok(body.edgeId);
+
+        //store for following tests
+        idTestNode1 = body.leftNodeId;
+        idTestNode2 = body.rightNodeId;
+    });
+
+    it("should be able to increase edge depth", async() => {
+
+        const {
+            status,
+            body
+        } = await reqProm("/edge/depth/increase", {
+            method: "PUT",
+            headers: {
+                "content-type": "application/json"
+            },
+            body: JSON.stringify({
+                leftId: idTestNode1,
+                rightId: idTestNode2,
+                relation: "1"
+            })
+        }, true, "Increase depth of an edge.");
+
+        console.log(body);
+        assert.equal(status, 200);
+        assert.ok(body.success);
+    });
+
+    it("should be able to await next depth transfer job execution", function(done){
+        this.timeout(2250);
+        setTimeout(done, 2200);
+    });
+
+    it("should be able to see increased edge depth", async() => {
+        const {
+            status,
+            body
+        } = await reqProm(`/edge/${idTestNode1}/${idTestNode2}/1`);
+        assert.equal(status, 200);
+        assert.equal(body.depth, 2);
+        assert.ok(body.ttld);
+        assert.ok(body.created_at);
+    });
+
+    it("should be able to decrease edge depth", async() => {
+
+        const {
+            status,
+            body
+        } = await reqProm("/edge/depth/decrease", {
+            method: "PUT",
+            headers: {
+                "content-type": "application/json"
+            },
+            body: JSON.stringify({
+                leftId: idTestNode1,
+                rightId: idTestNode2,
+                relation: "1"
+            })
+        }, true, "Decrease depth of an edge.");
+
+        console.log(body);
+        assert.equal(status, 200);
+        assert.ok(body.success);
+    });
+
+    it("should be able to await next depth transfer job execution", function(done){
+        this.timeout(2250);
+        setTimeout(done, 2200);
+    });
+
+    it("should be able to see decreased edge depth", async() => {
+        const {
+            status,
+            body
+        } = await reqProm(`/edge/${idTestNode1}/${idTestNode2}/1`);
+        assert.equal(status, 200);
+        assert.equal(body.depth, 1);
+    });
+
+    it("should be able to delete test edge", async() => {
+        const {
+            status,
+            body
+        } = await reqProm(`/edge/${idTestNode1}/${idTestNode2}/1`, {
+            method: "DELETE"
+        }, true, "Deleting an edge.");
+        assert.equal(status, 200);
+        assert.ok(body.success);
     });
 
     it("should be able to delete edges", async() => {
