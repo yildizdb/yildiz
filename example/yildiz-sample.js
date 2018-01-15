@@ -14,7 +14,7 @@ const yildiz = new Yildiz("kn1", config);
             name: Yildiz.TYPES.STRING
         },
         attributes: {
-            rel: Yildiz.TYPES.STRING
+            as: Yildiz.TYPES.STRING
         }
     }, true);
 
@@ -37,9 +37,9 @@ const yildiz = new Yildiz("kn1", config);
     const romeo = await nodeHandler.createNode(romeoIdentifier, {someKey: "someValue1"}, {name: "Romeo"});
     const juliet = await nodeHandler.createNode(julietIdentifier, {someKey: "someValue2"}, {name: "Juliet"});
 
-    const edge1 = await nodeHandler.createEdgeWithId(romeo.getYildizID(), juliet.getYildizID(), loveRelation, {someKey: "someValue3"}, {rel: "loves"});
-    const edge2 = await nodeHandler.createEdgeWithId(juliet.getYildizID(), romeo.getYildizID(), hateRelation, {someKey: "someValue4"}, {rel: "hates"});
-    const edge3 = await nodeHandler.createEdgeWithId(romeo.getYildizID(), juliet.getYildizID(), loveRelation, {someKey: "someValue5"}, {rel: "loves"});
+    const edge1 = await nodeHandler.createEdgeWithId(romeo.getYildizID(), juliet.getYildizID(), loveRelation, {someKey: "someValue3"}, {as: "loves"});
+    const edge2 = await nodeHandler.createEdgeWithId(juliet.getYildizID(), romeo.getYildizID(), hateRelation, {someKey: "someValue4"}, {as: "hates"});
+    const edge3 = await nodeHandler.createEdgeWithId(romeo.getYildizID(), juliet.getYildizID(), loveRelation, {someKey: "someValue5"}, {as: "loves"});
     console.log(edge1, edge2, edge3);
 
     const rromeo = await nodeHandler.getNodeByIdentifier(romeoIdentifier);
