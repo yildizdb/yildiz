@@ -2,6 +2,7 @@
     "accessLog": true,
     "enableRaw": true,
     "noBanner": false,
+    "access": "*",
     "ttl": {
         "active": true,
         "lifeTimeInSec": 86400,
@@ -24,5 +25,14 @@
             "idle": 15000
         }
     },
-    "access": "*"
+    "procedures": {
+        "depthTransfer": {
+            "minAge": 15,
+            "minAgeType": "MINUTE"
+        }
+    },
+    "walker": {
+        "disable": false,
+        "interval": 120000
+    }
 }
