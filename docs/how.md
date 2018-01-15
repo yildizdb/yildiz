@@ -1,7 +1,7 @@
 # How does yildiz work?
 
-* in its core yildiz creates a table triplet for every prefix it is accessed with
-* the triple consists of: "nodes, translations and edges"
+* in its core yildiz creates four tables for every prefix it is accessed with
+* which consists of: "nodes, translations, edges and depths"
 * the relation between two nodes can be shown with an edge [Wikipedia Graph Database](https://en.wikipedia.org/wiki/Graph_database)
 * it is possible to attach data to nodes (properties) and to edges (attributes)
 * in yildiz this data is directly attached to the same row (node or edge) there is no separated table
@@ -16,8 +16,9 @@
 * this is the reason why there is a third table called "translations", which helps you to store the
     unhashed representations of your identifiers and relations
 * all three tables have the option to store additional values in JSON colum called "data" which is by default   NULL
+* the depth table enables a batched way of increasing the depth values (like edge weight) of edges
 
-Here is a shortened overview of the table-tripled generation in sequelize:
+Here is a shortened overview of the table generation in sequelize:
 
 ```javascript
 const Node = this.sequelize.define(`${this.prefix}_node`, {
@@ -93,6 +94,16 @@ const Translate = this.sequelize.define(`${this.prefix}_translate`, {
         }
     },{/* .. */});
 
+const Depth = this.sequelize.define(`${this.prefix}_depth`, {
+    edge_id: {
+        type: Sequelize.BIGINT
+    },
+    created_at: {
+        type: Sequelize.DATE,
+        defaultValue: Sequelize.NOW
+    }
+}, {/* .. */});
+
 Node.belongsToMany(Node, {
     as: {singular: "other_node", plural: "other_nodes"},
     through: {
@@ -101,5 +112,15 @@ Node.belongsToMany(Node, {
     },
     foreignKey: "left_node_id",
     otherKey: "right_node_id"
+});
+
+Edge.hasMany(Depth, {
+    foreignKey: "edge_id",
+    sourceKey: "id"
+});
+
+Depth.belongsTo(Edge, {
+    foreignKey: "edge_id", 
+    targetKey: "id"
 });
 ```
