@@ -1,5 +1,17 @@
 # yilidzdb changelog
 
+## 4.0.0
+
+- depth increases / decreases are now handled by a job on the edge table called DepthWalker
+- depth increases are therefore a lot faster, as they the actual update statements only run
+        in batched collections every few minutes
+- depth operations are stored in their own table
+- procedures have been altered accordingly
+- a new procedure DepthTransfer has been added to deal with depth increases from within the job
+- NodeHandler has been altered to deal with new increase solution
+- yildiz now spawns jobs in a different row
+- procedure loader now enables configs for procedures and generic initialisation
+
 ## 3.0.0
 
 - changing from auto increment to self generated ids based on uuid.v4 hashes
