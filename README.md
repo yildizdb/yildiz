@@ -1,6 +1,6 @@
-# yildiz - HTTP graph layer on top of MySQL
+# yildiz - HTTP graph layer on top of MySQL or Postgres
 
-high performance graph database on top of MySQL
+high performance graph database on top of MySQL or Postgres
 
 ## Features
 
@@ -8,7 +8,7 @@ high performance graph database on top of MySQL
 * multi-tenancy/table-size management through table prefixes (with [access management](docs/access.md))
 * high read and write performance
 * lightweight deployments (small Node.js footprint) + scales easily
-* sits on top of any MySQL database (easy to adapt to Postgres, MSSQL or SQLite3)
+* sits on top of any MySQL >= 5.7 or Postgres >= 10.1 database
 * able to handle billions of edges and nodes
 * ttl feature for all resources
 * attach **dynamic data** to edges and nodes (as JSON columns)
@@ -53,15 +53,24 @@ high performance graph database on top of MySQL
 * [Access management](docs/access.md)
 * [Stats and metrics](docs/metrics.md)
 
-## Developing yildiz
+## Developing yildiz with MySQL backend
 
-* start database via docker `yarn db:start`
-* run tests via `yarn test`
+* start database via docker `yarn mysql:start`
+* run tests via `yarn test` for MySQL
 * run tests with SQL debugging via `yarn sql`
 * start http-server via `yarn http`
 * **generate Open API/Swagger** via `yarn swagger`
 * **generate CURL examples** via `yarn curl`
-* stop database via `yarn db:stop`
+* stop database via `yarn mysql:stop`
+
+## Developing yildiz with Postgres backend
+
+* start database via docker `yarn psql:start`
+* run tests via `yarn test:psql` for Postgres
+* start http-server via `yarn http:psql`
+* **generate Open API/Swagger** via `yarn swagger`
+* **generate CURL examples** via `yarn curl`
+* stop database via `yarn psql:stop`
 
 ## Misc
 

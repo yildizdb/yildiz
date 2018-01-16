@@ -19,6 +19,7 @@
     "yildiz",
     "sql",
     "mysql",
+    "postgres",
     "graphdb",
     "relation",
     "hyper relation",

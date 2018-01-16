@@ -1,5 +1,17 @@
 # yilidzdb changelog
 
+## 5.0.0
+
+- **added parallel Postgres mode**
+- yildiz now supports MySQL and Postgres as backends
+- moved mysql2 and pg modules to optionalDependencies
+- adjusted code to support second db backend
+- added second version of procedures to support additional postgres backend
+- adjusted new depth increase logic to work with postgres backend
+- adjusted docs
+- adjusted pjson scripts to work with mysql and postgres
+- added new docker-compose for postgres
+
 ## 4.0.0
 
 - depth increases / decreases are now handled by a job on the edge table called DepthWalker
