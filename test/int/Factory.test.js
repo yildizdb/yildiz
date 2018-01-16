@@ -3,10 +3,11 @@
 const assert = require("assert");
 
 const {YildizFactory} = require("./../../index.js");
+const config = process.env["DIALECT"] === "postgres" ? require("../../config/psql.json") : require("../../config/default.json");
 
 describe("Factory INT", () => {
 
-    const factory = new YildizFactory();
+    const factory = new YildizFactory(config);
     const prefix = "derp_test";
 
     it("should be able to get an instance for a prefix", async () => {

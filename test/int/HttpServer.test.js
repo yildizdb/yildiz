@@ -10,6 +10,7 @@ const {
     HttpServer
 } = require("./../../index.js");
 const pjson = require("./../../package.json");
+const config = process.env["DIALECT"] === "postgres" ? require("../../config/psql.json") : require("../../config/default.json");
 
 const PATH_TO_CURL_DOC = "../../docs/curl.md";
 let CURL_OUTPUT = `# yildiz ${pjson.version} HttpServer CURL Examples\n
@@ -21,7 +22,7 @@ if(CURLOUT){
 }
 
 const port = 45456;
-const server = new HttpServer(port, {
+const server = new HttpServer(port, Object.assign(config, {
     accessLog: false,
     enableRaw: true, //be aware that this might be a security issue
     ttl: {
@@ -39,7 +40,7 @@ const server = new HttpServer(port, {
         disable: false,
         interval: 500
     }
-});
+}));
 
 const prefix = "http_test";
 
@@ -430,7 +431,7 @@ describe("HttpServer INT", () => {
         }, true, "Executing raw spread (queries with metadata result).");
         assert.equal(status, 200);
         assert.ok(body.metadata);
-        assert.ok(body.metadata.affectedRows);
+        assert.ok(body.metadata.affectedRows || body.metadata.rowCount);
     });
 
     it("should be able to query edge count via raw command", async() => {
@@ -448,7 +449,7 @@ describe("HttpServer INT", () => {
         }, true, "Executing raw spread (queries with result set).");
         assert.equal(status, 200);
         assert.ok(body.results);
-        assert.ok(!body.results[0].count);
+        assert.ok(!parseInt(body.results[0].count));
     });
 
     it("should not be able to see edge", async() => {
@@ -553,7 +554,9 @@ describe("HttpServer INT", () => {
                 data: {},
                 ttld: true
             })
-        }).then(({body}) => nodeId2 = body.id);
+        }).then(({body}) => {
+            nodeId2 = body.id;
+        });
 
         const {
             status,
