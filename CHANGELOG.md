@@ -1,5 +1,8 @@
 # yilidzdb changelog
 
+## 5.0.1
+- Fix bug on `upsert` procedure sql on `depthBeforeCreation` is false
+
 ## 5.0.0
 
 - **added parallel Postgres mode**
