@@ -1,5 +1,13 @@
 # yilidzdb changelog
 
+## 5.1.0 - RELEASE-NAME: Tomahawk
+
+- improved logs
+- added metrics for procedure and depth walker execution
+- added retry for upsert relation procedure on deadlock
+- added additional error handling (different treatment) for constraints and deadlocks for upsert relation
+- fixed bug in depth walker for postgres
+
 ## 5.0.1
 - Fix bug on `upsert` procedure sql on `depthBeforeCreation` is false
 
