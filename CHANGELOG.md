@@ -7,6 +7,7 @@
 - added retry for upsert relation procedure on deadlock
 - added additional error handling (different treatment) for constraints and deadlocks for upsert relation
 - fixed bug in depth walker for postgres
+- added metrics for deadlock and constraint errors on upsert relation
 
 ## 5.0.1
 - Fix bug on `upsert` procedure sql on `depthBeforeCreation` is false
