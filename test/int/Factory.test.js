@@ -2,7 +2,7 @@
 
 const assert = require("assert");
 
-const {YildizFactory} = require("./../../index.js");
+const YildizFactory = require("./../../index.js").rdbms.YildizFactory;
 const config = process.env["DIALECT"] === "postgres" ? require("../../config/psql.json") : require("../../config/default.json");
 
 describe("Factory INT", () => {
