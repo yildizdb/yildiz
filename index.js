@@ -7,5 +7,9 @@ module.exports = {
         Yildiz: require("./lib/rdbms/Yildiz.js").Yildiz,
         YildizFactory: require("./lib/rdbms/YildizFactory.js").YildizFactory
     },
+    bigtable: {
+        Yildiz: require("./lib/bigtable/Yildiz.js").Yildiz,
+        YildizFactory: require("./lib/bigtable/YildizFactory.js").YildizFactory
+    },
     HttpServer
 };
