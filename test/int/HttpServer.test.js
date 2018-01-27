@@ -10,7 +10,9 @@ const {
     HttpServer
 } = require("./../../index.js");
 const pjson = require("./../../package.json");
-const config = process.env["DIALECT"] === "postgres" ? require("../../config/psql.json") : require("../../config/default.json");
+
+const dialect = process.env["DIALECT"] || "default";
+const config = require(`../../config/${dialect}.json`);
 
 const PATH_TO_CURL_DOC = "../../docs/curl.md";
 let CURL_OUTPUT = `# yildiz ${pjson.version} HttpServer CURL Examples\n
@@ -27,8 +29,8 @@ const server = new HttpServer(port, Object.assign(config, {
     enableRaw: true, //be aware that this might be a security issue
     ttl: {
         active: true,
-        lifeTimeInSec: 2,
-        jobIntervalInSec: 1
+        lifeTimeInSec: dialect !== "bigtable" ? 1 : 4,
+        jobIntervalInSec: dialect !== "bigtable" ? 1 : 4,
     },
     procedures: {
         depthTransfer: {
@@ -191,7 +193,7 @@ describe("HttpServer INT", () => {
         assert.equal(status, 201);
         assert.ok(body.identifier);
         assert.ok(body.ttld);
-        assert.ok(body.created_at);
+        dialect !== "bigtable" && assert.ok(body.created_at);
         leftId = body.id;
     });
 
@@ -203,7 +205,7 @@ describe("HttpServer INT", () => {
         assert.equal(status, 200);
         assert.ok(body.data);
         assert.ok(body.ttld);
-        assert.ok(body.created_at);
+        dialect !== "bigtable" && assert.ok(body.created_at);
     });
 
     it("should be able to create another node", async() => {
@@ -272,7 +274,6 @@ describe("HttpServer INT", () => {
         assert.equal(status, 200);
         assert.ok(body.data);
         assert.ok(body.ttld);
-        assert.ok(body.created_at);
     });
 
     it("should be able to create another similar edge for the same id pair", async() => {
@@ -373,7 +374,7 @@ describe("HttpServer INT", () => {
 
         assert.equal(status, 200);
         assert.ok(body.edges);
-        assert.ok(body.edges.length);
+        assert.ok(body.edges.length);dialect
         assert.ok(body.edges[0].depth);
     });
 
@@ -409,6 +410,75 @@ describe("HttpServer INT", () => {
         assert.ok(body.edgeId);
     });
 
+    it("should be able to create relation in singularity with transaction", async () => {
+
+        const {
+            status,
+            body
+        } = await reqProm("/access/upsert-singular-relation", {
+            method: "POST",
+            headers: {
+                "content-type": "application/json"
+            },
+            body: JSON.stringify({
+                leftNodeIdentifierVal: "bla-bla-bla",
+                rightNodeIdentifierVal: "blup-blup-blup", 
+                leftNodeData: {},
+                rightNodeData: {},
+                ttld: true,
+                relation: "1",
+                edgeData: {},
+                depthBeforeCreation: true
+            })
+        }, true, "Complex 2 node, 1 edge relation creation (also creates translations) in single request.");
+
+        if(status !== 200){
+            console.log(body);
+        }
+
+        assert.equal(status, 200);
+        assert.ok(body.leftNodeId);
+        assert.ok(body.rightNodeId);
+        assert.ok(body.edgeId);
+    });
+
+
+    it("should be able to count translates", async() => {
+        const {
+            status,
+            body
+        } = await reqProm("/translator/count", {
+            method: "GET"
+        }, true, "Get a count for translates.");
+
+        assert.equal(status, 200);
+        assert.equal(body.count, 4);
+    });
+
+    it("should be able to count nodes", async() => {
+        const {
+            status,
+            body
+        } = await reqProm("/node/count", {
+            method: "GET"
+        }, true, "Get a count for nodes.");
+
+        assert.equal(status, 200);
+        assert.equal(body.count, 4);
+    });
+
+    it("should be able to count edges", async() => {
+        const {
+            status,
+            body
+        } = await reqProm("/edge/count", {
+            method: "GET"
+        }, true, "Get a count for edges.");
+
+        assert.equal(status, 200);
+        assert.equal(body.count, 4);
+    });
+
     it("should be able to delete edges", async() => {
         const {
             status,
@@ -420,49 +490,54 @@ describe("HttpServer INT", () => {
         assert.ok(body.success);
     });
 
-    it("should be able to delete additional swapped edge via raw command", async() => {
-        const {
-            status,
-            body
-        } = await reqProm(`/raw/spread`, {
-            method: "POST",
-            headers: {
-                "content-type": "application/json"
-            },
-            body: JSON.stringify({
-                query: "DELETE FROM http_test_edges WHERE 1 = 1"
-            })
-        }, true, "Executing raw spread (queries with metadata result).");
-        assert.equal(status, 200);
-        assert.ok(body.metadata);
-        assert.ok(body.metadata.affectedRows || body.metadata.rowCount);
-    });
+    if (dialect !== "bigtable") {
 
-    it("should be able to query edge count via raw command", async() => {
-        const {
-            status,
-            body
-        } = await reqProm(`/raw/query`, {
-            method: "POST",
-            headers: {
-                "content-type": "application/json"
-            },
-            body: JSON.stringify({
-                query: "SELECT COUNT(*) AS count FROM http_test_edges"
-            })
-        }, true, "Executing raw spread (queries with result set).");
-        assert.equal(status, 200);
-        assert.ok(body.results);
-        assert.ok(!parseInt(body.results[0].count));
-    });
+        it("should be able to delete additional swapped edge via raw command", async() => {
+            const {
+                status,
+                body
+            } = await reqProm(`/raw/spread`, {
+                method: "POST",
+                headers: {
+                    "content-type": "application/json"
+                },
+                body: JSON.stringify({
+                    query: "DELETE FROM http_test_edges WHERE 1 = 1"
+                })
+            }, true, "Executing raw spread (queries with metadata result).");
+            assert.equal(status, 200);
+            assert.ok(body.metadata);
+            assert.ok(body.metadata.affectedRows || body.metadata.rowCount);
+        });
+    
+        it("should be able to query edge count via raw command", async() => {
+            const {
+                status,
+                body
+            } = await reqProm(`/raw/query`, {
+                method: "POST",
+                headers: {
+                    "content-type": "application/json"
+                },
+                body: JSON.stringify({
+                    query: "SELECT COUNT(*) AS count FROM http_test_edges"
+                })
+            }, true, "Executing raw spread (queries with result set).");
+            assert.equal(status, 200);
+            assert.ok(body.results);
+            assert.ok(!parseInt(body.results[0].count));
+        });
 
-    it("should not be able to see edge", async() => {
-        const {
-            status,
-            body
-        } = await reqProm(`/edge/${leftId}/${rightId}/test`);
-        assert.equal(status, 404);
-    });
+        it("should not be able to see edge", async() => {
+            const {
+                status,
+                body
+            } = await reqProm(`/edge/${leftId}/${rightId}/test`);
+            assert.equal(status, 404);
+        });
+    }
+
+
 
     it("should be able to delete node", async() => {
         const {
@@ -516,7 +591,7 @@ describe("HttpServer INT", () => {
         assert.equal(status, 200);
         assert.ok(body.factory.http_test);
         assert.equal(typeof body.factory.http_test, "object");
-        assert.ok(body.factory.http_test.internCalls.queries);
+        dialect!== "bigtable" && assert.ok(body.factory.http_test.internCalls.queries);
     });
 
     it("should be able to create a few ttld resources", async() => {
@@ -588,197 +663,239 @@ describe("HttpServer INT", () => {
         setTimeout(done, 2500);
     });
 
-    it("should be not see any of the created ttl flagged resources", async() => {
+    if (dialect === "bigtable") {
 
-        const transQuery = "SELECT COUNT(*) as count FROM http_test_translates";
-        const nodesQuery = "SELECT COUNT(*) as count FROM http_test_nodes";
-        const edgesQuery = "SELECT COUNT(*) as count FROM http_test_edges";
-
-        const {
-            status,
-            body
-        } = await reqProm(`/raw/query`, {
-            method: "POST",
-            headers: {
-                "content-type": "application/json"
-            },
-            body: JSON.stringify({
-                query: `SELECT (${transQuery}) as tcount, (${nodesQuery}) as ncount, (${edgesQuery}) as ecount`
-            })
+        it("should count zero for translates after job running", async() => {
+            const {
+                status,
+                body
+            } = await reqProm("/translator/count", {
+                method: "GET"
+            }, true, "Get a count for translates.");
+    
+            assert.equal(status, 200);
+            assert.equal(body.count, 0);
         });
-        assert.equal(status, 200);
-        assert.ok(body.results);
-        assert.ok(body.results[0]);
-        assert.equal(body.results[0].tcount, 0);
-        assert.equal(body.results[0].ncount, 0);
-        assert.equal(body.results[0].ecount, 0);
-    });
-
-    it("should be able to create relation in singularity with transaction [increase / decrease]", async () => {
-
-        const {
-            status,
-            body
-        } = await reqProm("/access/upsert-singular-relation", {
-            method: "POST",
-            headers: {
-                "content-type": "application/json"
-            },
-            body: JSON.stringify({
-                leftNodeIdentifierVal: "RAAAF-l",
-                rightNodeIdentifierVal: "RAAAF-r", 
-                leftNodeData: {},
-                rightNodeData: {},
-                ttld: false, //not flagged, as needed for increase / decrease test
-                relation: "1",
-                edgeData: {},
-                depthBeforeCreation: true
-            })
-        }, true, "Complex 2 node, 1 edge relation creation (also creates translations) in single request.");
-
-        if(status !== 200){
-            console.log(body);
-        }
-
-        assert.equal(status, 200);
-        assert.ok(body.leftNodeId);
-        assert.ok(body.rightNodeId);
-        assert.ok(body.edgeId);
-
-        //store for following tests
-        idTestNode1 = body.leftNodeId;
-        idTestNode2 = body.rightNodeId;
-        idTestIdentifier1 = body.leftNodeIdentifier;
-        idTestIdentifier2 = body.rightNodeIdentifier;
-    });
-
-    it("should be able to increase edge depth [increase / decrease]", async() => {
-
-        const {
-            status,
-            body
-        } = await reqProm("/edge/depth/increase", {
-            method: "PUT",
-            headers: {
-                "content-type": "application/json"
-            },
-            body: JSON.stringify({
-                leftId: idTestNode1,
-                rightId: idTestNode2,
-                relation: "1"
-            })
-        }, true, "Increase depth of an edge.");
-
-        assert.equal(status, 200);
-        assert.ok(body.success);
-    });
-
-    it("should be able to await next depth transfer job execution [increase / decrease]", function(done){
-        this.timeout(3250);
-        setTimeout(done, 3200);
-    });
-
-    it("should be able to see increased edge depth [increase / decrease]", async() => {
-        const {
-            status,
-            body
-        } = await reqProm(`/edge/${idTestNode1}/${idTestNode2}/1`);
-
-        assert.equal(status, 200);
-        assert.equal(body.depth, 2);
-        assert.ok(!body.ttld);
-        assert.ok(body.created_at);
-    });
-
-    it("should be able to decrease edge depth [increase / decrease]", async() => {
-
-        const {
-            status,
-            body
-        } = await reqProm("/edge/depth/decrease", {
-            method: "PUT",
-            headers: {
-                "content-type": "application/json"
-            },
-            body: JSON.stringify({
-                leftId: idTestNode1,
-                rightId: idTestNode2,
-                relation: "1"
-            })
-        }, true, "Decrease depth of an edge.");
-
-        assert.equal(status, 200);
-        assert.ok(body.success);
-    });
-
-    it("should be able to await next depth transfer job execution [increase / decrease]", function(done){
-        this.timeout(3250);
-        setTimeout(done, 3200);
-    });
-
-    it("should be able to see decreased edge depth [increase / decrease]", async() => {
-        const {
-            status,
-            body
-        } = await reqProm(`/edge/${idTestNode1}/${idTestNode2}/1`);
-        assert.equal(status, 200);
-        assert.equal(body.depth, 1);
-    });
-
-    it("should be able to delete test edge [increase / decrease]", async() => {
-        const {
-            status,
-            body
-        } = await reqProm(`/edge/${idTestNode1}/${idTestNode2}/1`, {
-            method: "DELETE"
-        }, true, "Deleting an edge.");
-        assert.equal(status, 200);
-        assert.ok(body.success);
-    });
-
-    it("should be able to delete node [increase / decrease]", async() => {
-        const {
-            status,
-            body
-        } = await reqProm(`/node/${idTestIdentifier1}`, {
-            method: "DELETE"
-        }, true, "Deleting a node.");
-        assert.equal(status, 200);
-        assert.ok(body.success);
-    });
-
-    it("should be able to delete other node [increase / decrease]", async() => {
-        const {
-            status,
-            body
-        } = await reqProm(`/node/${idTestIdentifier2}`, {
-            method: "DELETE"
+    
+        it("should count zero for nodes after job running", async() => {
+            const {
+                status,
+                body
+            } = await reqProm("/node/count", {
+                method: "GET"
+            }, true, "Get a count for nodes.");
+    
+            assert.equal(status, 200);
+            assert.equal(body.count, 0);
         });
-        assert.equal(status, 200);
-        assert.ok(body.success);
-    });
+    
+        it("should count zero for edges after job running", async() => {
+            const {
+                status,
+                body
+            } = await reqProm("/edge/count", {
+                method: "GET"
+            }, true, "Get a count for edges.");
+    
+            assert.equal(status, 200);
+            assert.equal(body.count, 0);
+        });
+    }
+    
+    else {
 
-    it("should be able to delete translation [increase / decrease]", async() => {
-        const {
-            status,
-            body
-        } = await reqProm(`/translator/${idTestIdentifier1}`, {
-            method: "DELETE"
-        }, true, "Deleting a translation.");
-        assert.equal(status, 200);
-        assert.ok(body.success);
-    });
+        it("should be not see any of the created ttl flagged resources", async() => {
+    
+            const transQuery = "SELECT COUNT(*) as count FROM http_test_translates";
+            const nodesQuery = "SELECT COUNT(*) as count FROM http_test_nodes";
+            const edgesQuery = "SELECT COUNT(*) as count FROM http_test_edges";
+    
+            const {
+                status,
+                body
+            } = await reqProm(`/raw/query`, {
+                method: "POST",
+                headers: {
+                    "content-type": "application/json"
+                },
+                body: JSON.stringify({
+                    query: `SELECT (${transQuery}) as tcount, (${nodesQuery}) as ncount, (${edgesQuery}) as ecount`
+                })
+            });
+            assert.equal(status, 200);
+            assert.ok(body.results);
+            assert.ok(body.results[0]);
+            assert.equal(body.results[0].tcount, 0);
+            assert.equal(body.results[0].ncount, 0);
+            assert.equal(body.results[0].ecount, 0);
+        });
 
-    it("should be able to delete other translation [increase / decrease]", async() => {
-        const {
-            status,
-            body
-        } = await reqProm(`/translator/${idTestIdentifier2}`, {
-            method: "DELETE"
-        }, true, "Deleting a translation.");
-        assert.equal(status, 200);
-        assert.ok(body.success);
-    });
+        it("should be able to create relation in singularity with transaction [increase / decrease]", async () => {
+    
+            const {
+                status,
+                body
+            } = await reqProm("/access/upsert-singular-relation", {
+                method: "POST",
+                headers: {
+                    "content-type": "application/json"
+                },
+                body: JSON.stringify({
+                    leftNodeIdentifierVal: "RAAAF-l",
+                    rightNodeIdentifierVal: "RAAAF-r", 
+                    leftNodeData: {},
+                    rightNodeData: {},
+                    ttld: false, //not flagged, as needed for increase / decrease test
+                    relation: "1",
+                    edgeData: {},
+                    depthBeforeCreation: true
+                })
+            }, true, "Complex 2 node, 1 edge relation creation (also creates translations) in single request.");
+    
+            if(status !== 200){
+                console.log(body);
+            }
+    
+            assert.equal(status, 200);
+            assert.ok(body.leftNodeId);
+            assert.ok(body.rightNodeId);
+            assert.ok(body.edgeId);
+    
+            //store for following tests
+            idTestNode1 = body.leftNodeId;
+            idTestNode2 = body.rightNodeId;
+            idTestIdentifier1 = body.leftNodeIdentifier;
+            idTestIdentifier2 = body.rightNodeIdentifier;
+        });
+    
+        it("should be able to increase edge depth [increase / decrease]", async() => {
+    
+            const {
+                status,
+                body
+            } = await reqProm("/edge/depth/increase", {
+                method: "PUT",
+                headers: {
+                    "content-type": "application/json"
+                },
+                body: JSON.stringify({
+                    leftId: idTestNode1,
+                    rightId: idTestNode2,
+                    relation: "1"
+                })
+            }, true, "Increase depth of an edge.");
+    
+            assert.equal(status, 200);
+            assert.ok(body.success);
+        });
+    
+        it("should be able to await next depth transfer job execution [increase / decrease]", function(done){
+            this.timeout(3250);
+            setTimeout(done, 3200);
+        });
+    
+        it("should be able to see increased edge depth [increase / decrease]", async() => {
+            const {
+                status,
+                body
+            } = await reqProm(`/edge/${idTestNode1}/${idTestNode2}/1`);
+    
+            assert.equal(status, 200);
+            assert.equal(body.depth, 2);
+            assert.ok(!body.ttld);
+            assert.ok(body.created_at);
+        });
+    
+        it("should be able to decrease edge depth [increase / decrease]", async() => {
+    
+            const {
+                status,
+                body
+            } = await reqProm("/edge/depth/decrease", {
+                method: "PUT",
+                headers: {
+                    "content-type": "application/json"
+                },
+                body: JSON.stringify({
+                    leftId: idTestNode1,
+                    rightId: idTestNode2,
+                    relation: "1"
+                })
+            }, true, "Decrease depth of an edge.");
+    
+            assert.equal(status, 200);
+            assert.ok(body.success);
+        });
+    
+        it("should be able to await next depth transfer job execution [increase / decrease]", function(done){
+            this.timeout(3250);
+            setTimeout(done, 3200);
+        });
+    
+        it("should be able to see decreased edge depth [increase / decrease]", async() => {
+            const {
+                status,
+                body
+            } = await reqProm(`/edge/${idTestNode1}/${idTestNode2}/1`);
+            assert.equal(status, 200);
+            assert.equal(body.depth, 1);
+        });
+    
+        it("should be able to delete test edge [increase / decrease]", async() => {
+            const {
+                status,
+                body
+            } = await reqProm(`/edge/${idTestNode1}/${idTestNode2}/1`, {
+                method: "DELETE"
+            }, true, "Deleting an edge.");
+            assert.equal(status, 200);
+            assert.ok(body.success);
+        });
+    
+        it("should be able to delete node [increase / decrease]", async() => {
+            const {
+                status,
+                body
+            } = await reqProm(`/node/${idTestIdentifier1}`, {
+                method: "DELETE"
+            }, true, "Deleting a node.");
+            assert.equal(status, 200);
+            assert.ok(body.success);
+        });
+    
+        it("should be able to delete other node [increase / decrease]", async() => {
+            const {
+                status,
+                body
+            } = await reqProm(`/node/${idTestIdentifier2}`, {
+                method: "DELETE"
+            });
+            assert.equal(status, 200);
+            assert.ok(body.success);
+        });
+    
+        it("should be able to delete translation [increase / decrease]", async() => {
+            const {
+                status,
+                body
+            } = await reqProm(`/translator/${idTestIdentifier1}`, {
+                method: "DELETE"
+            }, true, "Deleting a translation.");
+            assert.equal(status, 200);
+            assert.ok(body.success);
+        });
+    
+        it("should be able to delete other translation [increase / decrease]", async() => {
+            const {
+                status,
+                body
+            } = await reqProm(`/translator/${idTestIdentifier2}`, {
+                method: "DELETE"
+            }, true, "Deleting a translation.");
+            assert.equal(status, 200);
+            assert.ok(body.success);
+        });
+    }
 
     it("should be able to see metrics", async() => {
         const {

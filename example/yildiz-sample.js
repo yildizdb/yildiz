@@ -1,9 +1,8 @@
 "use strict";
 
-const {Yildiz} = require("./../index.js");
-const config = process.env["DIALECT"] === "postgres" ? require("../config/psql.json") : require("../config/default.json");
-
-const yildiz = new Yildiz("kn1", config);
+const dialect = process.env["DIALECT"] || "default";
+const config = require(`../config/${dialect}.json`);
+const Yildiz = require("./../index.js").rdbms.Yildiz;
 
 (async () => {
 

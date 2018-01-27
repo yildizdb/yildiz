@@ -9,6 +9,8 @@ const {
 
 const port = 45454;
 
+const dialect = process.env["DIALECT"] || "default";
+
 const serverOptions = {
     accessLog: false,
     enableRaw: true,
@@ -16,6 +18,9 @@ const serverOptions = {
         active: true,
         lifeTimeInSec: 2,
         jobIntervalInSec: 1
+    },
+    database: {
+        dialect
     }
 };
 
