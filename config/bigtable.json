@@ -1,0 +1,22 @@
+{
+  "accessLog": false,
+  "enableRaw": true,
+  "noBanner": false,
+  "ttl": {
+      "active": true,
+      "lifeTimeInSec": 86400,
+      "jobIntervalInSec": 120
+  },
+  "cache": {
+      "nodeCacheTime": 6000,
+      "edgeCacheTime": 12000
+  },
+  "database": {
+      "dialect": "bigtable",
+      "projectId": "yildiz-bigdata-prd-v002",
+      "instanceName": "plat-yildiz-1",
+      "keyFilename": "~/.config/gcloud/application_default_credentials.json",
+      "columnFamilyName": "yildiz"
+  },
+  "access": "*"
+}
