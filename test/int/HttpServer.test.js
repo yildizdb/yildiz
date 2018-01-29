@@ -29,8 +29,8 @@ const server = new HttpServer(port, Object.assign(config, {
     enableRaw: true, //be aware that this might be a security issue
     ttl: {
         active: true,
-        lifeTimeInSec: dialect !== "bigtable" ? 1 : 4,
-        jobIntervalInSec: dialect !== "bigtable" ? 1 : 4,
+        lifeTimeInSec: dialect !== "bigtable" ? 2 : 3,
+        jobIntervalInSec: dialect !== "bigtable" ? 1 : 3,
     },
     procedures: {
         depthTransfer: {
@@ -189,7 +189,6 @@ describe("HttpServer INT", () => {
                 ttld: true
             })
         }, true, "Create a node.");
-
         assert.equal(status, 201);
         assert.ok(body.identifier);
         assert.ok(body.ttld);
@@ -664,6 +663,17 @@ describe("HttpServer INT", () => {
     });
 
     if (dialect === "bigtable") {
+
+        it("should delete edge with swapped IDs, and no TTL", async() => {
+            const {
+                status,
+                body
+            } = await reqProm(`/edge/${rightId}/${leftId}/test`, {
+                method: "DELETE"
+            }, true, "Deleting an edge.");
+            assert.equal(status, 200);
+            assert.ok(body.success);
+        });
 
         it("should count zero for translates after job running", async() => {
             const {
