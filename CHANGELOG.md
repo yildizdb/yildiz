@@ -1,5 +1,9 @@
 # yilidzdb changelog
 
+## 5.6.0
+
+- rolled back fastify to 0.33.0 because 0.41.0 breaks tcp cons in docker environments
+
 ## 5.5.0
 
 - removed "id" field from schemas of incoming params, because of new ajv warnings
