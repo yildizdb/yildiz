@@ -1,12 +1,18 @@
 # yilidzdb changelog
 
+## 6.9.0 -> 6.10.0
+
+- upgraded fastify, found listening bug for docker cases (bind interface..)
+- refactoring edge id logic, for faster lookups
+- in non depth mode, relation must be unique now and are always used as integers (hash representation)
+
 ## 6.8.0
 
 - switched to major as of bigtable support (docu still to go)
 - improved lookup performance for edges in upsert relation
 - increased default cache time for edges and nodes
 
-## 5.6.0 + 5.7.0
+## 5.6.0 -> 5.7.0
 
 - rolled back and forth for fastify
 
