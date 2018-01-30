@@ -1,8 +1,8 @@
 # yilidzdb changelog
 
-## 5.6.0
+## 5.6.0 + 5.7.0
 
-- rolled back fastify to 0.33.0 because 0.41.0 breaks tcp cons in docker environments
+- rolled back and forth for fastify
 
 ## 5.5.0
 
