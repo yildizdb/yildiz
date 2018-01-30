@@ -4,6 +4,7 @@
 
 - now accepting HEAD requests properly
 - fixed 404 non returning in error handler
+- removed "id" field from schemas of incoming params, because of new ajv warnings
 
 ## 5.3.0
 

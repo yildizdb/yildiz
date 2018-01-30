@@ -154,7 +154,7 @@ describe("Security INT", () => {
         return await yildiz.checkAuth()
         .then(_ => {throw new Error("shouldnt reach");})
         .catch(error => {
-            assert.equal(error.message, "Response status code: 401 does match expected status code: 200.");
+            assert.equal(error.message, "Response status code: 401 does match expected status code: 200. Your token has no access to this prefix..");
             server.close();
             return new Promise(resolve => setTimeout(resolve, 500));
         });
@@ -180,7 +180,7 @@ describe("Security INT", () => {
         return await yildiz.checkAuth()
         .then(_ => {throw new Error("shouldnt reach");})
         .catch(error => {
-            assert.equal(error.message, "Response status code: 403 does match expected status code: 200.");
+            assert.equal(error.message, "Response status code: 403 does match expected status code: 200. Using this prefix is not allowed..");
             server.close();
             return new Promise(resolve => setTimeout(resolve, 500));
         });
@@ -204,7 +204,7 @@ describe("Security INT", () => {
         return await yildiz.checkAuth()
         .then(_ => {throw new Error("shouldnt reach");})
         .catch(error => {
-            assert.equal(error.message, "Response status code: 401 does match expected status code: 200.");
+            assert.equal(error.message, "Response status code: 401 does match expected status code: 200. Your token has no access to this prefix..");
             server.close();
             return new Promise(resolve => setTimeout(resolve, 500));
         });
@@ -227,7 +227,7 @@ describe("Security INT", () => {
         return await yildiz.checkAuth()
         .then(_ => {throw new Error("shouldnt reach");})
         .catch(error => {
-            assert.equal(error.message, "Response status code: 401 does match expected status code: 200.");
+            assert.equal(error.message, "Response status code: 401 does match expected status code: 200. Your token has no access to this prefix..");
             server.close();
             return new Promise(resolve => setTimeout(resolve, 500));
         });
