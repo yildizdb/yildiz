@@ -1,4 +1,4 @@
-# yildiz 3.1.0 HttpServer CURL Examples
+# yildiz 5.7.0 HttpServer CURL Examples
 
 [This file is auto-generated via **'yarn curl'**.]
 
@@ -9,7 +9,7 @@
     curl 'http://localhost:45456/' -H 'x-yildiz-prefix: http_test' --compressed
 
     # 200-Response:
-    # {"version":"3.1.0"}
+    # {"version":"5.7.0"}
 ```
 
 * ->Healthcheck with status information.<-
@@ -32,61 +32,71 @@
     #
 ```
 
+* ->Not described<-
+
+```shell
+    # Request:
+    curl 'http://localhost:45456/brr/brr' -H 'x-yildiz-prefix: http_test' --compressed
+
+    # 404-Response:
+    # "{\"error\":\"Route and method not found.\",\"stack\":null}"
+```
+
 * ->Store translation information. (value is automatically translated into hash.)<-
 
 ```shell
     # Request:
-    curl 'http://localhost:45456/translator/translate-and-store' -H 'content-type: application/json' -H 'x-yildiz-prefix: http_test' --data-binary '{"value":"0c430265-f4df-45d4-a78f-0195663be695","data":{"bla":"blup","xd":123,"derp":1.2,"hihi":false},"ttld":true}' --compressed
+    curl 'http://localhost:45456/translator/translate-and-store' -H 'content-type: application/json' -H 'x-yildiz-prefix: http_test' --data-binary '{"value":"93c150e1-5886-4fa8-b017-7406cbff1830","data":{"bla":"blup","xd":123,"derp":1.2,"hihi":false},"ttld":true}' --compressed
 
     # 201-Response:
-    # {"identifier":4080112899,"value":"0c430265-f4df-45d4-a78f-0195663be695","data":{"bla":"blup","xd":123,"derp":1.2,"hihi":false},"ttld":true}
+    # {"identifier":2031160443,"value":"93c150e1-5886-4fa8-b017-7406cbff1830","data":{"bla":"blup","xd":123,"derp":1.2,"hihi":false},"ttld":true}
 ```
 
 * ->Get translation information.<-
 
 ```shell
     # Request:
-    curl 'http://localhost:45456/translator/4080112899' -H 'x-yildiz-prefix: http_test' --compressed
+    curl 'http://localhost:45456/translator/2031160443' -H 'x-yildiz-prefix: http_test' --compressed
 
     # 200-Response:
-    # {"identifier":4080112899,"value":"0c430265-f4df-45d4-a78f-0195663be695","data":{"xd":123,"bla":"blup","derp":1.2,"hihi":false},"ttld":true,"created_at":"2018-01-15T15:01:00.000Z"}
+    # {"identifier":2031160443,"value":"93c150e1-5886-4fa8-b017-7406cbff1830","data":{"xd":123,"bla":"blup","derp":1.2,"hihi":false},"ttld":true,"created_at":"2018-01-30T15:15:45.000Z"}
 ```
 
 * ->Create a node.<-
 
 ```shell
     # Request:
-    curl 'http://localhost:45456/node' -H 'content-type: application/json' -H 'x-yildiz-prefix: http_test' --data-binary '{"identifier":4080112899,"data":{"bla":"blup"},"ttld":true}' --compressed
+    curl 'http://localhost:45456/node' -H 'content-type: application/json' -H 'x-yildiz-prefix: http_test' --data-binary '{"identifier":2031160443,"data":{"bla":"blup"},"ttld":true}' --compressed
 
     # 201-Response:
-    # {"id":1374055644,"identifier":"4080112899","data":{"bla":"blup"},"ttld":true,"created_at":"2018-01-15T15:01:00.000Z"}
+    # {"id":4003848189,"identifier":"2031160443","data":{"bla":"blup"},"ttld":true,"created_at":"2018-01-30T15:15:45.468Z"}
 ```
 
 * ->Get information about node.<-
 
 ```shell
     # Request:
-    curl 'http://localhost:45456/node/4080112899' -H 'x-yildiz-prefix: http_test' --compressed
+    curl 'http://localhost:45456/node/2031160443' -H 'x-yildiz-prefix: http_test' --compressed
 
     # 200-Response:
-    # {"id":1374055644,"identifier":"4080112899","data":{"bla":"blup"},"ttld":true,"created_at":"2018-01-15T15:01:00.000Z"}
+    # {"id":4003848189,"identifier":"2031160443","data":{"bla":"blup"},"ttld":true,"created_at":"2018-01-30T15:15:45.000Z"}
 ```
 
 * ->Create a second node.<-
 
 ```shell
     # Request:
-    curl 'http://localhost:45456/node' -H 'content-type: application/json' -H 'x-yildiz-prefix: http_test' --data-binary '{"identifier":1962203821,"data":{"bla":"blup 2"}}' --compressed
+    curl 'http://localhost:45456/node' -H 'content-type: application/json' -H 'x-yildiz-prefix: http_test' --data-binary '{"identifier":2726446795,"data":{"bla":"blup 2"}}' --compressed
 
     # 201-Response:
-    # {"id":2875232043,"identifier":"1962203821","data":{"bla":"blup 2"},"ttld":false,"created_at":"2018-01-15T15:01:00.000Z"}
+    # {"id":1860314135,"identifier":"2726446795","data":{"bla":"blup 2"},"ttld":false,"created_at":"2018-01-30T15:15:45.478Z"}
 ```
 
 * ->Check whether an edge exists.<-
 
 ```shell
     # Request:
-    curl 'http://localhost:45456/edge/1374055644/2875232043/test' -H 'x-yildiz-prefix: http_test' --compressed
+    curl 'http://localhost:45456/edge/4003848189/1860314135/test' -H 'x-yildiz-prefix: http_test' --compressed
 
     # 404-Response:
     # {"error":"Edge with these ids and relation does not exist.","code":404}
@@ -96,7 +106,7 @@
 
 ```shell
     # Request:
-    curl 'http://localhost:45456/edge' -H 'content-type: application/json' -H 'x-yildiz-prefix: http_test' --data-binary '{"leftId":1374055644,"rightId":2875232043,"relation":"test","attributes":{"taschen":"voller lila"},"_extend":{},"ttld":true}' --compressed
+    curl 'http://localhost:45456/edge' -H 'content-type: application/json' -H 'x-yildiz-prefix: http_test' --data-binary '{"leftId":4003848189,"rightId":1860314135,"relation":"test","attributes":{"taschen":"voller lila"},"_extend":{},"ttld":true}' --compressed
 
     # 201-Response:
     # {"success":true}
@@ -106,17 +116,17 @@
 
 ```shell
     # Request:
-    curl 'http://localhost:45456/edge/1374055644/2875232043/test' -H 'x-yildiz-prefix: http_test' --compressed
+    curl 'http://localhost:45456/edge/4003848189/1860314135/test' -H 'x-yildiz-prefix: http_test' --compressed
 
     # 200-Response:
-    # {"id":2563127657,"depth":1,"data":{"taschen":"voller lila"},"ttld":true,"created_at":"2018-01-15T15:01:00.000Z"}
+    # {"id":3193443708,"depth":1,"data":{"taschen":"voller lila"},"ttld":true,"created_at":"2018-01-30T15:15:45.000Z"}
 ```
 
 * ->Create another edge between two nodes.<-
 
 ```shell
     # Request:
-    curl 'http://localhost:45456/edge' -H 'content-type: application/json' -H 'x-yildiz-prefix: http_test' --data-binary '{"leftId":1374055644,"rightId":2875232043,"relation":"test","attributes":{"taschen":"voller lila zum quadrat"},"_extend":{}}' --compressed
+    curl 'http://localhost:45456/edge' -H 'content-type: application/json' -H 'x-yildiz-prefix: http_test' --data-binary '{"leftId":4003848189,"rightId":1860314135,"relation":"test","attributes":{"taschen":"voller lila zum quadrat"},"_extend":{}}' --compressed
 
     # 201-Response:
     # {"success":true}
@@ -126,7 +136,7 @@
 
 ```shell
     # Request:
-    curl 'http://localhost:45456/edge' -H 'content-type: application/json' -H 'x-yildiz-prefix: http_test' --data-binary '{"leftId":2875232043,"rightId":1374055644,"relation":"test","attributes":{"taschen":"voller lila zum quadrat swapped"},"_extend":{}}' --compressed
+    curl 'http://localhost:45456/edge' -H 'content-type: application/json' -H 'x-yildiz-prefix: http_test' --data-binary '{"leftId":1860314135,"rightId":4003848189,"relation":"test","attributes":{"taschen":"voller lila zum quadrat swapped"},"_extend":{}}' --compressed
 
     # 201-Response:
     # {"success":true}
@@ -136,40 +146,40 @@
 
 ```shell
     # Request:
-    curl 'http://localhost:45456/edge/left/1374055644/test' -H 'x-yildiz-prefix: http_test' --compressed
+    curl 'http://localhost:45456/edge/left/4003848189/test' -H 'x-yildiz-prefix: http_test' --compressed
 
     # 200-Response:
-    # {"edges":[{"depth":1,"data":{"taschen":"voller lila zum quadrat"},"ttld":false,"created_at":"2018-01-15T15:01:00.000Z","right_node_id":2875232043},{"depth":1,"data":{"taschen":"voller lila"},"ttld":true,"created_at":"2018-01-15T15:01:00.000Z","right_node_id":2875232043}]}
+    # {"edges":[{"depth":1,"data":{"taschen":"voller lila zum quadrat"},"ttld":false,"created_at":"2018-01-30T15:15:45.000Z","right_node_id":1860314135},{"depth":1,"data":{"taschen":"voller lila"},"ttld":true,"created_at":"2018-01-30T15:15:45.000Z","right_node_id":1860314135}]}
 ```
 
 * ->Get all edges with right node id and relation<-
 
 ```shell
     # Request:
-    curl 'http://localhost:45456/edge/right/1374055644/test' -H 'x-yildiz-prefix: http_test' --compressed
+    curl 'http://localhost:45456/edge/right/4003848189/test' -H 'x-yildiz-prefix: http_test' --compressed
 
     # 200-Response:
-    # {"edges":[{"depth":1,"data":{"taschen":"voller lila zum quadrat swapped"},"ttld":false,"created_at":"2018-01-15T15:01:00.000Z","left_node_id":2875232043}]}
+    # {"edges":[{"depth":1,"data":{"taschen":"voller lila zum quadrat swapped"},"ttld":false,"created_at":"2018-01-30T15:15:45.000Z","left_node_id":1860314135}]}
 ```
 
 * ->Get all edges with left or right node id and relation<-
 
 ```shell
     # Request:
-    curl 'http://localhost:45456/edge/both/1374055644/test' -H 'x-yildiz-prefix: http_test' --compressed
+    curl 'http://localhost:45456/edge/both/4003848189/test' -H 'x-yildiz-prefix: http_test' --compressed
 
     # 200-Response:
-    # {"edges":[{"depth":1,"data":{"taschen":"voller lila zum quadrat"},"ttld":false,"created_at":"2018-01-15T15:01:00.000Z","right_node_id":2875232043,"left_node_id":1374055644},{"depth":1,"data":{"taschen":"voller lila zum quadrat swapped"},"ttld":false,"created_at":"2018-01-15T15:01:00.000Z","right_node_id":1374055644,"left_node_id":2875232043},{"depth":1,"data":{"taschen":"voller lila"},"ttld":true,"created_at":"2018-01-15T15:01:00.000Z","right_node_id":2875232043,"left_node_id":1374055644}]}
+    # {"edges":[{"depth":1,"data":{"taschen":"voller lila zum quadrat swapped"},"ttld":false,"created_at":"2018-01-30T15:15:45.000Z","right_node_id":4003848189,"left_node_id":1860314135},{"depth":1,"data":{"taschen":"voller lila zum quadrat"},"ttld":false,"created_at":"2018-01-30T15:15:45.000Z","right_node_id":1860314135,"left_node_id":4003848189},{"depth":1,"data":{"taschen":"voller lila"},"ttld":true,"created_at":"2018-01-30T15:15:45.000Z","right_node_id":1860314135,"left_node_id":4003848189}]}
 ```
 
 * ->Complex merged information about edges for translated nodes.<-
 
 ```shell
     # Request:
-    curl 'http://localhost:45456/access/translated-edge-info' -H 'content-type: application/json' -H 'x-yildiz-prefix: http_test' --data-binary '{"values":["0c430265-f4df-45d4-a78f-0195663be695","1002f195-2db8-4d84-b755-fab3dcbe016e"]}' --compressed
+    curl 'http://localhost:45456/access/translated-edge-info' -H 'content-type: application/json' -H 'x-yildiz-prefix: http_test' --data-binary '{"values":["93c150e1-5886-4fa8-b017-7406cbff1830","3ba548d2-4420-4809-a2f2-096c0cb2416b"]}' --compressed
 
     # 200-Response:
-    # {"edges":[{"relation":"3127628307","depth":1,"edata":{"taschen":"voller lila zum quadrat"},"value":"1002f195-2db8-4d84-b755-fab3dcbe016e","tdata":{"bla":"blup 2"}},{"relation":"3127628307","depth":1,"edata":{"taschen":"voller lila zum quadrat swapped"},"value":"0c430265-f4df-45d4-a78f-0195663be695","tdata":{"xd":123,"bla":"blup","derp":1.2,"hihi":false}},{"relation":"3127628307","depth":1,"edata":{"taschen":"voller lila"},"value":"1002f195-2db8-4d84-b755-fab3dcbe016e","tdata":{"bla":"blup 2"}}]}
+    # {"edges":[{"right_node_id":4003848189,"relation":"3127628307","depth":1},{"right_node_id":1860314135,"relation":"3127628307","depth":1},{"right_node_id":1860314135,"relation":"3127628307","depth":1}]}
 ```
 
 * ->Complex 2 node, 1 edge relation creation (also creates translations) in single request.<-
@@ -179,14 +189,54 @@
     curl 'http://localhost:45456/access/upsert-singular-relation-no-transaction' -H 'content-type: application/json' -H 'x-yildiz-prefix: http_test' --data-binary '{"leftNodeIdentifierVal":"bla-bla-bla","rightNodeIdentifierVal":"blup-blup-blup","leftNodeData":{},"rightNodeData":{},"ttld":true,"relation":"1","edgeData":{},"depthBeforeCreation":true}' --compressed
 
     # 200-Response:
-    # {"leftNodeId":396045399,"rightNodeId":3847440365,"edgeId":2450294816,"leftNodeIdentifier":678422669,"rightNodeIdentifier":945641971}
+    # {"leftNodeId":3971369474,"rightNodeId":315919661,"edgeId":135061638,"leftNodeIdentifier":678422669,"rightNodeIdentifier":945641971}
+```
+
+* ->Complex 2 node, 1 edge relation creation (also creates translations) in single request.<-
+
+```shell
+    # Request:
+    curl 'http://localhost:45456/access/upsert-singular-relation' -H 'content-type: application/json' -H 'x-yildiz-prefix: http_test' --data-binary '{"leftNodeIdentifierVal":"bla-bla-bla","rightNodeIdentifierVal":"blup-blup-blup","leftNodeData":{},"rightNodeData":{},"ttld":true,"relation":"1","edgeData":{},"depthBeforeCreation":true}' --compressed
+
+    # 200-Response:
+    # {"leftNodeId":3971369474,"rightNodeId":315919661,"edgeId":135061638,"leftNodeIdentifier":678422669,"rightNodeIdentifier":945641971}
+```
+
+* ->Get a count for translates.<-
+
+```shell
+    # Request:
+    curl 'http://localhost:45456/translator/count' -H 'x-yildiz-prefix: http_test' --compressed
+
+    # 200-Response:
+    # {"count":4}
+```
+
+* ->Get a count for nodes.<-
+
+```shell
+    # Request:
+    curl 'http://localhost:45456/node/count' -H 'x-yildiz-prefix: http_test' --compressed
+
+    # 200-Response:
+    # {"count":4}
+```
+
+* ->Get a count for edges.<-
+
+```shell
+    # Request:
+    curl 'http://localhost:45456/edge/count' -H 'x-yildiz-prefix: http_test' --compressed
+
+    # 200-Response:
+    # {"count":4}
 ```
 
 * ->Deleting an edge.<-
 
 ```shell
     # Request:
-    curl 'http://localhost:45456/edge/1374055644/2875232043/test' -X DELETE -H 'x-yildiz-prefix: http_test' -H 'content-length: 0' --compressed
+    curl 'http://localhost:45456/edge/4003848189/1860314135/test' -X DELETE -H 'x-yildiz-prefix: http_test' -H 'content-length: 0' --compressed
 
     # 200-Response:
     # {"success":true}
@@ -216,7 +266,7 @@
 
 ```shell
     # Request:
-    curl 'http://localhost:45456/node/4080112899' -X DELETE -H 'x-yildiz-prefix: http_test' -H 'content-length: 0' --compressed
+    curl 'http://localhost:45456/node/2031160443' -X DELETE -H 'x-yildiz-prefix: http_test' -H 'content-length: 0' --compressed
 
     # 200-Response:
     # {"success":true}
@@ -226,7 +276,7 @@
 
 ```shell
     # Request:
-    curl 'http://localhost:45456/translator/4080112899' -X DELETE -H 'x-yildiz-prefix: http_test' -H 'content-length: 0' --compressed
+    curl 'http://localhost:45456/translator/2031160443' -X DELETE -H 'x-yildiz-prefix: http_test' -H 'content-length: 0' --compressed
 
     # 200-Response:
     # {"success":true}
@@ -239,7 +289,7 @@
     curl 'http://localhost:45456/admin/stats' -H 'x-yildiz-prefix: http_test' --compressed
 
     # 200-Response:
-    # {"http":{"request":30,"missing_prefix":1,"bad_prefix":1,"auth_good":24},"avgResponseTime":2.762364014983177,"factory":{"http_test":{"internCalls":{"queries":36,"raw":5,"depths":1,"translates":7,"nodes":17,"graphs":2,"query":1},"externCalls":{"translate":5,"create_trans":2,"get_trans":1,"create_node":2,"get_node_identifier":1,"edge_exists_id":3,"create_edge_id":3,"get_edges_left":1,"get_edges_right":1,"get_edges_both":1,"edge_info_nodes_translates":1,"upsert_relation":1,"remove_edge_id":1,"remove_node":2,"remove_trans":2},"cache":{"nodes":{"hit":0,"miss":1,"set":1},"edges":{"hit":0,"miss":3,"set":1},"size":0,"deletes":3,"clears":0},"ttl":{}}}}
+    # {"http":{"request":37,"missing_prefix":2,"auth_good":29,"not_found":1},"avgResponseTime":2.2484024501754902,"factory":{"http_test":{"internCalls":{"queries":40,"raw":6,"depths":1,"translates":9,"nodes":20,"graphs":3,"query":1},"externCalls":{"translate":8,"create_trans":2,"get_trans":1,"create_node":2,"get_node_identifier":1,"edge_exists_id":3,"create_edge_id":3,"get_edges_left":1,"get_edges_right":1,"get_edges_both":1,"edge_info_nodes_translates":1,"upsert_relation":2,"remove_edge_id":1,"remove_node":2,"remove_trans":2},"cache":{"nodes":{"hit":0,"miss":1,"set":1},"edges":{"hit":0,"miss":3,"set":1},"size":0,"deletes":3,"clears":0},"gauges":{"http_test_5_7_0_y_relation_upsert_nt":5,"http_test_5_7_0_y_relation_upsert":2},"ttl":{}}}}
 ```
 
 * ->Complex 2 node, 1 edge relation creation (also creates translations) in single request.<-
@@ -249,14 +299,14 @@
     curl 'http://localhost:45456/access/upsert-singular-relation' -H 'content-type: application/json' -H 'x-yildiz-prefix: http_test' --data-binary '{"leftNodeIdentifierVal":"RAAAF-l","rightNodeIdentifierVal":"RAAAF-r","leftNodeData":{},"rightNodeData":{},"ttld":false,"relation":"1","edgeData":{},"depthBeforeCreation":true}' --compressed
 
     # 200-Response:
-    # {"leftNodeId":3315954130,"rightNodeId":2513444202,"edgeId":793617809,"leftNodeIdentifier":3686319182,"rightNodeIdentifier":1241057748}
+    # {"leftNodeId":3076707026,"rightNodeId":4274587850,"edgeId":4230702037,"leftNodeIdentifier":3686319182,"rightNodeIdentifier":1241057748}
 ```
 
 * ->Increase depth of an edge.<-
 
 ```shell
     # Request:
-    curl 'http://localhost:45456/edge/depth/increase' -X PUT -H 'content-type: application/json' -H 'x-yildiz-prefix: http_test' --data-binary '{"leftId":3315954130,"rightId":2513444202,"relation":"1"}' --compressed
+    curl 'http://localhost:45456/edge/depth/increase' -X PUT -H 'content-type: application/json' -H 'x-yildiz-prefix: http_test' --data-binary '{"leftId":3076707026,"rightId":4274587850,"relation":"1"}' --compressed
 
     # 200-Response:
     # {"success":true}
@@ -266,7 +316,7 @@
 
 ```shell
     # Request:
-    curl 'http://localhost:45456/edge/depth/decrease' -X PUT -H 'content-type: application/json' -H 'x-yildiz-prefix: http_test' --data-binary '{"leftId":3315954130,"rightId":2513444202,"relation":"1"}' --compressed
+    curl 'http://localhost:45456/edge/depth/decrease' -X PUT -H 'content-type: application/json' -H 'x-yildiz-prefix: http_test' --data-binary '{"leftId":3076707026,"rightId":4274587850,"relation":"1"}' --compressed
 
     # 200-Response:
     # {"success":true}
@@ -276,7 +326,7 @@
 
 ```shell
     # Request:
-    curl 'http://localhost:45456/edge/3315954130/2513444202/1' -X DELETE -H 'x-yildiz-prefix: http_test' -H 'content-length: 0' --compressed
+    curl 'http://localhost:45456/edge/3076707026/4274587850/1' -X DELETE -H 'x-yildiz-prefix: http_test' -H 'content-length: 0' --compressed
 
     # 200-Response:
     # {"success":true}
@@ -321,15 +371,15 @@
     # 200-Response:
     # # HELP gauge_http_avg_res_time gauge_http_avg_res_time_help
 # TYPE gauge_http_avg_res_time gauge
-gauge_http_avg_res_time{prefix="stats"} 2.880627308608382
+gauge_http_avg_res_time{prefix="stats"} 5.6789535180177495
 
 # HELP internCalls_queries internCalls_queries_help
 # TYPE internCalls_queries counter
-internCalls_queries{prefix="http_test"} 83
+internCalls_queries{prefix="http_test"} 87
 
 # HELP internCalls_raw internCalls_raw_help
 # TYPE internCalls_raw counter
-internCalls_raw{prefix="http_test"} 22
+internCalls_raw{prefix="http_test"} 23
 
 # HELP internCalls_depths internCalls_depths_help
 # TYPE internCalls_depths counter
@@ -337,15 +387,15 @@ internCalls_depths{prefix="http_test"} 1
 
 # HELP internCalls_translates internCalls_translates_help
 # TYPE internCalls_translates counter
-internCalls_translates{prefix="http_test"} 9
+internCalls_translates{prefix="http_test"} 11
 
 # HELP internCalls_nodes internCalls_nodes_help
 # TYPE internCalls_nodes counter
-internCalls_nodes{prefix="http_test"} 24
+internCalls_nodes{prefix="http_test"} 27
 
 # HELP internCalls_graphs internCalls_graphs_help
 # TYPE internCalls_graphs counter
-internCalls_graphs{prefix="http_test"} 3
+internCalls_graphs{prefix="http_test"} 4
 
 # HELP internCalls_query internCalls_query_help
 # TYPE internCalls_query counter
@@ -353,7 +403,7 @@ internCalls_query{prefix="http_test"} 25
 
 # HELP externCalls_translate externCalls_translate_help
 # TYPE externCalls_translate counter
-externCalls_translate{prefix="http_test"} 9
+externCalls_translate{prefix="http_test"} 12
 
 # HELP externCalls_create_trans externCalls_create_trans_help
 # TYPE externCalls_create_trans counter
@@ -397,7 +447,7 @@ externCalls_edge_info_nodes_translates{prefix="http_test"} 1
 
 # HELP externCalls_upsert_relation externCalls_upsert_relation_help
 # TYPE externCalls_upsert_relation counter
-externCalls_upsert_relation{prefix="http_test"} 2
+externCalls_upsert_relation{prefix="http_test"} 3
 
 # HELP externCalls_remove_edge_id externCalls_remove_edge_id_help
 # TYPE externCalls_remove_edge_id counter
@@ -437,7 +487,7 @@ cache_edges_set{prefix="http_test"} 4
 
 # HELP cache_size cache_size_help
 # TYPE cache_size counter
-cache_size{prefix="http_test"} 0
+cache_size{prefix="http_test"} 1
 
 # HELP cache_deletes cache_deletes_help
 # TYPE cache_deletes counter
@@ -446,6 +496,14 @@ cache_deletes{prefix="http_test"} 5
 # HELP cache_clears cache_clears_help
 # TYPE cache_clears counter
 cache_clears{prefix="http_test"} 0
+
+# HELP gauge_gauge_http_test_5_7_0_y_relation_upsert_nt gauge_gauge_http_test_5_7_0_y_relation_upsert_nt_help
+# TYPE gauge_gauge_http_test_5_7_0_y_relation_upsert_nt gauge
+gauge_gauge_http_test_5_7_0_y_relation_upsert_nt{prefix="http_test"} 5
+
+# HELP gauge_gauge_http_test_5_7_0_y_relation_upsert gauge_gauge_http_test_5_7_0_y_relation_upsert_help
+# TYPE gauge_gauge_http_test_5_7_0_y_relation_upsert gauge
+gauge_gauge_http_test_5_7_0_y_relation_upsert{prefix="http_test"} 8
 
 # HELP ttl_job_runs ttl_job_runs_help
 # TYPE ttl_job_runs counter
@@ -469,26 +527,42 @@ ttl_total_removes{prefix="http_test"} 8
 
 # HELP http_request http_request_help
 # TYPE http_request counter
-http_request{prefix="stats"} 39
+http_request{prefix="stats"} 46
 
 # HELP http_missing_prefix http_missing_prefix_help
 # TYPE http_missing_prefix counter
-http_missing_prefix{prefix="stats"} 1
-
-# HELP http_bad_prefix http_bad_prefix_help
-# TYPE http_bad_prefix counter
-http_bad_prefix{prefix="stats"} 1
+http_missing_prefix{prefix="stats"} 2
 
 # HELP http_auth_good http_auth_good_help
 # TYPE http_auth_good counter
-http_auth_good{prefix="stats"} 33
+http_auth_good{prefix="stats"} 38
+
+# HELP http_not_found http_not_found_help
+# TYPE http_not_found counter
+http_not_found{prefix="stats"} 1
 
 # HELP externCalls_inc_edge_depth externCalls_inc_edge_depth_help
 # TYPE externCalls_inc_edge_depth counter
 externCalls_inc_edge_depth{prefix="http_test"} 1
 
+# HELP externCalls_depth_walker_total_walks externCalls_depth_walker_total_walks_help
+# TYPE externCalls_depth_walker_total_walks counter
+externCalls_depth_walker_total_walks{prefix="http_test"} 1
+
+# HELP externCalls_depth_walker_total_edges externCalls_depth_walker_total_edges_help
+# TYPE externCalls_depth_walker_total_edges counter
+externCalls_depth_walker_total_edges{prefix="http_test"} 1
+
 # HELP externCalls_dec_edge_depth externCalls_dec_edge_depth_help
 # TYPE externCalls_dec_edge_depth counter
 externCalls_dec_edge_depth{prefix="http_test"} 1
+
+# HELP gauge_gauge_http_test_5_7_0_y_depth_transfer gauge_gauge_http_test_5_7_0_y_depth_transfer_help
+# TYPE gauge_gauge_http_test_5_7_0_y_depth_transfer gauge
+gauge_gauge_http_test_5_7_0_y_depth_transfer{prefix="http_test"} 8
+
+# HELP gauge_gauge_depth_walker_runtime gauge_gauge_depth_walker_runtime_help
+# TYPE gauge_gauge_depth_walker_runtime gauge
+gauge_gauge_depth_walker_runtime{prefix="http_test"} 11
 
 ```
