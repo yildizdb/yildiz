@@ -1,5 +1,19 @@
 # yilidzdb changelog
 
+## 5.4.0
+
+- now accepting HEAD requests properly
+- fixed 404 non returning in error handler
+
+## 5.3.0
+
+- refactored and optimized bigtable backend implementation
+
+## 5.2.0
+
+- refactored project struture to allow different backends
+- added google bigtable as backend
+
 ## 5.1.0 - RELEASE-NAME: Tomahawk
 
 - improved logs
@@ -10,6 +24,7 @@
 - added metrics for deadlock and constraint errors on upsert relation
 
 ## 5.0.1
+
 - Fix bug on `upsert` procedure sql on `depthBeforeCreation` is false
 
 ## 5.0.0
