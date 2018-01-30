@@ -1,11 +1,14 @@
 # yilidzdb changelog
 
+## 5.5.0
+
+- removed "id" field from schemas of incoming params, because of new ajv warnings
+- added HEAD, OPTIONS and 404 to http test
+
 ## 5.4.0
 
 - now accepting HEAD requests properly
 - fixed 404 non returning in error handler
-- removed "id" field from schemas of incoming params, because of new ajv warnings
-- added HEAD, OPTIONS and 404 to http test
 
 ## 5.3.0
 
