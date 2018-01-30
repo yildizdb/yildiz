@@ -106,8 +106,33 @@ describe("HttpServer INT", () => {
     it("should be able to get rejected for missing prefix", async() => {
         const {
             status
-        } = await reqProm("/translator/123", {}, null, null, "!-Ä:");
+        } = await reqProm("/translator/123", {}, null, null, null);
         assert.equal(status, 400);
+    });
+
+    it("should be able to make a HEAD request", async() => {
+        const {
+            status
+        } = await reqProm("/", {
+            method: "HEAD"
+        }, null, null, null);
+        assert.equal(status, 200);
+    });
+
+    it("should be able to make a OPTIONS request", async() => {
+        const {
+            status
+        } = await reqProm("/", {
+            method: "OPTIONS"
+        }, null, null, null);
+        assert.equal(status, 204);
+    });
+
+    it("should be able to make a 404 request", async() => {
+        const {
+            status
+        } = await reqProm("/brr/brr", undefined, true);
+        assert.equal(status, 404);
     });
 
     it("should be able to create translation", async() => {
