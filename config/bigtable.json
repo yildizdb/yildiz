@@ -13,9 +13,9 @@
   },
   "database": {
       "dialect": "bigtable",
-      "projectId": "yildiz-bigdata-prd-v002",
-      "instanceName": "plat-yildiz-1",
-      "keyFilename": "~/.config/gcloud/application_default_credentials.json",
+      "projectId": "rd-bigdata-prd-v002",
+      "instanceName": "plat-ca-1",
+      "keyFilename": "/home/rjmasikome/.config/gcloud/application_default_credentials.json",
       "columnFamilyName": "yildiz"
   },
   "access": "*"

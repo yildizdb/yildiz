@@ -313,7 +313,7 @@ describe("HttpServer INT", () => {
             body: JSON.stringify({
                 leftId,
                 rightId,
-                relation: relationVal,
+                relation: dialect !== "bigtable" ? relationVal : relationVal + "s",
                 attributes: {
                     taschen: "voller lila zum quadrat"
                 },
