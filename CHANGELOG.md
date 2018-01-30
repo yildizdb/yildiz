@@ -1,5 +1,11 @@
 # yilidzdb changelog
 
+## 6.8.0
+
+- switched to major as of bigtable support (docu still to go)
+- improved lookup performance for edges in upsert relation
+- increased default cache time for edges and nodes
+
 ## 5.6.0 + 5.7.0
 
 - rolled back and forth for fastify
