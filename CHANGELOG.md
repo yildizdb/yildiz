@@ -1,5 +1,9 @@
 # yilidzdb changelog
 
+# 6.11.0
+
+- improved performance of upsert relation by improving edge id appending
+
 ## 6.9.0 -> 6.10.0
 
 - upgraded fastify, found listening bug for docker cases (bind interface..)
