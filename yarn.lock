@@ -1730,6 +1730,10 @@ through@2:
   version "2.3.8"
   resolved "https://registry.yarnpkg.com/through/-/through-2.3.8.tgz#0dd4c9ffaabc357960b1b724115d7e0e86a2e1f5"
 
+toobusy-js@^0.5.1:
+  version "0.5.1"
+  resolved "https://registry.yarnpkg.com/toobusy-js/-/toobusy-js-0.5.1.tgz#5511f78f6a87a6a512d44fdb0efa13672217f659"
+
 toposort-class@^1.0.1:
   version "1.0.1"
   resolved "https://registry.yarnpkg.com/toposort-class/-/toposort-class-1.0.1.tgz#7ffd1f78c8be28c3ba45cd4e1a3f5ee193bd9988"

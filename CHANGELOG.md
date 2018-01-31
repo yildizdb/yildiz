@@ -1,5 +1,10 @@
 # yilidzdb changelog
 
+# 6.12.0
+
+- added toobusy to prevent http server meltdown
+- adjusted cache times (decreased)
+
 # 6.11.0
 
 - improved performance of upsert relation by improving edge id appending
