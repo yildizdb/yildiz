@@ -16,7 +16,10 @@
       "projectId": "rd-bigdata-prd-v002",
       "instanceName": "plat-ca-1",
       "keyFilename": "/home/rjmasikome/.config/gcloud/application_default_credentials.json",
-      "columnFamilyName": "yildiz"
+      "columnFamilyName": "yildiz",
+      "singleTableMode": true,
+      "leftNodeEdge": true,
+      "rightNodeEdge": true
   },
   "access": "*"
 }

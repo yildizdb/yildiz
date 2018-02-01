@@ -45,6 +45,7 @@ const server = new HttpServer(port, Object.assign(config, {
 }));
 
 const prefix = "http_test";
+const singleTableMode = config.database.singleTableMode;
 
 describe("HttpServer INT", () => {
 
@@ -261,7 +262,7 @@ describe("HttpServer INT", () => {
             status,
             body
         } = await reqProm(`/edge/${leftId}/${rightId}/test`, undefined, true, "Check whether an edge exists.");
-        assert.equal(status, 404);
+       assert.equal(status, 404);
     });
 
     it("should be able to create edge", async() => {
@@ -297,7 +298,7 @@ describe("HttpServer INT", () => {
         } = await reqProm(`/edge/${leftId}/${rightId}/test`, undefined, true, "Get existing edge.");
         assert.equal(status, 200);
         assert.ok(body.data);
-        assert.ok(body.ttld);
+        !singleTableMode && assert.ok(body.ttld);
     });
 
     it("should be able to create another similar edge for the same id pair", async() => {
@@ -348,35 +349,38 @@ describe("HttpServer INT", () => {
         assert.ok(body.success);
     });
 
-    it("should be able to see a two lefted edges", async() => {
-        const {
-            status,
-            body
-        } = await reqProm(`/edge/left/${leftId}/${relationVal}`, undefined, true, "Get all edges with left node id and relation.");
-        assert.equal(status, 200);
-        assert.ok(body.edges);
-        assert.equal(body.edges.length, 2);
-    });
-
-    it("should be able to see a single righted edges", async() => {
-        const {
-            status,
-            body
-        } = await reqProm(`/edge/right/${leftId}/${relationVal}`, undefined, true, "Get all edges with right node id and relation");
-        assert.equal(status, 200);
-        assert.ok(body.edges);
-        assert.equal(body.edges.length, 1);
-    });
-
-    it("should be able to see a all edges", async() => {
-        const {
-            status,
-            body
-        } = await reqProm(`/edge/both/${leftId}/${relationVal}`, undefined, true, "Get all edges with left or right node id and relation");
-        assert.equal(status, 200);
-        assert.ok(body.edges);
-        assert.equal(body.edges.length, 3);
-    });
+    if (!singleTableMode) {
+    
+        it("should be able to see a two lefted edges", async() => {
+            const {
+                status,
+                body
+            } = await reqProm(`/edge/left/${leftId}/${relationVal}`, undefined, true, "Get all edges with left node id and relation.");
+            assert.equal(status, 200);
+            assert.ok(body.edges);
+            assert.equal(body.edges.length, 2);
+        });
+    
+        it("should be able to see a single righted edges", async() => {
+            const {
+                status,
+                body
+            } = await reqProm(`/edge/right/${leftId}/${relationVal}`, undefined, true, "Get all edges with right node id and relation");
+            assert.equal(status, 200);
+            assert.ok(body.edges);
+            assert.equal(body.edges.length, 1);
+        });
+    
+        it("should be able to see a all edges", async() => {
+            const {
+                status,
+                body
+            } = await reqProm(`/edge/both/${leftId}/${relationVal}`, undefined, true, "Get all edges with left or right node id and relation");
+            assert.equal(status, 200);
+            assert.ok(body.edges);
+            assert.equal(body.edges.length, 3);
+        });
+    }
 
     it("should be able to get translated edge info for nodes", async() => {
 
@@ -398,8 +402,8 @@ describe("HttpServer INT", () => {
 
         assert.equal(status, 200);
         assert.ok(body.edges);
-        assert.ok(body.edges.length);dialect
-        assert.ok(body.edges[0].depth);
+        assert.ok(body.edges.length);
+        !singleTableMode && assert.ok(body.edges[0].depth);
     });
 
     it("should be able to create relation in singularity no transaction", async () => {
@@ -476,7 +480,7 @@ describe("HttpServer INT", () => {
         }, true, "Get a count for translates.");
 
         assert.equal(status, 200);
-        assert.equal(body.count, 4);
+        assert.equal(body.count, singleTableMode ? 2 : 4);
     });
 
     it("should be able to count nodes", async() => {
@@ -689,28 +693,43 @@ describe("HttpServer INT", () => {
 
     if (dialect === "bigtable") {
 
-        it("should delete edge with swapped IDs, and no TTL", async() => {
-            const {
-                status,
-                body
-            } = await reqProm(`/edge/${rightId}/${leftId}/test`, {
-                method: "DELETE"
-            }, true, "Deleting an edge.");
-            assert.equal(status, 200);
-            assert.ok(body.success);
-        });
+        if (!singleTableMode) {
+            it("should delete edge with swapped IDs, and no TTL", async() => {
+                const {
+                    status,
+                    body
+                } = await reqProm(`/edge/${rightId}/${leftId}/test`, {
+                    method: "DELETE"
+                }, true, "Deleting an edge.");
+                assert.equal(status, 200);
+                assert.ok(body.success);
+            });
+        
+            it("should count zero for translates after job running", async() => {
+                const {
+                    status,
+                    body
+                } = await reqProm("/translator/count", {
+                    method: "GET"
+                }, true, "Get a count for translates.");
+        
+                assert.equal(status, 200);
+                assert.equal(body.count, 0);
+            });
 
-        it("should count zero for translates after job running", async() => {
-            const {
-                status,
-                body
-            } = await reqProm("/translator/count", {
-                method: "GET"
-            }, true, "Get a count for translates.");
-    
-            assert.equal(status, 200);
-            assert.equal(body.count, 0);
-        });
+            it("should count zero for edges after job running", async() => {
+                const {
+                    status,
+                    body
+                } = await reqProm("/edge/count", {
+                    method: "GET"
+                }, true, "Get a count for edges.");
+        
+                assert.equal(status, 200);
+                assert.equal(body.count, 0);
+            });
+        }
+
     
         it("should count zero for nodes after job running", async() => {
             const {
@@ -724,17 +743,6 @@ describe("HttpServer INT", () => {
             assert.equal(body.count, 0);
         });
     
-        it("should count zero for edges after job running", async() => {
-            const {
-                status,
-                body
-            } = await reqProm("/edge/count", {
-                method: "GET"
-            }, true, "Get a count for edges.");
-    
-            assert.equal(status, 200);
-            assert.equal(body.count, 0);
-        });
     }
     
     else {
