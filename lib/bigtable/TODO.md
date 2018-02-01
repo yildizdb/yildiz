@@ -11,3 +11,5 @@
 - add http endpoints for metadata count methods
 - pull the metrics class and stats shit into the rdbms subfolder so that each backend can have its own stats and metrics
 - add new custom metrics class to bigtable as instance (bigtable/metrics/Metrics.js)
+- remove singleTable mode from config (but leave left and right node in config)
+- isPopularRightNode for graph access and edge creation (check second http endpoint)
