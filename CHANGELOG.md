@@ -1,5 +1,9 @@
 # yilidzdb changelog
 
+# 6.13.0
+
+- rewrote table schema to a single node table
+
 # 6.12.0
 
 - added toobusy to prevent http server meltdown
