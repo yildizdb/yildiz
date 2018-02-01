@@ -4,6 +4,7 @@
 
 - added toobusy to prevent http server meltdown
 - adjusted cache times (decreased)
+- more checks and data cleansing for upsert relation
 
 # 6.11.0
 
