@@ -33,9 +33,9 @@
   "scripts": {
     "start": "DEBUG=yildiz:* node example/yildiz-sample.js",
     "start:psql": "DEBUG=yildiz:* DIALECT=postgres node example/yildiz-sample.js",
-    "test": "_mocha -R spec --exit --timeout 5000 test/int/*",
-    "test:psql": "DIALECT=postgres _mocha -R spec --exit --timeout 5000 test/int/*",
-    "test:bt": "DIALECT=bigtable _mocha -R spec --exit --timeout 5000 test/int/*",
+    "test": "_mocha -R spec --exit --timeout 5000 './test/**/!(HttpServer.GBT.test).js'",
+    "test:psql": "DIALECT=postgres _mocha -R spec --exit --timeout 5000 './test/**/!(HttpServer.GBT.test).js'",
+    "test:bt": "DIALECT=bigtable ENV=test _mocha -R spec --exit --timeout 5000 './test/**/!(HttpServer.test).js'",
     "db:start": "cd db-setup && docker-compose -f docker-compose.mysql.yml up -d",
     "db:stop": "cd db-setup && docker-compose -f docker-compose.mysql.yml down",
     "mysql:start": "cd db-setup && docker-compose -f docker-compose.mysql.yml up -d",
