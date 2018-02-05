@@ -471,7 +471,7 @@ describe("HttpServer INT", () => {
         const {
             status,
             body
-        } = await reqProm("/translator/count", {
+        } = await reqProm("/translator/counts", {
             method: "GET"
         }, true, "Get a count for translates.");
 
@@ -483,7 +483,7 @@ describe("HttpServer INT", () => {
         const {
             status,
             body
-        } = await reqProm("/node/count", {
+        } = await reqProm("/node/counts", {
             method: "GET"
         }, true, "Get a count for nodes.");
 
@@ -495,7 +495,7 @@ describe("HttpServer INT", () => {
         const {
             status,
             body
-        } = await reqProm("/edge/count", {
+        } = await reqProm("/edge/counts", {
             method: "GET"
         }, true, "Get a count for edges.");
 
@@ -675,7 +675,7 @@ describe("HttpServer INT", () => {
         const {
             status,
             body
-        } = await reqProm("/translator/count", {
+        } = await reqProm("/translator/counts", {
             method: "GET"
         }, true, "Get a count for translates.");
 
@@ -687,7 +687,7 @@ describe("HttpServer INT", () => {
         const {
             status,
             body
-        } = await reqProm("/edge/count", {
+        } = await reqProm("/edge/counts", {
             method: "GET"
         }, true, "Get a count for edges.");
 
@@ -699,7 +699,7 @@ describe("HttpServer INT", () => {
         const {
             status,
             body
-        } = await reqProm("/node/count", {
+        } = await reqProm("/node/counts", {
             method: "GET"
         }, true, "Get a count for nodes.");
 
