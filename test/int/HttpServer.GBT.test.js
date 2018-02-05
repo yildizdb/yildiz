@@ -12,10 +12,10 @@ const {
 const pjson = require("./../../package.json");
 
 const dialect = process.env["DIALECT"] || "default";
-const configMain = require(`../../config/${dialect}.json`);
-const configTest = require("../../config.GBT.json");
-
-const config = process.env["LOCAL_CONFIG"] ? configTest : configMain;
+const config = process.env["LOCAL_CONFIG"] ? 
+    require("../../config.GBT.json") 
+    : 
+    require(`../../config/${dialect}.json`);
 
 const PATH_TO_CURL_DOC = "../../docs/curl.md";
 let CURL_OUTPUT = `# yildiz ${pjson.version} HttpServer CURL Examples\n
@@ -693,7 +693,7 @@ describe("HttpServer INT", () => {
         assert.equal(body.counts, 0);
     });
 
-    it("should be able to see stats", async() => {
+    xit("should be able to see stats", async() => {
         const {
             status,
             body

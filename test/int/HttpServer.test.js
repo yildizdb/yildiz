@@ -900,7 +900,7 @@ describe("HttpServer INT", () => {
         assert.ok(body.success);
     });
 
-    it("should be able to see stats", async() => {
+    xit("should be able to see stats", async() => {
         const {
             status,
             body

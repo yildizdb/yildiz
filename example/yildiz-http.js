@@ -5,6 +5,10 @@ const {
 } = require("./../index.js");
 
 const dialect = process.env["DIALECT"] || "default";
+const config = process.env["LOCAL_CONFIG"] ? 
+    require("../../config.GBT.json")
+    : 
+    require(`../../config/${dialect}.json`);
 
 const configMain = require(`../config/${dialect}.json`);
 const configTest = require("../config.GBT.json");

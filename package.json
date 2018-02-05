@@ -69,7 +69,7 @@
     "mysql2": "~1.5.1",
     "pg": "^7.4.1",
     "prom-client": "~10.2.2",
-    "sequelize": "~4.32.2",
+    "sequelize": "~4.32.6",
     "toobusy-js": "^0.5.1",
     "uuid": "~3.2.1"
   },
