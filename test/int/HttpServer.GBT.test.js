@@ -63,6 +63,11 @@ describe("HttpServer INT", () => {
     let idTestIdentifier1 = null;
     let idTestIdentifier2 = null;
 
+    let upsertNode1 = null;
+    let upsertNode2 = null;
+    let upsertNode3 = null;
+    let upsertNode4 = null;
+
     before(async() => {
         await server.listen();
     });
@@ -359,7 +364,7 @@ describe("HttpServer INT", () => {
         assert.ok(body.edges.length);
     });
 
-    it("should be able to create relation in singularity", async () => {
+    it("should be able to create relation in singularity with depthBeforeCreation ", async () => {
 
         const {
             status,
@@ -372,8 +377,8 @@ describe("HttpServer INT", () => {
             body: JSON.stringify({
                 leftNodeIdentifierVal: "bla-bla-bla",
                 rightNodeIdentifierVal: "blup-blup-blup", 
-                leftNodeData: {},
-                rightNodeData: {},
+                leftNodeData: {foo : "bar"},
+                rightNodeData: {tes : "ting"},
                 ttld: true,
                 relation: "1",
                 edgeData: {},
@@ -391,7 +396,7 @@ describe("HttpServer INT", () => {
         assert.ok(body.edgeId);
     });
 
-    it("should be able to create relation in singularity with transaction", async () => {
+    it("should be able to create another relation in singularity with depthBeforeCreation", async () => {
 
         const {
             status,
@@ -404,8 +409,8 @@ describe("HttpServer INT", () => {
             body: JSON.stringify({
                 leftNodeIdentifierVal: "bla-bla-bla",
                 rightNodeIdentifierVal: "blup-blup-blup", 
-                leftNodeData: {},
-                rightNodeData: {},
+                leftNodeData: {foo : "bar"},
+                rightNodeData: {tes : "ting"},
                 ttld: true,
                 relation: "1",
                 edgeData: {},
@@ -421,31 +426,129 @@ describe("HttpServer INT", () => {
         assert.ok(body.leftNodeId);
         assert.ok(body.rightNodeId);
         assert.ok(body.edgeId);
+
+        upsertNode1 = body.leftNodeId;
+        upsertNode2 = body.rightNodeId;
     });
 
+    it("should be able to check depths in created edges", async() => {
+        const {
+            status,
+            body
+        } = await reqProm(`/edge/${upsertNode1}/${upsertNode2}/test`, undefined, true, "Get existing edge.");
+        
+        assert.equal(status, 200);
+
+        const edges = body.id.split(",");
+
+        assert.ok(body.data);
+        assert.equal(body.data[edges[0]], 2);
+        assert.equal(body.data[edges[1]], 2);
+    });
+
+    it("should be able to get the correct data in left node from upsert", async() => {
+
+        const {
+            status,
+            body
+        } = await reqProm(`/node/${upsertNode1}`, undefined, true, "Get information about node.");
+        
+        assert.equal(status, 200);
+        assert.ok(body.data);
+        assert.equal(body.data.foo, "bar");
+        assert.ok(body.ttld);
+    });
+
+    it("should be able to get the correct data in right node from upsert", async() => {
+        
+        const {
+            status,
+            body
+        } = await reqProm(`/node/${upsertNode2}`, undefined, true, "Get information about node.");
+    
+        assert.equal(status, 200);
+        assert.ok(body.data);
+        assert.equal(body.data.tes, "ting");
+        assert.ok(body.ttld);
+    });
+
+    it("should be able to create another relation in singularity WITHOUT depthBeforeCreation", async () => {
+
+        const {
+            status,
+            body
+        } = await reqProm("/access/upsert-singular-relation", {
+            method: "POST",
+            headers: {
+                "content-type": "application/json"
+            },
+            body: JSON.stringify({
+                leftNodeIdentifierVal: "sna-sna",
+                rightNodeIdentifierVal: "foo-foo", 
+                leftNodeData: {foo : "bar"},
+                rightNodeData: {tes : "ting"},
+                ttld: true,
+                relation: "test",
+                edgeData: {bibim: "bap"},
+                depthBeforeCreation: false
+            })
+        }, true, "Complex 2 node, 1 edge relation creation (also creates translations) in single request.");
+
+        if(status !== 200){
+            console.log(body);
+        }
+
+        assert.equal(status, 200);
+        assert.ok(body.leftNodeId);
+        assert.ok(body.rightNodeId);
+        assert.ok(body.edgeId);
+
+        upsertNode3 = body.leftNodeId;
+        upsertNode4 = body.rightNodeId;
+    });
+
+    it("should be able to check data in created edges", async() => {
+        const {
+            status,
+            body
+        } = await reqProm(`/edge/${upsertNode3}/${upsertNode4}/test`, undefined, true, "Get existing edge.");
+        
+        assert.equal(status, 200);
+
+        const edges = body.id.split(",");
+
+        assert.ok(body.data);
+
+        const data1 = JSON.parse(body.data[edges[0]]);
+        const data2 = JSON.parse(body.data[edges[1]]);
+
+        assert.equal(data1.bibim, "bap");
+        assert.equal(data2.bibim, "bap");
+
+    });
 
     it("should be able to count nodes", async() => {
         const {
             status,
             body
-        } = await reqProm("/node/count", {
+        } = await reqProm("/node/counts", {
             method: "GET"
-        }, true, "Get a count for nodes.");
+        }, true, "Get counts for nodes.");
 
         assert.equal(status, 200);
-        assert.equal(body.counts, 4);
+        assert.equal(body.counts, 6);
     });
 
     it("should be able to count edges", async() => {
         const {
             status,
             body
-        } = await reqProm("/edge/count", {
+        } = await reqProm("/edge/counts", {
             method: "GET"
-        }, true, "Get a count for edges.");
+        }, true, "Get counts for edges.");
 
         assert.equal(status, 200);
-        assert.equal(body.counts, 4);
+        assert.equal(body.counts, 5);
     });
 
     it("should be able to delete edges", async() => {
@@ -488,6 +591,20 @@ describe("HttpServer INT", () => {
         });
         assert.equal(status, 200);
         assert.ok(body.success);
+    });
+
+    it("should be able to count all edges and nodes", async() => {
+        const {
+            status,
+            body
+        } = await reqProm("/admin/metadata/counts", {
+            method: "GET"
+        }, true, "Get counts for all.");
+
+        assert.equal(status, 200);
+        assert.equal(body.nodes, 4);
+        assert.equal(body.edges, 4);
+
     });
 
     it("should be able to create a few ttld resources", async() => {
@@ -554,17 +671,6 @@ describe("HttpServer INT", () => {
         assert.ok(body.success);
     });
 
-    it("should purge metadata", async() => {
-        const {
-            status,
-            body
-        } = await reqProm("/admin/metadata", {
-            method: "DELETE"
-        }, true, "Purge metadata.");
-
-        assert.equal(status, 200);
-    });
-
     it("should be able to await next ttl job execution", function(done){
         this.timeout(2505);
         setTimeout(done, 2500);
@@ -574,7 +680,7 @@ describe("HttpServer INT", () => {
         const {
             status,
             body
-        } = await reqProm("/node/count", {
+        } = await reqProm("/node/counts", {
             method: "GET"
         }, true, "Get a count for nodes.");
 
@@ -602,6 +708,20 @@ describe("HttpServer INT", () => {
         assert.equal(status, 200);
         assert.equal(headers["content-type"], "text/plain; version=0.0.4; charset=utf-8");
         assert.ok(body);
+    });
+
+    it("should reset tables based on prefix in bigtable", async() => {
+        const {
+            status,
+            body
+        } = await reqProm(
+            "/admin/reset-tables", 
+            { method: "POST" }, 
+            true, 
+            "Reset tables."
+        );
+
+        assert.equal(status, 200);
     });
 
     if(CURLOUT){
