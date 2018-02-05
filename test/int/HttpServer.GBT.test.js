@@ -12,7 +12,10 @@ const {
 const pjson = require("./../../package.json");
 
 const dialect = process.env["DIALECT"] || "default";
-const config = require(`../../config/${dialect}.json`);
+const configMain = require(`../../config/${dialect}.json`);
+const configTest = require("../../config.GBT.json");
+
+const config = process.env["LOCAL_CONFIG"] ? configTest : configMain;
 
 const PATH_TO_CURL_DOC = "../../docs/curl.md";
 let CURL_OUTPUT = `# yildiz ${pjson.version} HttpServer CURL Examples\n
@@ -24,13 +27,15 @@ if(CURLOUT){
 }
 
 const port = 45456;
-const server = new HttpServer(port, Object.assign(config, {
-    accessLog: false,
-    enableRaw: true, //be aware that this might be a security issue
-    ttl: {
-        active: true,
-        lifeTimeInSec: 3,
-        jobIntervalInSec: 3,
+const server = new HttpServer(port, Object.assign(
+    config, 
+    {
+        accessLog: false,
+        enableRaw: true, //be aware that this might be a security issue
+        ttl: {
+            active: true,
+            lifeTimeInSec: 3,
+            jobIntervalInSec: 3,
     },
     procedures: {
         depthTransfer: {

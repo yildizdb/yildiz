@@ -4,7 +4,10 @@ const assert = require("assert");
 
 
 const dialect = process.env["DIALECT"] || "default";
-const config = require(`../../config/${dialect}.json`);
+const configMain = require(`../../config/${dialect}.json`);
+const configTest = require("../../config.GBT.json");
+
+const config = process.env["LOCAL_CONFIG"] ? configTest : configMain;
 
 let YildizFactory = null;
 if (dialect === "bigtable") {
