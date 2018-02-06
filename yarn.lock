@@ -577,22 +577,21 @@ fast-json-stringify@^0.17.0:
     ajv "^6.0.0"
     fast-safe-stringify "^1.2.1"
 
-fast-safe-stringify@^1.0.8, fast-safe-stringify@^1.2.0, fast-safe-stringify@^1.2.1, fast-safe-stringify@^1.2.3:
+fast-safe-stringify@^1.0.8, fast-safe-stringify@^1.2.1, fast-safe-stringify@^1.2.3:
   version "1.2.3"
   resolved "https://registry.yarnpkg.com/fast-safe-stringify/-/fast-safe-stringify-1.2.3.tgz#9fe22c37fb2f7f86f06b8f004377dbf8f1ee7bc1"
 
-fastify-plugin@^0.1.1:
-  version "0.1.1"
-  resolved "https://registry.yarnpkg.com/fastify-plugin/-/fastify-plugin-0.1.1.tgz#13a94f495a90fd5a7ae4bcd827c54ea5986c794f"
+fastify-plugin@^0.2.1:
+  version "0.2.1"
+  resolved "https://registry.yarnpkg.com/fastify-plugin/-/fastify-plugin-0.2.1.tgz#38c620b544b41a2cfc75630f5e97faf8c5cb1746"
   dependencies:
-    semver "^5.3.0"
+    semver "^5.4.1"
 
-fastify-swagger@micro-tools/fastify-swagger#d1bc7ac192bc29fa54f84eca717ebf606283b29a:
-  version "0.1.0"
-  resolved "https://codeload.github.com/micro-tools/fastify-swagger/tar.gz/d1bc7ac192bc29fa54f84eca717ebf606283b29a"
+fastify-swagger@^0.3.1:
+  version "0.3.1"
+  resolved "https://registry.yarnpkg.com/fastify-swagger/-/fastify-swagger-0.3.1.tgz#6881433ef66b7a956e86c0694be672aa788c8013"
   dependencies:
-    fast-safe-stringify "^1.2.0"
-    fastify-plugin "^0.1.1"
+    fastify-plugin "^0.2.1"
     js-yaml "^3.10.0"
 
 fastify@~0.41.0:
@@ -1517,7 +1516,7 @@ semver@4.3.2:
   version "4.3.2"
   resolved "https://registry.yarnpkg.com/semver/-/semver-4.3.2.tgz#c7a07158a80bedd052355b770d82d6640f803be7"
 
-semver@^5.3.0, semver@^5.5.0:
+semver@^5.3.0, semver@^5.4.1, semver@^5.5.0:
   version "5.5.0"
   resolved "https://registry.yarnpkg.com/semver/-/semver-5.5.0.tgz#dc4bbc7a6ca9d916dee5d43516f0092b58f7b8ab"
 

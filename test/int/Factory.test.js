@@ -38,4 +38,5 @@ describe("Factory INT", () => {
         const yildiz = await factory.get(prefix);
         assert.ok(yildiz);
     }); 
+
 });

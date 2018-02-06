@@ -364,6 +364,7 @@ describe("HttpServer INT", () => {
                 ]
             })
         }, true, "Complex merged information about edges for translated nodes.");
+
         assert.equal(status, 200);
         assert.ok(body.edges);
         assert.ok(body.edges.length);

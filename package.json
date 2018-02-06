@@ -35,7 +35,7 @@
     "start:psql": "DEBUG=yildiz:* DIALECT=postgres node example/yildiz-sample.js",
     "test": "_mocha -R spec --exit --timeout 5000 './test/**/!(HttpServer.GBT.test).js'",
     "test:psql": "DIALECT=postgres _mocha -R spec --exit --timeout 5000 './test/**/!(HttpServer.GBT.test).js'",
-    "test:bt": "DIALECT=bigtable LOCAL_CONFIG=true _mocha -R spec --exit --timeout 5000 './test/**/!(HttpServer.test).js'",
+    "test:bt": "DIALECT=bigtable LOCAL_CONFIG=true _mocha -R spec --exit --timeout 6000 './test/**/!(HttpServer.test).js'",
     "db:start": "cd db-setup && docker-compose -f docker-compose.mysql.yml up -d",
     "db:stop": "cd db-setup && docker-compose -f docker-compose.mysql.yml down",
     "mysql:start": "cd db-setup && docker-compose -f docker-compose.mysql.yml up -d",
@@ -74,7 +74,7 @@
     "uuid": "~3.2.1"
   },
   "devDependencies": {
-    "fastify-swagger": "micro-tools/fastify-swagger#d1bc7ac192bc29fa54f84eca717ebf606283b29a",
+    "fastify-swagger": "^0.3.1",
     "mocha": "~5.0.0",
     "mocha-silent-reporter": "~1.0.0",
     "request": "~2.83.0",
