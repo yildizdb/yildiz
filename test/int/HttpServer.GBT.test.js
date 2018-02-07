@@ -209,6 +209,7 @@ describe("HttpServer INT", () => {
             },
             body: JSON.stringify({
                 identifier: transIdentifier,
+                value: transValue,
                 data: {
                     bla: "blup"
                 },
@@ -244,6 +245,7 @@ describe("HttpServer INT", () => {
             },
             body: JSON.stringify({
                 identifier: transIdentifier2,
+                value: transValue2,
                 data: {
                     bla: "blup 2"
                 }
