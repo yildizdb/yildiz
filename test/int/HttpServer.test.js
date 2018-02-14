@@ -378,7 +378,7 @@ describe("HttpServer INT", () => {
         assert.equal(body.edges.length, 3);
     });
 
-    it("should be able to get translated edge info for nodes", async() => {
+    xit("should be able to get translated edge info for nodes", async() => {
 
         const {
             status,
@@ -397,9 +397,8 @@ describe("HttpServer INT", () => {
         }, true, "Complex merged information about edges for translated nodes.");
 
         assert.equal(status, 200);
-        assert.ok(body.edges);
-        assert.ok(body.edges.length);
-        assert.ok(body.edges[0].depth);
+        assert.ok(body.nodes);
+        assert.ok(body.nodes.length);
     });
 
     it("should be able to create relation in singularity no transaction", async () => {

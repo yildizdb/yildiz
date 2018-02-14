@@ -34,8 +34,8 @@ const server = new HttpServer(port, Object.assign(
         enableRaw: true, //be aware that this might be a security issue
         ttl: {
             active: true,
-            lifeTimeInSec: 3,
-            jobIntervalInSec: 3,
+            lifeTimeInSec: 1,
+            jobIntervalInSec: 2,
     },
     procedures: {
         depthTransfer: {
@@ -368,8 +368,12 @@ describe("HttpServer INT", () => {
         }, true, "Complex merged information about edges for translated nodes.");
 
         assert.equal(status, 200);
+        assert.ok(body.identifiers);
+        assert.ok(body.nodes);
         assert.ok(body.edges);
-        assert.ok(body.edges.length);
+        assert.equal(body.identifiers.length, 2);
+        assert.equal(body.nodes.length, 2);
+        assert.equal(body.edges.length, 4);
     });
 
     it("should be able to create relation in singularity with depthBeforeCreation ", async () => {
