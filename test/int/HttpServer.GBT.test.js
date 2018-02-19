@@ -584,12 +584,14 @@ describe("HttpServer INT", () => {
     });
 
     it("should be able to delete node", async() => {
+
         const {
             status,
             body
         } = await reqProm(`/node/${transIdentifier}`, {
             method: "DELETE"
         }, true, "Deleting a node.");
+
         assert.equal(status, 200);
         assert.ok(body.success);
     });
@@ -684,8 +686,8 @@ describe("HttpServer INT", () => {
     });
 
     it("should be able to await next ttl job execution", function(done){
-        this.timeout(2505);
-        setTimeout(done, 2500);
+        this.timeout(3005);
+        setTimeout(done, 3000);
     });
 
     it("should count zero for nodes after job running", async() => {
