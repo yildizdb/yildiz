@@ -1,6 +1,6 @@
 {
   "name": "yildiz",
-  "version": "6.21.0",
+  "version": "6.22.0",
   "description": "graph database layer on top of SQL with http interface",
   "main": "index.js",
   "repository": "git@github.com:yildizdb/yildiz.git",
@@ -54,7 +54,8 @@
     "docker:logs": "docker logs yildiz_yildiz_1",
     "docker:down": "docker-compose down",
     "mysql": "mysql -u root -p",
-    "postgres": "psql -U root postgres"
+    "postgres": "psql -U root postgres",
+    "_vb": "git add . && git commit -m 'vb' && git push origin master && npm publish"
   },
   "dependencies": {
     "@google-cloud/bigtable": "~0.11.1",
