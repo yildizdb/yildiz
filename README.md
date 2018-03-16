@@ -1,4 +1,4 @@
-# YildizDB - HTTP event relation storage layer on top of Google Big Table
+# YildizDB - HTTP event relation storage layer
 
 high performance event relation storage on top of BigTable, MySQL or Postgres
 
