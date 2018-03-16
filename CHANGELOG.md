@@ -1,5 +1,11 @@
 # yilidzdb changelog
 
+# 7.0.0
+
+- adapted documentation (not yet fully done though)
+- updated dependencies (especially "@google-cloud/bigtable": "~0.12.1")
+- (fastify, prom-client coming soon)
+
 # 6.13.0
 
 - rewrote table schema to a single node table

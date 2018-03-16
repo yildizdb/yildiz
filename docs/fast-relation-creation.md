@@ -1,12 +1,10 @@
 # Fast Relation Creation
 
-- YildizDB offers a faster way to ensure that a single-handed relation ship, shown as edge between two nodes
-    is created in the database
+- YildizDB offers a faster way to ensure that a single-handed relation ship, shown as edge between two nodes is created in the database
 - it will also create two translations for the created nodes (if necessary)
 - you can use the `GraphAccess.upsertSingleEdgeRelationBetweenNodes({})` directly or use the 
 - HTTP endpoint `POST: /access/upsert-singular-relation` (there is an example [here](curl.md))
-- usually it would take up to 7 method calls to create this kind of relation, but with this method Yildiz runs all
-    of the operations straight in a single stored procedure MySQL transaction
+- usually it would take up to 7 method calls to create this kind of relation, but with this method Yildiz runs all of the operations straight in a single stored procedure MySQL transaction
 
 ## What happens when you call this method/endpoint:
 

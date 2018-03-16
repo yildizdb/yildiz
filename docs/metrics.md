@@ -5,4 +5,3 @@
     which it exposes under `/admin/metrics`
 - you can configure your [Prometheus](https://prometheus.io/) to scrape the metrics from your yilidzdb instances
 - and use [Grafana](https://grafana.com/get) for example to illustrate the metrics in real-time graphs
-- you can find an example **Grafana Dashboard** [here](grafana.json)

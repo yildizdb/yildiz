@@ -1,4 +1,4 @@
-# How does yildiz work?
+# How does yildiz work? (RDBMS as Backend)
 
 * in its core yildiz creates four tables for every prefix it is accessed with
 * which consists of: "nodes, translations, edges and depths"
