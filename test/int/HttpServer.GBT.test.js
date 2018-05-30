@@ -451,7 +451,7 @@ describe("HttpServer INT", () => {
         
         assert.equal(status, 200);
 
-        const edges = body.id.split(",");
+        const edges = body.id;
 
         assert.ok(body.data);
         assert.equal(body.data[edges[0]], 2);
@@ -527,7 +527,7 @@ describe("HttpServer INT", () => {
         
         assert.equal(status, 200);
 
-        const edges = body.id.split(",");
+        const edges = body.id;
 
         assert.ok(body.data);
 
