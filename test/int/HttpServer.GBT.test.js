@@ -34,7 +34,7 @@ const server = new HttpServer(port, Object.assign(
         enableRaw: true, //be aware that this might be a security issue
         ttl: {
             active: true,
-            lifeTimeInSec: 1,
+            lifeTimeInSec: 2,
             jobIntervalInSec: 2,
     },
     procedures: {
