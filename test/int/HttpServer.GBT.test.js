@@ -34,7 +34,7 @@ const server = new HttpServer(port, Object.assign(
         enableRaw: true, //be aware that this might be a security issue
         ttl: {
             active: true,
-            lifeTimeInSec: 1,
+            lifeTimeInSec: 2,
             jobIntervalInSec: 2,
     },
     procedures: {
@@ -451,7 +451,7 @@ describe("HttpServer INT", () => {
         
         assert.equal(status, 200);
 
-        const edges = body.id;
+        const edges = body.id.split(",");
 
         assert.ok(body.data);
         assert.equal(body.data[edges[0]], 2);
@@ -527,7 +527,7 @@ describe("HttpServer INT", () => {
         
         assert.equal(status, 200);
 
-        const edges = body.id;
+        const edges = body.id.split(",");
 
         assert.ok(body.data);
 
