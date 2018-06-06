@@ -154,6 +154,14 @@ Object.keys(process.env)
             options.database.password = iter.val;
         break;
 
+        case "REDIS_SINGLE_HOST":
+            options.redis.single.host = iter.val;
+        break;
+
+        case "REDIS_SINGLE_PORT":
+            options.redis.single.port = iter.val;
+        break;
+
         default:
             debug("unknown env key", PREFIX + iter.key);
         return;
