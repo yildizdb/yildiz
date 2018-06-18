@@ -724,7 +724,7 @@ describe("HttpServer INT", () => {
         assert.ok(body);
     });
 
-    it("should reset tables based on prefix in bigtable", async() => {
+    xit("should reset tables based on prefix in bigtable", async() => {
         const {
             status,
             body
