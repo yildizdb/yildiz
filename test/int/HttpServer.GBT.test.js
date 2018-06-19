@@ -724,6 +724,104 @@ describe("HttpServer INT", () => {
         assert.ok(body);
     });
 
+    it("should be able to create another relation in singularity WITHOUT depthBeforeCreation", async () => {
+
+        const {
+            status,
+            body
+        } = await reqProm("/access/upsert-singular-relation", {
+            method: "POST",
+            headers: {
+                "content-type": "application/json"
+            },
+            body: JSON.stringify({
+                leftNodeIdentifierVal: "sweden",
+                rightNodeIdentifierVal: "stockholm", 
+                leftNodeData: {foo : "bar"},
+                rightNodeData: {tes : "ting"},
+                ttld: false,
+                relation: "test",
+                edgeData: {bibim: "bap"},
+                depthBeforeCreation: false
+            })
+        }, true, "Complex 2 node, 1 edge relation creation (also creates translations) in single request.");
+
+        if(status !== 200){
+            console.log(body);
+        }
+
+        assert.equal(status, 200);
+        assert.ok(body.leftNodeId);
+        assert.ok(body.rightNodeId);
+        assert.ok(body.edgeId);
+
+        upsertNode1 = body.leftNodeId;
+        upsertNode2 = body.rightNodeId;
+    });
+
+    it("should be able to create another relation in singularity WITH depthBeforeCreation", async () => {
+
+        const {
+            status,
+            body
+        } = await reqProm("/access/upsert-singular-relation", {
+            method: "POST",
+            headers: {
+                "content-type": "application/json"
+            },
+            body: JSON.stringify({
+                leftNodeIdentifierVal: "finnland",
+                rightNodeIdentifierVal: "helsinki", 
+                leftNodeData: {foo : "bar"},
+                rightNodeData: {tes : "ting"},
+                ttld: false,
+                relation: "test",
+                edgeData: {bibim: "bap"},
+                depthBeforeCreation: true
+            })
+        }, true, "Complex 2 node, 1 edge relation creation (also creates translations) in single request.");
+
+        if(status !== 200){
+            console.log(body);
+        }
+
+        assert.equal(status, 200);
+        assert.ok(body.leftNodeId);
+        assert.ok(body.rightNodeId);
+        assert.ok(body.edgeId);
+
+        upsertNode3 = body.leftNodeId;
+        upsertNode4 = body.rightNodeId;
+    });
+
+    it("should be able to wait a for expiry job to start", (done) => {
+        setTimeout(() => {
+        done();
+        }, 15000);
+    });
+
+    it("should be able to check that edges have been deleted", async() => {
+
+        const {
+            status,
+            body
+        } = await reqProm(`/edge/${upsertNode1}/${upsertNode2}/test`, undefined, true, "Get existing edge.");
+        
+        assert.equal(status, 404);
+    });
+
+    it("should be able to get the correct data in left node from upsert", async() => {
+
+        const {
+            status,
+            body
+        } = await reqProm(`/node/${upsertNode1}`, undefined, true, "Get information about node.");
+        
+        assert.equal(status, 200);
+        assert.ok(body.data);
+        assert.equal(body.data.foo, "bar");
+    });
+
     it("should reset tables based on prefix in bigtable", async() => {
         const {
             status,
