@@ -1,5 +1,11 @@
 # yilidzdb changelog
 
+# 8.0.0
+
+- new fastify  and google bigtable client
+- added new cache jobs
+- added new ttl cell deletion jobs
+
 # 7.0.0
 
 - adapted documentation (not yet fully done though)
