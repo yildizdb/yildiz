@@ -1,5 +1,9 @@
 # yilidzdb changelog
 
+# 8.1.0
+
+- fixed bug in redis client initialisation, now starting and dropping a new client with every yildiz instance (life cycle)
+
 # 8.0.0
 
 - new fastify  and google bigtable client
