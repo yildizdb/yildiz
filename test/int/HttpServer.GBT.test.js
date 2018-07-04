@@ -794,22 +794,6 @@ describe("HttpServer INT", () => {
         upsertNode4 = body.rightNodeId;
     });
 
-    it("should be able to wait a for expiry job to start", (done) => {
-        setTimeout(() => {
-        done();
-        }, 15000);
-    });
-
-    it("should be able to check that edges have been deleted", async() => {
-
-        const {
-            status,
-            body
-        } = await reqProm(`/edge/${upsertNode1}/${upsertNode2}/test`, undefined, true, "Get existing edge.");
-        
-        assert.equal(status, 404);
-    });
-
     it("should be able to get the correct data in left node from upsert", async() => {
 
         const {
