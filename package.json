@@ -62,7 +62,7 @@
     "_vb": "git add . && git commit -m 'vb' && git push origin master && npm publish"
   },
   "dependencies": {
-    "@google-cloud/bigtable": "~0.14.0",
+    "@google-cloud/bigtable": "~0.15.0",
     "bluebird": "~3.5.1",
     "commander": "~2.15.1",
     "cors": "~2.8.4",
