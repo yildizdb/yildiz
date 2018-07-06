@@ -1,5 +1,11 @@
 # yilidzdb changelog
 
+
+# 8.2.0
+
+- bumped `@google-cloud/bigtable` to `0.15.0` with some breaking changes
+- remove `edgeLifetime` and using `maxAgeSeconds` for cell ttl in `config.database` object config
+
 # 8.1.0
 
 - fixed bug in redis client initialisation, now starting and dropping a new client with every yildiz instance (life cycle)
