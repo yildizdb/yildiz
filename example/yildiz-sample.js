@@ -1,8 +1,6 @@
 "use strict";
 
-const dialect = process.env["DIALECT"] || "default";
-const config = require(`../config/${dialect}.json`);
-const Yildiz = require("./../index.js").rdbms.Yildiz;
+const Yildiz = require("./../index.js").bigtable.Yildiz;
 
 (async () => {
 

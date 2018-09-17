@@ -61,12 +61,6 @@ describe("HttpServer INT", () => {
     let rightId = null;
 
     const relationVal = "test";
-    const relationHash = 3127628307;
-
-    let idTestNode1 = null;
-    let idTestNode2 = null;
-    let idTestIdentifier1 = null;
-    let idTestIdentifier2 = null;
 
     let upsertNode1 = null;
     let upsertNode2 = null;

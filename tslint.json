@@ -1,0 +1,30 @@
+{
+  "defaultSeverity": "error",
+  "extends": [
+    "tslint:recommended"
+  ],
+  "jsRules": {},
+  "rules": {
+    "variable-name": [
+      true,
+      "ban-keywords",
+      "check-format"
+    ],
+    "interface-name": {
+      "options": [
+        "never-prefix"
+      ]
+    },
+    "no-console": [true, "log"],
+    "object-literal-sort-keys": false,
+    "ordered-imports": false,
+    "member-ordering": false
+  },
+  "rulesDirectory": [],
+  "linterOptions": {
+    "exclude": [
+      "dist/**/*",
+      "node_modules/**/*"
+    ]
+  }
+}
