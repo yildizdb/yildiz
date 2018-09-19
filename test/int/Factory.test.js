@@ -32,8 +32,8 @@ describe("Factory INT", () => {
 
     it("should be able to get an instance from cache", async () => {
 
-        assert.ok(factory._cache.size());
-        assert.equal(factory._cache.keys().length, 1);
+        assert.ok(factory.cache.size());
+        assert.equal(factory.cache.keys().length, 1);
 
         const yildiz = await factory.get(prefix);
         assert.ok(yildiz);
