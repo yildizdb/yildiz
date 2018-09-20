@@ -77,23 +77,6 @@ const translatorPath = (
             };
         } catch (error) {
 
-            if (error.message === "Validation error" &&
-                error.name === "SequelizeUniqueConstraintError") {
-
-                    let description = "";
-                    Object.keys(error.fields).forEach((key) => {
-                        description += `${key} -> ${error.fields[key]}, `;
-                    });
-
-                    const message = `Unique constraint error, for fields: ${description}`;
-                    debug(message);
-
-                    res.code(409);
-                    return {
-                        message,
-                    };
-            }
-
             debug("Translation creation error", error);
             res.code(500);
             return {

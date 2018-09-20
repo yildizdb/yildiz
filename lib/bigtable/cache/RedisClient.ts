@@ -49,11 +49,6 @@ export class RedisClient {
         return;
     }
 
-    this.redis.on("error", (error: Error) => {
-        debug(`Redis error: ${error}`);
-        this.metrics.inc("redis_error");
-    });
-
     this.redis.on("node error", (error: Error) => {
         debug(`Redis node error: ${error}`);
         this.metrics.inc("redis_node_error");
@@ -61,15 +56,27 @@ export class RedisClient {
 
     this.redis.on("connect", () => debug("Redis is connected."));
 
-    this.redis.on("ready", () => {
-      debug("Redis is ready.");
-    });
-
     this.redis.on("close", () => debug("Redis connection is closed."));
 
     this.redis.on("reconnecting", () => debug("Redis is reconnecting..."));
 
     this.redis.on("end", () => debug("Redis connection has ended."));
+
+    return new Promise((resolve, reject) => {
+
+      this.redis.on("error", (error: Error) => {
+
+          debug(`Redis error: ${error}`);
+          this.metrics.inc("redis_error");
+          reject(error);
+      });
+
+      this.redis.on("ready", () => {
+        debug("Redis is ready.");
+        resolve();
+      });
+    });
+
   }
 
   public setLastAccess(keys: string | string[]) {

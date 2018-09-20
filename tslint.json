@@ -18,7 +18,8 @@
     "no-console": [true, "log"],
     "object-literal-sort-keys": false,
     "ordered-imports": false,
-    "member-ordering": false
+    "member-ordering": false,
+    "no-var-requires": false
   },
   "rulesDirectory": [],
   "linterOptions": {

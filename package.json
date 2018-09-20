@@ -31,11 +31,12 @@
     "storage"
   ],
   "scripts": {
-    "build": "npm run compile",
+    "build": "npm run compile && cp config.GBT.json build/ 2>/dev/null || : && cp -r config/ build/",
     "precompile": "npm run clean",
     "compile": "tsc --pretty",
     "clean": "rm -rf build",
-    "start": "DEBUG=yildiz:* node example/yildiz-sample.js",
+    "prepublish": "npm run compile",
+    "start": "DEBUG=yildiz:* LOCAL_CONFIG=true node build/lib/index.js",
     "test": "DIALECT=bigtable LOCAL_CONFIG=true _mocha -R spec --exit --timeout 20000 './test/**/!(HttpServer.test).js'",
     "http": "DEBUG=yildiz:* LOCAL_CONFIG=true DIALECT=bigtable node example/yildiz-http.js",
     "curl": "CURLOUT=true _mocha -R mocha-silent-reporter --exit --timeout 5000 test/int/HttpServer.test.js",
@@ -85,6 +86,10 @@
     "typescript": "^2.6.2",
     "yildiz-js": "~2.9.0"
   },
+  "pre-commit": [
+    "compile"
+  ],
+  "pre-push": [],
   "preferGlobal": true,
   "bin": {
     "yildizdb": "bin/yildizdb.js"

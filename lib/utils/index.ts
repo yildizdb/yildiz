@@ -1,6 +1,6 @@
-import isUUID from "./isUUID.js";
-import strToInt from "./strToInt.js";
-import generateId from "./generateId.js";
+import isUUID from "./isUUID";
+import strToInt from "./strToInt";
+import generateId from "./generateId";
 
 export {
     strToInt,

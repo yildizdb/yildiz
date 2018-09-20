@@ -25,7 +25,7 @@ export class Translator {
     }
 
     public removeTranslation(identifier?: string) {
-      return;
+        return;
     }
 
     public getTranslationCount() {

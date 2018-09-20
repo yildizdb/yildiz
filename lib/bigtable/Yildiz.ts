@@ -101,10 +101,14 @@ export class Yildiz {
         this.metrics = new Metrics(this.prefix);
         this.cache = new InMemory(this.config, this.metrics);
         this.metadata = new Metadata(this);
-        await this.metadata.init();
-
         this.redisClient = new RedisClient(this.config, this.metrics);
-        await this.redisClient.connect();
+
+        try {
+            await this.metadata.init();
+            await this.redisClient.connect();
+        } catch (error) {
+            debug(error);
+        }
 
         this.lookupCache = new LookupCache(this.config, this.metrics, this.redisClient);
         this.fetchJob = new FetchJob(this.config, this, this.metrics, this.redisClient);

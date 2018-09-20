@@ -67,6 +67,12 @@ const accessSchema = {
               depthBeforeCreation: {
                   type: "boolean",
               },
+              isPopularRightNode: {
+                  type: "boolean",
+              },
+              edgeTime: {
+                type: "number",
+              },
               required: [
                   "leftNodeIdentifierVal", "rightNodeIdentifierVal", "leftNodeData", "rightNodeData",
                   "ttld", "relation", "edgeData", "depthBeforeCreation",

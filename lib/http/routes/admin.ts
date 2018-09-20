@@ -2,7 +2,7 @@ import { FastifyInstance, RegisterOptions } from "fastify";
 import { IncomingMessage, Server, ServerResponse } from "http";
 import { NextFunction } from "express";
 
-import { getPrefixHeader } from "./../helper.js";
+import { getPrefixHeader } from "./../helper";
 import { adminSchema } from "./../schemas";
 import { Registry } from "prom-client";
 
@@ -60,22 +60,6 @@ const adminRoute = (
         await yildiz.resetTables();
         res.code(200).send("Ok");
     });
-
-    /*
-    instance.get("/throw", {}, async (req, res) => {
-        setTimeout(() => {
-            throw new Error("throw endpoint error");
-        }, 10);
-    });
-
-    instance.get("/sync-throw", {}, async (req, res) => {
-        throw new Error("throw endpoint error");
-    });
-
-    instance.get("/reject", {}, async (req, res) => {
-        await Promise.reject(new Error("throw endpoint error"));
-    });
-    */
 
     next();
 };

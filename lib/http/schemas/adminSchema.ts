@@ -1,4 +1,4 @@
-import { get200ObjectSchema } from "./../helper.js";
+import { get200ObjectSchema } from "./../helper";
 
 const adminSchema = {
   HEALTH: get200ObjectSchema({

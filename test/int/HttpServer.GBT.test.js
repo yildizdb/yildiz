@@ -191,6 +191,27 @@ describe("HttpServer INT", () => {
         transIdentifier2 = body.identifier;
     });
 
+    it("should not be able to get edge info on non existent data", async() => {
+
+        const {
+            status,
+            body
+        } = await reqProm("/access/translated-edge-info", {
+            method: "POST",
+            headers: {
+                "content-type": "application/json"
+            },
+            body: JSON.stringify({
+                values: [
+                    transValue,
+                    transValue2
+                ]
+            })
+        }, true, "Complex merged information about edges for translated nodes.");
+
+        assert.equal(status, 404);
+    });
+
     it("should be able to create node", async() => {
 
         const {
@@ -375,7 +396,7 @@ describe("HttpServer INT", () => {
         const {
             status,
             body
-        } = await reqProm("/access/upsert-singular-relation-no-transaction", {
+        } = await reqProm("/access/upsert-singular-relation", {
             method: "POST",
             headers: {
                 "content-type": "application/json"
