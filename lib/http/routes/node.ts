@@ -8,7 +8,7 @@ import { nodeSchema } from "./../schemas";
 import {
     getPrefixHeader,
     getErrorObject,
-} from "./../helper.js";
+} from "./../helper";
 
 const debug = Debug("yildiz:routes:node");
 
@@ -84,23 +84,6 @@ const nodeRoute = (
 
             return node;
         } catch (error) {
-
-            if (error.message === "Validation error" &&
-                error.name === "SequelizeUniqueConstraintError") {
-
-                    let description = "";
-                    Object.keys(error.fields).forEach((key: string) => {
-                        description += `${key} -> ${error.fields[key]}, `;
-                    });
-
-                    const message = `Unique constraint error, for fields: ${description}`;
-                    debug(message);
-
-                    res.code(409);
-                    return {
-                        message,
-                    };
-            }
 
             debug("Node creation error", error);
             res.code(500);

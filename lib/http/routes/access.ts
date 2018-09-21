@@ -3,7 +3,7 @@ import { IncomingMessage, Server, ServerResponse } from "http";
 import { NextFunction } from "express";
 
 import { accessSchema } from "./../schemas";
-import { strToInt } from "./../../utils/index.js";
+import { strToInt } from "./../../utils";
 import {
     getPrefixHeader,
     getErrorObject,
@@ -40,6 +40,11 @@ const accessRouter = (
             graphAccess.setLastAccessFireAndForget(body.values);
         }
 
+        if (!result) {
+            res.code(404);
+            return getErrorObject("No relations found for the identifiers " + body.values, 404);
+        }
+
         return result;
     });
 
@@ -53,67 +58,6 @@ const accessRouter = (
             const result = await graphAccess.runUpsertRelationWithRetry(req.body);
             return result;
         } catch (error) {
-
-            if (error.message.indexOf("SequelizeUniqueConstraintError") !== -1) {
-                yildiz.incStat("total_upsert_relation_contraint_error");
-                res.code(409);
-                res.header("content-type", "application/json");
-                return {
-                    error: "SequelizeUniqueConstraintError during procedure call.",
-                    stack: null,
-                };
-            }
-
-            if (error.message.indexOf("Deadlock") !== -1) {
-                yildiz.incStat("total_upsert_relation_deadlock");
-                res.code(500);
-                res.header("content-type", "application/json");
-                return {
-                    error: "Procedure failed with deadlock, even after retry.",
-                    stack: null,
-                };
-            }
-
-            yildiz.incStat("total_upsert_relation_error");
-            res.code(500);
-            res.header("content-type", "application/json");
-            return {
-                error: error.message,
-                stack: error.stack,
-            };
-        }
-    });
-
-    instance.post("/upsert-singular-relation-no-transaction", SCHEMES.SC_RELATION, async (req, res) => {
-
-        const prefix = getPrefixHeader(req);
-        const yildiz = await instance.factory.get(prefix);
-        const graphAccess = await yildiz.getGraphAccess();
-
-        try {
-            const result = await graphAccess.runUpsertRelationWithRetry(req.body);
-            return result;
-        } catch (error) {
-
-            if (error.message.indexOf("SequelizeUniqueConstraintError") !== -1) {
-                yildiz.incStat("total_upsert_relation_contraint_error");
-                res.code(409);
-                res.header("content-type", "application/json");
-                return {
-                    error: "SequelizeUniqueConstraintError during procedure call.",
-                    stack: null,
-                };
-            }
-
-            if (error.message.indexOf("Deadlock") !== -1) {
-                yildiz.incStat("total_upsert_relation_deadlock");
-                res.code(500);
-                res.header("content-type", "application/json");
-                return {
-                    error: "Procedure failed with deadlock, even after retry.",
-                    stack: null,
-                };
-            }
 
             yildiz.incStat("total_upsert_relation_error");
             res.code(500);

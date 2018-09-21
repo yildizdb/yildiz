@@ -10,11 +10,11 @@ export interface YildizModel {
   popnodeTable: Bigtable.Table;
   cacheTable: Bigtable.Table;
 
-  columnFamilyNode: any;
-  columnFamilyTTL: any;
-  columnFamilyMetadata: any;
-  columnFamilyPopnode: any;
-  columnFamilyCache: any;
+  columnFamilyNode: Bigtable.Family;
+  columnFamilyTTL: Bigtable.Family;
+  columnFamilyMetadata: Bigtable.Family;
+  columnFamilyPopnode: Bigtable.Family;
+  columnFamilyCache: Bigtable.Family;
 }
 
 export interface YildizSingleSchema {

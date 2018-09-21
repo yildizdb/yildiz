@@ -3,7 +3,7 @@ import promClient, { Registry } from "prom-client";
 import Debug from "debug";
 
 import { Yildiz } from "./Yildiz";
-import { Metrics } from "./metrics/Metrics.js";
+import { Metrics } from "./metrics/Metrics";
 import { ServiceConfig } from "../interfaces/ServiceConfig";
 
 const CACHE_TIME_MS = 15 * 60 * 1000; // 15 minutes

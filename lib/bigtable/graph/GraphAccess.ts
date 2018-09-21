@@ -8,7 +8,7 @@ import { UpsertConfig } from "../../interfaces/ServiceConfig";
 import { FetchJob } from "../cache/FetchJob";
 import { NodeHandler } from "./NodeHandler";
 
-import { GenericObject } from "../../interfaces/Generic";
+import { GenericObject, AnyObject } from "../../interfaces/Generic";
 
 import {
     YildizSingleSchema,
@@ -209,7 +209,7 @@ export class GraphAccess {
         return results;
     }
 
-    public buildResult(resultArray?: any[]) {
+    public buildResult(resultArray?: AnyObject[]) {
 
         if (!resultArray || !resultArray.length) {
             return;
@@ -269,10 +269,8 @@ export class GraphAccess {
             throw new Error("values should not be empty");
         }
 
-        const start = Date.now();
-
-        let error = null;
         let cacheResults: YildizSingleSchema[] = [];
+        const start = Date.now();
 
         const nodeIdentifiers = values.map((value) => strToInt(value) + "");
         const {cache, nocache} = await this.lookupCache.classifyExistence(nodeIdentifiers);
@@ -285,23 +283,21 @@ export class GraphAccess {
                 cache.map((identifier: string) => this.nodeHandler.getCacheByIdentifier(identifier)),
             );
 
+            const errorKeys: Array<string | number> = [];
+
             // Return error if there is an empty result from bigtable
             cacheResults.map((cacheResult, index) => {
-
-                const errorKeys = [];
 
                 if (!cacheResult) {
                     errorKeys.push(cache[index]);
                 }
 
-                if (errorKeys.length) {
-                    error = new Error(`Cache in Bigtable does not exist for keys ${errorKeys.join(",")}`);
-                }
+                nocache.push(cache[index]);
             });
 
             // Throw error if exists
-            if (error) {
-                throw error;
+            if (errorKeys.length) {
+                debug(`Cache in Bigtable does not exist for keys ${errorKeys.join(",")}`);
             }
 
             this.metrics.inc("resolvedNodes_cache_hits", cache.length);

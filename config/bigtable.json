@@ -1,32 +1,39 @@
 {
-  "accessLog": false,
-  "enableRaw": true,
-  "noBanner": false,
-  "ttl": {
-      "active": true,
-      "lifeTimeInSec": 86400,
-      "jobIntervalInSec": 120
-  },
-  "cache": {
-      "nodeCacheTime": 6000,
-      "edgeCacheTime": 12000
-  },
-  "database": {
-      "dialect": "bigtable",
-      "projectId": "yildiz-bigdata-prd-v002",
-      "instanceName": "plat-yildiz-1",
-      "keyFilename": "~/.config/gcloud/application_default_credentials.json",
-      "columnFamilyName": "yildiz",
-      "leftNodeEdge": true,
-      "rightNodeEdge": true
-  },
-  "redis": {
-    "single": {
-        "port": 6379,
-        "host": "127.0.0.1",
-        "family": 4,
-        "db": 0 
-    }
-  },
-  "access": "*"
+    "accessLog": false,
+    "enableRaw": true,
+    "noBanner": false,
+    "ttl": {
+        "active": true,
+        "lifeTimeInSec": 86400,
+        "jobIntervalInSec": 120
+    },
+    "cache": {
+        "nodeCacheTime": 6000,
+        "edgeCacheTime": 12000
+    },
+    "database": {
+        "dialect": "bigtable",
+        "projectId": "yildiz-bigdata-prd-v002",
+        "instanceName": "plat-yildiz-1",
+        "keyFilename": "~/.config/gcloud/application_default_credentials.json",
+        "columnFamilyName": "yildiz",
+        "leftNodeEdge": true,
+        "rightNodeEdge": true
+    },
+    "fetchJob": {
+        "expireInSec": 60,
+        "fetchIntervalInSec": 10,
+        "fetchLastAccess": 40,
+        "fetchBatchSize": 50,
+        "limit": 100
+    },
+    "redis": {
+        "single": {
+            "port": 6379,
+            "host": "127.0.0.1",
+            "family": 4,
+            "db": 0
+        }
+    },
+    "access": "*"
 }

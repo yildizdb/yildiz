@@ -183,8 +183,8 @@ export class Lifetime {
 
         this.lifeTimeInSec = lifeTimeInSec;
 
-        debug(`ttl job active running every ${jobIntervalInSec} sec,
-            deleting all ttld flags after ${lifeTimeInSec} sec.`);
+        debug(`ttl job active running every ${jobIntervalInSec} sec,` +
+            `deleting all ttld flags after ${lifeTimeInSec} sec.`);
 
         this.runJob(jobIntervalInSec);
     }
@@ -197,8 +197,8 @@ export class Lifetime {
             this.job().then((affected) => {
                 const diff = Date.now() - startTime;
 
-                debug(`ttl job done took ${diff} ms, removed ${affected.rowCount} rows,
-                    from ${affected.tableCount} tables.`);
+                debug(`ttl job done took ${diff} ms, removed ${affected.rowCount} rows,` +
+                    `from ${affected.tableCount} tables.`);
 
                 this.metrics.inc("ttl_job_runs");
                 this.metrics.set("ttl_job_duration", diff);

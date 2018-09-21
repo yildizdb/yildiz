@@ -1,4 +1,4 @@
-import { get2xxResponse } from "./../helper.js";
+import { get2xxResponse } from "./../helper";
 
 const NODE_SCHEME = {
   id: {

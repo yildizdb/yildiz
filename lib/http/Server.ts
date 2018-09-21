@@ -12,7 +12,7 @@ import pjson from "./../../package.json";
 const debug = Debug("yildiz:http:server");
 const SERVER_NAME = `yildizdb:${pjson.version}`;
 
-import { YildizFactory } from "./../bigtable/YildizFactory.js";
+import { YildizFactory } from "./../bigtable/YildizFactory";
 import { AccessHandler } from "./AccessHandler";
 
 import {
@@ -23,11 +23,11 @@ import {
     edge,
     access,
     path as pathRouter,
-} from "./routes/index.js";
+} from "./routes/index";
 
 const INTERFACE = "0.0.0.0";
 
-const SWAGGER_FILE = "../../docs/swagger.json";
+const SWAGGER_FILE = "../../../docs/swagger.json";
 let CREATE_SWAGGER = false;
 if (process.env.CREATE_SWAGGER) {
     CREATE_SWAGGER = true;
@@ -125,10 +125,11 @@ export class Server {
         if (CREATE_SWAGGER) {
             debug("creating swagger file.");
             this.app.register(require("fastify-swagger"), {
+                routePrefix: "/apidoc",
                 swagger: {
                     info: {
-                        title: "yildiz HTTP interface",
-                        description: "Graph Database on top of MySQL",
+                        title: "YildizDB HTTP interface",
+                        description: "Graph Database on top of Google Bigtable",
                         version: pjson.version,
                     },
                     host: "localhost",
@@ -273,10 +274,10 @@ export class Server {
 
                 res.code(404);
                 res.header("content-type", "application/json");
-                return res.send(JSON.stringify({
-                    error: "Route and method not found.",
+                return res.send({
+                    error: "Route, method, or result not found.",
                     stack: null,
-                }));
+                });
             }
 
             debug("YildizDB Error:", error.message, error.stack);
@@ -284,10 +285,10 @@ export class Server {
 
             res.code(500);
             res.header("content-type", "application/json");
-            res.send(JSON.stringify({
+            res.send({
                 error: error.message,
                 stack: error.stack,
-            }));
+            });
         });
 
         this.app.ready((error: Error) => {
@@ -306,6 +307,7 @@ export class Server {
 
                     debug("wrote swagger file.");
                 });
+                this.app.swagger();
             }
         });
 

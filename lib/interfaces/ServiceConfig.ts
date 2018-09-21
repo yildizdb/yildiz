@@ -60,7 +60,6 @@ export interface UpsertConfig {
   translatedEdgeDebug?: boolean;
 }
 
-// TODO: Probably drop edgeTime and use the one from Bigtable
 export interface ServiceConfig {
   accessLog: boolean;
   enableRaw: boolean;
