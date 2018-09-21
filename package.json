@@ -1,6 +1,6 @@
 {
   "name": "yildiz",
-  "version": "9.0.5",
+  "version": "9.0.6",
   "description": "Big Data Event Relation Storage",
   "main": "index.js",
   "repository": "git@github.com:yildizdb/yildiz.git",
@@ -41,7 +41,6 @@
     "http": "DEBUG=yildiz:* LOCAL_CONFIG=true DIALECT=bigtable node example/yildiz-http.js",
     "curl": "CURLOUT=true _mocha -R mocha-silent-reporter --exit --timeout 5000 test/int/HttpServer.test.js",
     "sql": "DEBUG=yildiz:*,sql:* _mocha -R spec --exit --timeout 5000 test/int/*",
-    "swagger": "CREATE_SWAGGER=true DEBUG=yildiz:* node example/_gen-swagger.js",
     "i:self": "./scripts/self-install.sh",
     "i:update": "./scripts/self-update.sh",
     "docker:up": "docker-compose build --no-cache && docker-compose up -d",

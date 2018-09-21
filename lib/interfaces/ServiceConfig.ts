@@ -35,6 +35,7 @@ export interface RedisConfig {
   sentinels?: any;
   cluster?: any;
   ttl?: number;
+  timeoutReady?: number;
 }
 
 export interface FetchJobConfig {

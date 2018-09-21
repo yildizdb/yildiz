@@ -20,12 +20,14 @@ export class RedisClient {
   private ttl: number;
   private metrics: Metrics;
   private redis!: Redis;
+  private timeoutReadyInMs: number;
 
   constructor(config: ServiceConfig, metrics: Metrics) {
 
     this.config = config;
     this.redisConfig = this.config.redis;
     this.ttl = this.config.redis.ttl || 180;
+    this.timeoutReadyInMs = (this.config.redis.timeoutReady || 1) * 1000;
     this.metrics = metrics;
   }
 
@@ -62,19 +64,37 @@ export class RedisClient {
 
     this.redis.on("end", () => debug("Redis connection has ended."));
 
+    this.redis.on("error", (error: Error) => {
+      debug(`Redis error: ${error}`);
+      this.metrics.inc("redis_error");
+    });
+
+    // This Promise rejects on timeout
     return new Promise((resolve, reject) => {
 
-      this.redis.on("error", (error: Error) => {
+      let isResolvedOrRejected = false;
 
-          debug(`Redis error: ${error}`);
-          this.metrics.inc("redis_error");
-          reject(error);
-      });
+      const promiseTimeout = setTimeout(() => {
 
-      this.redis.on("ready", () => {
+        if (!isResolvedOrRejected) {
+          isResolvedOrRejected = true;
+          reject("Error connecting to Redis");
+        }
+
+      }, this.timeoutReadyInMs);
+
+      this.redis.once("ready", () => {
+
         debug("Redis is ready.");
-        resolve();
+
+        if (!isResolvedOrRejected) {
+          isResolvedOrRejected = true;
+          clearTimeout(promiseTimeout);
+          resolve();
+        }
+
       });
+
     });
 
   }
