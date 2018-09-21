@@ -65,7 +65,7 @@ if(program.logs){
     debugBase.enable("yildiz:bin");
 }
 
-const defaultOptions = require("./../config/default.json");
+const defaultOptions = require("./../config/bigtable.json");
 
 if(!program.args || !program.args.length){
     debug("No config JSON file path passed, exiting.");
