@@ -242,6 +242,7 @@ export class Server {
         this.app.addHook("onResponse", (res, next) => {
 
             let diff = -1;
+
             if (res.inc) {
                 diff = Date.now() - res.inc;
             }

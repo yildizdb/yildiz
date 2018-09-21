@@ -4,6 +4,7 @@ import promClient from "prom-client";
 const debug = Debug("yildiz:http:metrics");
 const promDefaultMetrics = promClient.collectDefaultMetrics;
 const promRegistry = promClient.Registry;
+const FACTORY_METRICS_PREFIX = "__FACTORY__";
 
 export class Metrics {
 
@@ -16,7 +17,7 @@ export class Metrics {
 
     constructor(prefix: string) {
 
-        this.prefix = prefix;
+        this.prefix = prefix === FACTORY_METRICS_PREFIX ? "" : prefix;
         this.register = new promRegistry();
         this.metrics = {}; // Stores metric objects
     }
