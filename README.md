@@ -1,6 +1,15 @@
 # YildizDB - HTTP event relation storage layer
 
-high performance event relation storage on top of BigTable, MySQL or Postgres
+<p align="center">
+  <img alt="yildiz" src="docs/assets/images/logo.jpeg" width="200">
+</p>
+<p align="center">
+  high performance event relation storage on top of BigTable, MySQL or Postgres
+</p>
+
+[![Build Status][build-badge]][build]
+[![Version][version-badge]][package]
+[![MIT License][license-badge]][license]
 
 ## Features
 
@@ -93,3 +102,11 @@ high performance event relation storage on top of BigTable, MySQL or Postgres
 
 * This product is not affiliated with Google
 * License is MIT [see](LICENSE)
+
+<!-- badges -->
+[build-badge]: https://quay.io/repository/yildizdb/yildiz/status "Docker Repository on Quay"
+[build]: https://quay.io/repository/yildizdb/yildiz
+[version-badge]: https://badge.fury.io/js/yildiz.svg
+[package]: https://www.npmjs.com/package/yildiz
+[license-badge]: https://img.shields.io/npm/l/yildiz.svg
+[license]: https://opensource.org/licenses/MIT
