@@ -215,15 +215,23 @@ export class GraphAccess {
             return;
         }
 
+        const filteredResultArray = resultArray
+            .filter((singleResult) => !!singleResult);
+
+        if (!filteredResultArray || !filteredResultArray.length) {
+            return;
+        }
+
         const result: YildizResultSchema = {};
 
         // Build identifiers field
-        result.identifiers = resultArray.map((singleResult) => {
-            return {
-                identifier: singleResult.identifier,
-                value: singleResult.value,
-            };
-        });
+        result.identifiers = filteredResultArray
+            .map((singleResult) => {
+                return {
+                    identifier: singleResult.identifier,
+                    value: singleResult.value,
+                };
+            });
 
         // Remove duplicate of nodes field
         const seenNodes: GenericObject = {};
