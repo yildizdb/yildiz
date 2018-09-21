@@ -1,6 +1,6 @@
 {
   "name": "yildiz",
-  "version": "9.0.1",
+  "version": "9.0.2",
   "description": "Big Data Event Relation Storage",
   "main": "index.js",
   "repository": "git@github.com:yildizdb/yildiz.git",

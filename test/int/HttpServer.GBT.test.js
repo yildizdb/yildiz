@@ -396,7 +396,7 @@ describe("HttpServer INT", () => {
         const {
             status,
             body
-        } = await reqProm("/access/upsert-singular-relation", {
+        } = await reqProm("/access/upsert-singular-relation-no-transaction", {
             method: "POST",
             headers: {
                 "content-type": "application/json"

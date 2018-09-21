@@ -69,6 +69,27 @@ const accessRouter = (
         }
     });
 
+    instance.post("/upsert-singular-relation-no-transaction", SCHEMES.SC_RELATION, async (req, res) => {
+
+        const prefix = getPrefixHeader(req);
+        const yildiz = await instance.factory.get(prefix);
+        const graphAccess = await yildiz.getGraphAccess();
+
+        try {
+            const result = await graphAccess.runUpsertRelationWithRetry(req.body);
+            return result;
+        } catch (error) {
+
+            yildiz.incStat("total_upsert_relation_error");
+            res.code(500);
+            res.header("content-type", "application/json");
+            return {
+                error: error.message,
+                stack: error.stack,
+            };
+        }
+    });
+
     instance.delete("/node/:identifier", SCHEMES.DELETE_NODE_RELATION, async (req, res) => {
 
         const prefix = getPrefixHeader(req);
