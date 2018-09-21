@@ -1,7 +1,5 @@
 import fastify from "fastify";
 import cors from "cors";
-import * as path from "path";
-import * as fs from "fs";
 import toobusy from "toobusy-js";
 import { ServiceConfig } from "../interfaces/ServiceConfig";
 import { IncomingMessage, ServerResponse } from "http";
@@ -26,12 +24,6 @@ import {
 } from "./routes/index";
 
 const INTERFACE = "0.0.0.0";
-
-const SWAGGER_FILE = "../../../docs/swagger.json";
-let CREATE_SWAGGER = false;
-if (process.env.CREATE_SWAGGER) {
-    CREATE_SWAGGER = true;
-}
 
 const prefixRegex = /^\w+$/;
 
@@ -121,24 +113,6 @@ export class Server {
         });
 
         this.app.use(cors());
-
-        if (CREATE_SWAGGER) {
-            debug("creating swagger file.");
-            this.app.register(require("fastify-swagger"), {
-                routePrefix: "/apidoc",
-                swagger: {
-                    info: {
-                        title: "YildizDB HTTP interface",
-                        description: "Graph Database on top of Google Bigtable",
-                        version: pjson.version,
-                    },
-                    host: "localhost",
-                    schemes: ["http"],
-                    consumes: ["application/json"],
-                    produces: ["application/json"],
-                },
-            });
-        }
 
         this.app.register(root, {
             prefix: "/",
@@ -298,18 +272,6 @@ export class Server {
                 throw error;
             }
 
-            if (typeof this.app.swagger === "function") {
-                const filePath = path.join(__dirname, SWAGGER_FILE);
-                fs.writeFile(filePath, JSON.stringify(this.app.swagger()), (errorFile: Error) => {
-
-                    if (errorFile) {
-                        throw errorFile;
-                    }
-
-                    debug("wrote swagger file.");
-                });
-                this.app.swagger();
-            }
         });
 
         debug("initialising http server routes... done.");
