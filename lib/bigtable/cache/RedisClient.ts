@@ -78,7 +78,7 @@ export class RedisClient {
 
         if (!isResolvedOrRejected) {
           isResolvedOrRejected = true;
-          reject("Error connecting to Redis");
+          reject(new Error("Error connecting to Redis"));
         }
 
       }, this.timeoutReadyInMs);
