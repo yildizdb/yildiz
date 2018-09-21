@@ -235,7 +235,7 @@ export class GraphAccess {
 
         // Remove duplicate of nodes field
         const seenNodes: GenericObject = {};
-        result.nodes = [].concat(...resultArray
+        result.nodes = [].concat(...filteredResultArray
             .map((flattenResults) => flattenResults.nodes))
             .filter((singleResult: YildizSingleSchema) => {
 
@@ -252,7 +252,7 @@ export class GraphAccess {
 
         // Remove duplicate of edges field
         const seenEdges: GenericObject = {};
-        result.edges = [].concat(...resultArray
+        result.edges = [].concat(...filteredResultArray
             .map((flattenResults) => flattenResults.edges))
             .filter((singleResult: YildizSingleSchema) => {
 
