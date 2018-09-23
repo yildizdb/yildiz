@@ -51,14 +51,20 @@ export class LookupCache {
 
   public async classifyExistence(keys: string[]) {
     const start = Date.now();
-    const mexistence = await this.redisClient.mgetExistence(keys);
+    let mExistence: any;
+
+    try {
+      mExistence = await this.redisClient.mgetExistence(keys);
+    } catch (error) {
+      throw error;
+    }
     const cacheKeys: string[] = [];
     const nocacheKeys: string[] = [];
 
     // if they are null, it means they are not cached
     keys.map((key: string, index) => {
 
-      if (mexistence[index]) {
+      if (mExistence[index]) {
         cacheKeys.push(key);
       } else {
         nocacheKeys.push(key);
@@ -77,7 +83,13 @@ export class LookupCache {
   public async classifyRightNode(keys: string[]) {
 
     const start = Date.now();
-    const mRightNode = await this.redisClient.mgetRightNode(keys);
+    let mRightNode: any;
+
+    try {
+      mRightNode = await this.redisClient.mgetRightNode(keys);
+    } catch (error) {
+      throw error;
+    }
 
     const cacheNodes: YildizSingleSchema[] = [];
     const nocacheKeys: string[] = [];

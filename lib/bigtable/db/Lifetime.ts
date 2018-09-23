@@ -130,6 +130,10 @@ export class Lifetime {
                             if (type === "cache") {
                                 this.cacheTable.row(key).delete();
                             }
+
+                            if (type === "ttl") {
+                                this.ttlTable.row(key).delete();
+                            }
                         },
                         {
                             concurrency: this.promiseConcurrency,
