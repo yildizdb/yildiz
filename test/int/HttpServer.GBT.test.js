@@ -382,6 +382,11 @@ describe("HttpServer INT", () => {
         assert.equal(body.edges.length, 4);
     });
 
+    it("should be able to await next ttl job execution", function(done){
+        this.timeout(5005);
+        setTimeout(done, 5000);
+    });
+
     it("should be able to create relation in singularity with depthBeforeCreation ", async () => {
 
         const {
@@ -812,7 +817,7 @@ describe("HttpServer INT", () => {
         assert.equal(body.data.foo, "bar");
     });
 
-    it("should reset tables based on prefix in bigtable", async() => {
+    xit("should reset tables based on prefix in bigtable", async() => {
         const {
             status,
             body

@@ -120,19 +120,19 @@ export class Lifetime {
                         (key) => {
 
                             if (type === "node") {
-                                this.nodeTable.row(key).delete();
+                                return this.nodeTable.row(key).delete();
                             }
 
                             if (type === "popnode") {
-                                this.popnodeTable.row(key).delete();
+                                return this.popnodeTable.row(key).delete();
                             }
 
                             if (type === "cache") {
-                                this.cacheTable.row(key).delete();
+                                return this.cacheTable.row(key).delete();
                             }
 
                             if (type === "ttl") {
-                                this.ttlTable.row(key).delete();
+                                return this.ttlTable.row(key).delete();
                             }
                         },
                         {
