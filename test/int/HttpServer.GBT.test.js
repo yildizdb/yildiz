@@ -17,15 +17,6 @@ const config = process.env["LOCAL_CONFIG"] ?
     : 
     require(`../../config/${dialect}.json`);
 
-const PATH_TO_CURL_DOC = "../../docs/curl.md";
-let CURL_OUTPUT = `# yildiz ${pjson.version} HttpServer CURL Examples\n
-[This file is auto-generated via **'yarn curl'**.]\n`;
-
-const CURLOUT = !!process.env.CURLOUT;
-if(CURLOUT){
-    require("request-to-curl");
-}
-
 const port = 45456;
 const server = new HttpServer(port, Object.assign(
     config, 
@@ -835,12 +826,6 @@ describe("HttpServer INT", () => {
         assert.equal(status, 200);
     });
 
-    if(CURLOUT){
-        it("should be able to write curl output to file", async() => {
-            await writeCurlToFile(CURL_OUTPUT);
-            console.log("Curl-Docs updated.");
-        });
-    }
 });
 
 const reqProm = (path = "/", options = {}, curl = false, description = "Not described", _prefix = undefined) => {
@@ -862,10 +847,6 @@ const reqProm = (path = "/", options = {}, curl = false, description = "Not desc
                 return reject(error);
             }
 
-            if(CURLOUT && curl){
-                formatCurl(response.request.req.toCurl(), description, body, response.statusCode);
-            }
-
             try {
                 body = JSON.parse(body);
             } catch (error) {
@@ -877,29 +858,6 @@ const reqProm = (path = "/", options = {}, curl = false, description = "Not desc
                 headers: response.headers,
                 body
             });
-        });
-    });
-};
-
-const formatCurl = (curl, description, body, status) => {
-    CURL_OUTPUT += `\n* ->${description}<-\n\n\`\`\`shell
-    # Request:
-    ${curl}\n
-    # ${status}-Response:
-    ${body ? "# " : "#"}${body}\n\`\`\`\n`;
-};
-
-const writeCurlToFile = (curlOutput) => {
-    return new Promise((resolve, reject) => {
-        const filePath = path.join(__dirname, PATH_TO_CURL_DOC);
-        console.log("Storing:", filePath, curlOutput.length);
-        fs.writeFile(filePath, curlOutput, "utf8", error => {
-
-            if(error){
-                return reject(error);
-            }
-
-            resolve();
         });
     });
 };

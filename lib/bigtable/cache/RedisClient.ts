@@ -1,5 +1,6 @@
 import IORedis, { Redis } from "ioredis";
 import Debug from "debug";
+import Bluebird from "bluebird";
 
 import { Metrics } from "../metrics/Metrics";
 import { ServiceConfig, RedisConfig } from "../../interfaces/ServiceConfig";
@@ -70,7 +71,7 @@ export class RedisClient {
     });
 
     // This Promise rejects on timeout
-    return new Promise((resolve, reject) => {
+    return new Bluebird((resolve, reject) => {
 
       let isResolvedOrRejected = false;
 

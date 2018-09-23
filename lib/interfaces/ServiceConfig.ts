@@ -65,6 +65,7 @@ export interface ServiceConfig {
   accessLog: boolean;
   enableRaw: boolean;
   noBanner: boolean;
+  promiseConcurrency?: number;
   ttl: TTLConfig;
   database: DatabaseConfig;
   redis: RedisConfig;

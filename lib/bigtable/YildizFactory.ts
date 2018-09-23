@@ -1,6 +1,7 @@
 import cache from "memory-cache";
 import promClient, { Registry } from "prom-client";
 import Debug from "debug";
+import Bluebird from "bluebird";
 
 import { Yildiz } from "./Yildiz";
 import { Metrics } from "./metrics/Metrics";
@@ -14,7 +15,7 @@ const promRegistry = promClient.Registry;
 const debug = Debug("yildiz:factory");
 
 export interface BlockedInstance {
-    [key: string]: Promise<Yildiz>;
+    [key: string]: Bluebird<Yildiz>;
 }
 
 export interface UpdatedTimestamp {
@@ -55,7 +56,7 @@ export class YildizFactory {
     }
 
     public async getStats() {
-        return (await Promise.all(
+        return (await Bluebird.all(
             this.cache.keys()
                 .map(async (prefix: string) => ({
                     prefix,
@@ -117,7 +118,7 @@ export class YildizFactory {
 
         // Instance is not present, create blocking promise for future requests during init
         // Init, set cache and clean-up afterwards
-        this.blocked[prefix] = new Promise((resolve, reject) => {
+        this.blocked[prefix] = new Bluebird((resolve, reject) => {
             const newInstance = new Yildiz(prefix, this.baseConfig);
             newInstance.init().then(() => {
                 this.storeInstance(prefix, newInstance);
@@ -151,7 +152,7 @@ export class YildizFactory {
 
     public async closeAll() {
 
-        await Promise.all(this.cache.keys()
+        await Bluebird.all(this.cache.keys()
             .map((key: string) => this.cache.get(key))
             .map((instance: Yildiz) => instance.close()));
 

@@ -16,8 +16,8 @@ const DEFAULT_FETCH_LIMIT = 20;
 
 export class FetchJob {
 
-  private config: ServiceConfig;
   private yildiz: Yildiz;
+  private config: ServiceConfig;
   private metrics: Metrics;
   private redisClient: RedisClient;
 
@@ -30,11 +30,11 @@ export class FetchJob {
   private tov!: NodeJS.Timer | number;
   private graphAccess!: GraphAccess;
 
-  constructor(config: ServiceConfig, yildiz: Yildiz, metrics: Metrics, redisClient: RedisClient) {
+  constructor(yildiz: Yildiz, metrics: Metrics, redisClient: RedisClient) {
 
-    this.config = config;
     this.redisClient = redisClient;
     this.yildiz = yildiz;
+    this.config = yildiz.config;
     this.metrics = metrics;
 
     const {

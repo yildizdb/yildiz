@@ -1,5 +1,5 @@
 import Debug from "debug";
-
+import Bluebird from "bluebird";
 import Bigtable from "@google-cloud/bigtable";
 
 import { Yildiz } from "../Yildiz";
@@ -28,6 +28,8 @@ export class Metadata {
   private metadataTable: Bigtable.Table;
   private columnFamilyMetadata: Bigtable.Family;
 
+  private promiseConcurrency: number;
+
     constructor(yildiz: Yildiz) {
 
       this.yildiz = yildiz;
@@ -44,6 +46,7 @@ export class Metadata {
 
       this.metadataTable = metadataTable;
       this.columnFamilyMetadata = columnFamilyMetadata;
+      this.promiseConcurrency = this.yildiz.config.promiseConcurrency || 1000;
     }
 
     public async init() {
@@ -161,9 +164,9 @@ export class Metadata {
         const cfname = this.columnFamilyMetadata.id;
         const row = this.metadataTable.row(MAIN_KEY);
 
-        return await Promise.all(Object
-          .keys(this.counts)
-          .map(async (key: string) => {
+        return await Bluebird.map(
+          Object.keys(this.counts),
+          async (key: string) => {
 
             if (this.counts[key] === 0 || isNaN(this.counts[key])) {
               return 0;
@@ -176,7 +179,11 @@ export class Metadata {
             this.counts[key] = 0;
 
             return val;
-          }));
+          },
+          {
+            concurrency: this.promiseConcurrency,
+          },
+        );
     }
 
     private runIntervalSave(saveMetadataInSec: number) {

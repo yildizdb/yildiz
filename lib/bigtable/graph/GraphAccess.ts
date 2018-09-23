@@ -1,4 +1,5 @@
 import Debug from "debug";
+import Bluebird from "bluebird";
 
 import { strToInt } from "./../../utils";
 import { Yildiz } from "../Yildiz";
@@ -29,12 +30,15 @@ export class GraphAccess {
 
     private nodeHandler!: NodeHandler;
 
+    private promiseConcurrency: number;
+
     constructor(yildiz: Yildiz) {
         this.yildiz = yildiz;
         this.metrics = this.yildiz.metrics;
         this.lookupCache = this.yildiz.lookupCache;
         this.fetchJob = this.yildiz.fetchJob;
         this.upsertConfig = this.yildiz.config.upsert || {};
+        this.promiseConcurrency = this.yildiz.config.promiseConcurrency || 1000;
     }
 
     public async init() {
@@ -67,9 +71,15 @@ export class GraphAccess {
         }
 
         // Resolve the right node if it is not in cache
-        const nocacheNodes = (await Promise.all(
-                nocache.map((identifier: string) => this.nodeHandler.getNodeByIdentifier(identifier)),
-            ))
+        const nocacheNodes = (await Bluebird
+                .map(
+                    nocache,
+                    (identifier: string) => this.nodeHandler.getNodeByIdentifier(identifier),
+                    {
+                        concurrency: this.promiseConcurrency,
+                    },
+                )
+            )
             .filter((node) => !!node)
             .map((node) => {
 
@@ -109,10 +119,15 @@ export class GraphAccess {
     public async buildNodes(identifiers: string[]): Promise<YildizSingleSchema[]> {
 
         // Get the nodes from node table
-        const nodes = (await Promise.all(
-            identifiers
-                .map((identifier: string) => this.nodeHandler.getNodeByIdentifier(identifier)),
-            ))
+        const nodes = (await Bluebird
+            .map(
+                identifiers,
+                (identifier: string) => this.nodeHandler.getNodeByIdentifier(identifier),
+                {
+                    concurrency: this.promiseConcurrency,
+                },
+                )
+            )
             .filter((node) => !!node) as YildizSingleSchema[];
 
         if (!nodes.length) {
@@ -195,15 +210,27 @@ export class GraphAccess {
         );
 
         // Resolve all promises as the array will contain Promise as element
-        const results = (await Promise.all(resultsPromise))
+        const results = (await Bluebird
+                .map(
+                    resultsPromise,
+                    (resultPromise) => resultPromise,
+                    {
+                        concurrency: this.promiseConcurrency,
+                    },
+                )
+            )
             .filter((result) => !!result) as YildizSingleSchema[];
 
         // Set the existence in redis cache
         await this.lookupCache.setExistence(results);
 
         // Save the cache in bigtable cache table
-        await Promise.all(
-            results.map((result) => this.nodeHandler.createCache(result)),
+        await Bluebird.map(
+            results,
+            (result) => this.nodeHandler.createCache(result),
+            {
+                concurrency: this.promiseConcurrency,
+            },
         );
 
         return results;
@@ -287,8 +314,12 @@ export class GraphAccess {
         if (cache.length) {
 
             // Get the cache from cache table in bigtable
-            cacheResults = await Promise.all(
-                cache.map((identifier: string) => this.nodeHandler.getCacheByIdentifier(identifier)),
+            cacheResults = await Bluebird.map(
+                cache,
+                (identifier: string) => this.nodeHandler.getCacheByIdentifier(identifier),
+                {
+                    concurrency: this.promiseConcurrency,
+                },
             );
 
             const errorKeys: Array<string | number> = [];

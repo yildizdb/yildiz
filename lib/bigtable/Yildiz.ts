@@ -1,5 +1,6 @@
 import Bigtable, { FamilyRule } from "@google-cloud/bigtable";
 import Debug from "debug";
+import Bluebird from "bluebird";
 
 import { NodeHandler } from "./graph/NodeHandler";
 import { GraphAccess } from "./graph/GraphAccess";
@@ -43,17 +44,17 @@ export class Yildiz {
         this.translator = new Translator();
     }
 
-    public getNodeHandler(): Promise<NodeHandler> {
+    public getNodeHandler(): Bluebird<NodeHandler> {
 
         // Promisified because of future api relations
-        return new Promise((resolve) => {
+        return new Bluebird((resolve) => {
             resolve(new NodeHandler(this));
         });
     }
 
-    public getGraphAccess(): Promise<GraphAccess> {
+    public getGraphAccess(): Bluebird<GraphAccess> {
 
-        return new Promise((resolve, reject) => {
+        return new Bluebird((resolve, reject) => {
 
             const access = new GraphAccess(this);
 
@@ -111,7 +112,7 @@ export class Yildiz {
         }
 
         this.lookupCache = new LookupCache(this.config, this.metrics, this.redisClient);
-        this.fetchJob = new FetchJob(this.config, this, this.metrics, this.redisClient);
+        this.fetchJob = new FetchJob(this, this.metrics, this.redisClient);
 
         debug("starting jobs");
         this.runJobs();
@@ -287,7 +288,7 @@ export class Yildiz {
     private runJobs() {
 
         if (this.config.ttl && typeof this.config.ttl === "object") {
-            this.ttlJob = new Lifetime(this, this.config);
+            this.ttlJob = new Lifetime(this);
             this.ttlJob.init();
         } else {
             debug("ttl job configuration missing.");

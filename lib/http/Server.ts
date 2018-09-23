@@ -5,6 +5,7 @@ import { ServiceConfig } from "../interfaces/ServiceConfig";
 import { IncomingMessage, ServerResponse } from "http";
 import { NextFunction } from "connect";
 import Debug from "debug";
+import Bluebird from "bluebird";
 
 import pjson from "./../../package.json";
 const debug = Debug("yildiz:http:server");
@@ -294,7 +295,7 @@ export class Server {
     }
 
     public listen() {
-        return new Promise((resolve, reject) => {
+        return new Bluebird((resolve, reject) => {
             this.app.listen(this.port, INTERFACE, (error: Error) => {
 
                 if (error) {
@@ -309,7 +310,7 @@ export class Server {
 
     public close() {
 
-        return new Promise((resolve) => {
+        return new Bluebird((resolve) => {
             this.app.close(resolve);
         });
     }

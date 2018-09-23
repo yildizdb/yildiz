@@ -14,9 +14,9 @@ export class LookupCache {
   private redisClient: RedisClient;
   private tosv!: NodeJS.Timer | number;
 
-  constructor(options: ServiceConfig, metrics: Metrics, redisClient: RedisClient) {
+  constructor(config: ServiceConfig, metrics: Metrics, redisClient: RedisClient) {
 
-    this.config = options;
+    this.config = config;
     this.metrics = metrics;
     this.redisClient = redisClient;
     this.init();

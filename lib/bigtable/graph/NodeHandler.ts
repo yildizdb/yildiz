@@ -1,5 +1,6 @@
 import Debug from "debug";
 import Bigtable from "@google-cloud/bigtable";
+import Bluebird from "bluebird";
 
 import { Yildiz } from "../Yildiz";
 import {
@@ -370,7 +371,7 @@ export class NodeHandler {
 
         this.metrics.inc("edge_created");
         this.metadata.increaseCount("edges");
-        await Promise.all(requests);
+        await Bluebird.all(requests);
 
         return results;
     }
@@ -463,7 +464,7 @@ export class NodeHandler {
         }
 
         try {
-            await Promise.all(requests);
+            await Bluebird.all(requests);
         } catch (error) {
             debug("Error while saving row" + error);
             return {
@@ -529,7 +530,7 @@ export class NodeHandler {
         }
 
         try {
-            await Promise.all(requests);
+            await Bluebird.all(requests);
         } catch (error) {
             debug("Error while saving row" + error);
             return {
@@ -600,7 +601,7 @@ export class NodeHandler {
 
         this.metadata.decreaseCount("edges");
 
-        return await Promise.all(requests);
+        return await Bluebird.all(requests);
     }
 
     public async getEdgeTime(firstNodeId: string | number, secondNodeId: string | number, relation?: string | number) {
@@ -656,7 +657,7 @@ export class NodeHandler {
         }
 
         try {
-            await Promise.all(requests);
+            await Bluebird.all(requests);
         } catch (error) {
             return error;
         }
@@ -719,7 +720,7 @@ export class NodeHandler {
             deletion.push(this.removePopNode(key));
         });
 
-        const result = await Promise.all(deletion);
+        const result = await Bluebird.all(deletion);
 
         this.metadata.decreaseCount("nodes");
         this.metadata.decreaseCount("edges", popNodeKeys.length);
@@ -826,7 +827,7 @@ export class NodeHandler {
             },
         };
 
-        await Promise.all([
+        await Bluebird.all([
             row.save(saveData),
             rowTTL.save(saveDataTTL),
         ]);

@@ -1,5 +1,6 @@
 import moment from "moment";
 import Debug from "debug";
+import Bluebird from "bluebird";
 
 import Bigtable from "@google-cloud/bigtable";
 
@@ -31,8 +32,9 @@ export class Lifetime {
     private tov!: NodeJS.Timer | number;
 
     private lifeTimeInSec!: number;
+    private promiseConcurrency: number;
 
-    constructor(yildiz: Yildiz, config: ServiceConfig) {
+    constructor(yildiz: Yildiz) {
 
         this.yildiz = yildiz;
 
@@ -47,18 +49,19 @@ export class Lifetime {
         this.metadata = this.yildiz.metadata;
         this.metrics = this.yildiz.metrics;
 
-        this.configTTL = config.ttl;
+        this.configTTL = this.yildiz.config.ttl;
         this.ttlTable = ttlTable;
         this.nodeTable = nodeTable;
         this.popnodeTable = popnodeTable;
         this.cacheTable = cacheTable;
 
         this.columnFamilyNode = columnFamilyNode;
+        this.promiseConcurrency = this.yildiz.config.promiseConcurrency || 1000;
     }
 
-    private getTTLIds(type: string): Promise<string[]> {
+    private getTTLIds(type: string): Bluebird<string[]> {
 
-        return new Promise((resolve, reject) => {
+        return new Bluebird((resolve, reject) => {
 
             if (!type) {
                 resolve([]);
@@ -112,8 +115,9 @@ export class Lifetime {
                 // If it is not edge, just delete the row from the table
                 if (type !== "edge") {
 
-                    deletedCounts = await Promise.all(
-                        cleanedKeys.map((key) => {
+                    deletedCounts = await Bluebird.map(
+                        cleanedKeys,
+                        (key) => {
 
                             if (type === "node") {
                                 this.nodeTable.row(key).delete();
@@ -126,7 +130,10 @@ export class Lifetime {
                             if (type === "cache") {
                                 this.cacheTable.row(key).delete();
                             }
-                        }),
+                        },
+                        {
+                            concurrency: this.promiseConcurrency,
+                        },
                     );
                 }
 
@@ -135,8 +142,9 @@ export class Lifetime {
 
                     const cfName = this.columnFamilyNode.id;
 
-                    deletedCounts = await Promise.all(
-                        cleanedKeys.map((key) => {
+                    deletedCounts = await Bluebird.map(
+                        cleanedKeys,
+                        (key) => {
                             const nodeKey = key.split("-")[0];
                             const columnKey = key.split("-")[1];
 
@@ -144,7 +152,10 @@ export class Lifetime {
                                 `${cfName}:${columnKey}`,
                             ]);
                         },
-                    ));
+                        {
+                            concurrency: this.promiseConcurrency,
+                        },
+                    );
 
                 }
 
@@ -219,17 +230,20 @@ export class Lifetime {
         const results = [];
 
         // Remove Nodes and TTLs
-        const nodeKeys = await this.getTTLIds("nodes");
-        results.push(await deleteTTLOrigin.node(nodeKeys));
+        const [ nodeKeys, edgeKeys, popnodeKeys, cacheKeys] =
+            await Bluebird.all([
+                this.getTTLIds("nodes"),
+                this.getTTLIds("edges"),
+                this.getTTLIds("popnodes"),
+                this.getTTLIds("caches"),
+            ]);
 
-        const edgeKeys = await this.getTTLIds("edges");
-        results.push(await deleteTTLOrigin.edge(edgeKeys));
-
-        const popnodeKeys = await this.getTTLIds("popnodes");
-        results.push(await deleteTTLOrigin.popnode(popnodeKeys));
-
-        const cacheKeys = await this.getTTLIds("caches");
-        results.push(await deleteTTLOrigin.cache(cacheKeys));
+        results.push(...(await Bluebird.all([
+            deleteTTLOrigin.node(nodeKeys),
+            deleteTTLOrigin.edge(edgeKeys),
+            deleteTTLOrigin.popnode(popnodeKeys),
+            deleteTTLOrigin.cache(cacheKeys),
+        ])));
 
         const ttlKeys = nodeKeys
             .concat(edgeKeys ? edgeKeys : [])
