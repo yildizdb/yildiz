@@ -1,7 +1,7 @@
 {
   "name": "yildiz",
   "version": "9.0.9",
-  "description": "Big Data Event Relation Storage",
+  "description": "Graph Database on top of Bigtable",
   "main": "index.js",
   "repository": "git@github.com:yildizdb/yildiz.git",
   "author": "Christian Froehlingsdorf <chris@5cf.de>",
@@ -9,6 +9,9 @@
     "Christian Froehlingsdorf <chris@5cf.de>",
     "Rian Josua Masikome (RJ) <rj@masiko.me>"
   ],
+  "engines" : {
+    "node" : ">=9.0.0"
+  },
   "license": "MIT",
   "keywords": [
     "graphdatabase",

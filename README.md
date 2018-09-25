@@ -1,106 +1,101 @@
-# YildizDB - HTTP event relation storage layer
-
+<h1 align="center">Yildiz Graph Database</h1>
 <p align="center">
-  <img alt="yildiz" src="docs/assets/images/logo.jpeg" width="200">
+  <img alt="yildiz" src="docs/images/YildizDBLogo.png" width="362">
 </p>
 <p align="center">
-  high performance event relation storage on top of BigTable, MySQL or Postgres
+  Thin graph database layer on top of Google Bigtable.
 </p>
 
-[![Build Status][build-badge]][build]
-[![Version][version-badge]][package]
-[![MIT License][license-badge]][license]
+[![Build Status][build-badge]][build] [![Version][version-badge]][package] [![MIT License][license-badge]][license] ![node][node-badge] [![Swagger][swagger-badge]][swagger-url]
+
+## Intro
+
+YildizDB acts as a highly scaleable HTTP layer in front of Google Bigtable. It helps you store billions of relations between nodes in edges and resolve them in milliseconds. A small access layer helps you manage multiple namespaces with ease. YildizDB scales to hundrets of Terabytes. YildizDB excells in $N:N$ non nested relationships.
 
 ## Features
 
-* multi-tenancy/table-size management through table prefixes (with [access management](docs/access.md))
+* simple namespacing (table separation) with [prefixes](docs/access.md)
+* simple access management through [tokens](docs/access.md)
+* multi-tenancy through table prefixes (with [access management](docs/access.md))
 * high read and write performance
+* fast read access under heavy write load
 * able to handle billions of edges and nodes
 * scales beyond Terabytes
 * lightweight deployments (small Node.js footprint)
-* multiple backends
 * ttl feature for all resources
+* HTTP [Open API][swagger-url]
+* Kubernetes HELM [charts](https://github.com/yildizdb/charts)
 
-## Available Clients
+## Build for high throughput $N:N$
 
-* [Node.js](https://github.com/yildizdb/yildiz-js)
+* Highly async API based on `fastify`
+* Thin layer on top of Google's GRPC Bigtable API
+* Hashing and translating all string identifiers into **integer** representations via `murmurhash3` automatically
+
+## Fast random access to a node's edge data $1:N$
+
+* Multiple complex caching layers
+* Custom Bigtable cache table speed up by Google Memorystore (Redis)
+* All Memorystore hits also speed up by In-Memory store
+* Fetch job that keeps active nodes refreshed in cache
+
+## Available clients
+
+* [Node.js Client](https://github.com/yildizdb/yildiz-js)
 * **Any Http Client** can be used to access the HTTP-Interface
-
-## Build for High Throughput
-
-* Highly async API based on `fastify` and in-memory + Redis cache
-* Hashing string keys into **integer** representations via `murmurhash3`
 
 ## Usage
 
-* **We suggest to always use YildizDB with Google Big Table as backend**
-* Use as application: `npm install -g yildiz` and `yildizdb -p 3058 -l /path/to/config.json`
+* **You will need a Google Cloud Project with a running Bigtable cluster**
+* **Additionally YildizDB requires a Memorystore (or Redis) instance**
+* Configure `./config/bigtable.json` accordingly
+* Install and start: `npm install -g yildiz` and `yildizdb -p 3058 -l ./config/bigtable.json`
 * A word on configuration [can be found here](docs/configuration.md)
 * Use right [alongside your code](example/yildiz-sample.js)
 * Spawn server via [http interface](example/yildiz-http.js)
 
-## Documentation
+## Deployment
 
-* `yildiz` means :star: in turkish
-* [Best practices / Rules](docs/best-practice.md)
-* [Http interface curl examples](docs/curl.md)
-* [Open API/Swagger JSON](docs/swagger.json)
-* [Access management](docs/access.md)
-* [Stats and metrics](docs/metrics.md)
-* [YildizDB use-cases](docs/use-case.md)
-* [Why develop another graph database?](docs/why.md)
-* [How does it work (RBDMS) ?](docs/how-rdbms.md)
-* [How does it work (Google Big Table) ?](docs/how-gbt.md)
-* [Storing node relations even faster](docs/fast-relation-creation.md)
-* [Project History](docs/project-history.md)
-* [The popular right node concept](docs/popular-right-node.md)
-* [Configuration & Deployments](docs/configuration.md)
+* YildizDB is designed to be deployed as simple platform service
+* it requires Node.js > 9.x.x and Redis > 3.x
+* It simply requires its npm module as well as a config file that describes
+the connections to Bigtable and Memorystore (Redis)
+* It scales best with an HTTP load balancer in front of it e.g. NGINX
+* We run and scale it very successfully in Google's Kubernetes Engine
+* We also offer HELM [charts](https://github.com/yildizdb/charts)
+* Read some more about the config file [here](docs/configuration.md)
 
-## Metrics
+## Metrics & Monitoring
 
 * Yildiz exposes Prometheus Metrics @ `/admin/metrics`
 * Read more about it [here](docs/metrics.md)
 
 ## Developing YildizDB
 
-### Developing yildiz with Google Big Table backend
+### Developing YildizDB with Google Bigtable backend
 
-* run tests via `yarn test:bt` for MySQL
-* start http-server via `yarn http:bt`
-* **generate Open API/Swagger** via `yarn swagger`
-* **generate CURL examples** via `yarn curl`
+* Configure `./config/bigtable.json` accordingly
+* Run tests via `yarn test`
+* Start via `yarn http`
 
-### Developing yildiz with MySQL backend
+## Documentation
 
-* start database via docker `yarn mysql:start`
-* run tests via `yarn test` for MySQL
-* run tests with SQL debugging via `yarn sql`
-* start http-server via `yarn http`
-* **generate Open API/Swagger** via `yarn swagger`
-* **generate CURL examples** via `yarn curl`
-* stop database via `yarn mysql:stop`
-
-### Developing yildiz with Postgres backend
-
-* start database via docker `yarn psql:start`
-* run tests via `yarn test:psql` for Postgres
-* start http-server via `yarn http:psql`
-* **generate Open API/Swagger** via `yarn swagger`
-* **generate CURL examples** via `yarn curl`
-* stop database via `yarn psql:stop`
-
-### Easy Setup with Docker & Docker-Compose
-
-* if you have docker and docker-compose installed you can setup yildiz locally super easy:
-* `git clone https://github.com/yildizdb/yildiz`
-* `cd yildiz`
-* `docker-compose up --build`
-* this will start a MySQL Database, Adminer Admin UI @ `http://localhost:8080` and yildiz @ `http://localhost:3058`
-* it will pull its config from `config/docker.json`
+* `yildiz` means :star: in turkish
+* [Best practice](docs/best-practice.md)
+* [Open API/Swagger JSON](docs/swagger.json)
+* [Access management](docs/access.md)
+* [Stats and metrics](docs/metrics.md)
+* [YildizDB Use-cases](docs/use-cases.md)
+* [Why develop another Graph Database?](docs/why.md)
+* [How does it work?](docs/how.md)
+* [Storing node relations even faster](docs/fast-relation-creation.md)
+* [The popular right node concept](docs/popular-right-node.md)
+* ["Depth" or "Create" edge creation](docs/edge-modes.md)
+* [Configuration & Deployments](docs/configuration.md)
 
 ## Disclaimer
 
-* This product is not affiliated with Google
+* This project is not affiliated with Google
 * License is MIT [see](LICENSE)
 
 <!-- badges -->
@@ -110,3 +105,6 @@
 [package]: https://www.npmjs.com/package/yildiz
 [license-badge]: https://img.shields.io/npm/l/yildiz.svg
 [license]: https://opensource.org/licenses/MIT
+[swagger-url]: https://petstore.swagger.io/?url=https://raw.githubusercontent.com/yildizdb/yildiz/master/docs/swagger.yml
+[node-badge]: https://img.shields.io/node/v/yildiz.svg
+[swagger-badge]: https://img.shields.io/badge/Swagger%20UI-OK-orange.svg
