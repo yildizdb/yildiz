@@ -1,5 +1,11 @@
-# yilidzdb changelog
+# YilidzDB Changelog
 
+# 9.0.x
+
+- removed support for multiple database backends, 100% focus on Bigtable
+- ported codebase to TypeScript
+- new logo
+- new docs
 
 # 8.2.0
 

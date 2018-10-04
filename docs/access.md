@@ -2,9 +2,12 @@
 
 There are multiple ways to control resource access
 as well as allowed prefixes, with the help of the config's `access` field.
+Access works with a combination of a prefix (similar to a username) and token (similar to a password) that are defined in a map in the config.
 
-* access control can only be used with the http-server
-* per default, if the access field is not defined it wil be set to `*`
+* access control can only be used with the HTTP server
+* a client provides the prefix in the `x-yildiz-prefix` HTTP header
+* the token should be provided in the `authorization` HTTP header
+* per default, if the access field is not defined it will be set to `*`
 * the wildcard `*` allows any access (requires no token), as well as any prefix
 * if not set to the wildcard, the access field can **only** be set to an object,
     where the keys represent the prefix names and the values represent the
@@ -16,6 +19,9 @@ as well as allowed prefixes, with the help of the config's `access` field.
 * bad tokens will result in `401` http responses
 * tokens under the `*` will always overrule other tokens (they can access all prefixes)
 * its also possible to set these via env variables, see below
+* whenever possible you should add SSL to secure the traffic and keep the
+tokens private
+* do not expose YildizDB HTTP ports to the public directly
 
 ## Example Access Configurations
 
@@ -60,7 +66,7 @@ const config = {
 };
 ```
 
-## Setting access keys and values with acces variables
+## Setting access keys and values with access variables
 
 ```sh
 YILDIZDB_ACK_MYPREFIX=123

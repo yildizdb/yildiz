@@ -1,6 +1,6 @@
 # Why develop another "graph" / "relation" storage
 
-TL;DR: easy setup, simple scaling, maintainability, heavy write throughput, http API, ttl feature
+TL;DR: easy setup, simple scaling, maintainability, heavy write throughput, HTTP API, ttl feature
 
 ## In detail
 
