@@ -11,7 +11,6 @@ const debug = Debug("yildiz:fetchjob");
 const DEFAULT_EXP_IN_SEC = 60 * 60 * 72; // 72 hours
 const DEFAULT_FETCH_INTERV_IN_SEC = 3;
 const DEFAULT_FETCH_LAST_ACCESS = 180;
-const DEFAULT_FETCH_BATCH_SIZE = 10;
 const DEFAULT_FETCH_LIMIT = 20;
 
 export class FetchJob {
@@ -24,7 +23,6 @@ export class FetchJob {
   private expireInSec: number;
   private fetchIntervalInSec: number;
   private fetchLastAccess: number;
-  private fetchBatchSize: number;
   private limit: number;
 
   private tov!: NodeJS.Timer | number;
@@ -41,7 +39,6 @@ export class FetchJob {
       expireInSec = DEFAULT_EXP_IN_SEC,
       fetchIntervalInSec = DEFAULT_FETCH_INTERV_IN_SEC,
       fetchLastAccess = DEFAULT_FETCH_LAST_ACCESS,
-      fetchBatchSize = DEFAULT_FETCH_BATCH_SIZE,
       limit = DEFAULT_FETCH_LIMIT,
     } = this.config.fetchJob || {};
 
@@ -54,21 +51,8 @@ export class FetchJob {
     // How long the cache is stored until it should be fetched again
     this.fetchLastAccess = fetchLastAccess;
 
-    // Batch size for storing the cache
-    this.fetchBatchSize = fetchBatchSize;
-
     // Limit in retrieving the lastAccess nodeId from redis
     this.limit = limit;
-  }
-
-  private arrayToChunks(array: string[], size: number) {
-
-    const result = [];
-    for (let i = 0; i < array.length; i += size) {
-        const chunk = array.slice(i, i + size);
-        result.push(chunk);
-    }
-    return result;
   }
 
   private runJob() {
@@ -90,20 +74,19 @@ export class FetchJob {
     let keys = null;
 
     try {
-
       keys = await this.getKeysToBeCached();
-
-      if (!keys || !keys.length) {
-        return this.runJob();
-      }
-
-      await this.batchFetch(keys);
     } catch (error) {
       debug("error occurred when running job", error.message);
     }
 
+    if (!keys || !keys.length) {
+      return this.runJob();
+    }
+
+    this.graphAccess.setCacheLastAccessFireAndForget(keys);
+
     if (keys && (keys.length === this.limit)) {
-      return await this.jobAction();
+      return this.jobAction();
     }
 
     return this.runJob();
@@ -130,7 +113,10 @@ export class FetchJob {
     if (!accessedKeys.length) {
       // Remove the keys from CACHEREFRESH_SET because if it is not in LASTACCESS_SET it means it is no longer valid
       debug(`expired keys found from CR_SET, removed ${keys.length} keys`);
+
       await this.redisClient.clearCacheRefresh(keys);
+      this.metrics.inc("fetchJob_removed_keys", keys.length);
+
       return [];
     }
 
@@ -149,29 +135,18 @@ export class FetchJob {
     // If it is not there, remove the keys from CACHEREFRESH_SET
     if (keysToBeRemoved.length) {
       debug(`expired keys found from CR_SET, removed ${keysToBeRemoved.length} keys`);
+
       await this.redisClient.clearCacheRefresh(keysToBeRemoved);
+      this.metrics.inc("fetchJob_removed_keys", keysToBeRemoved.length);
     }
 
-    debug(`scanning keys, found ${keysToBeCached.length} keys to be cached`);
+    const keysToBeCachedLength = keysToBeCached.length;
+
+    debug(`scanning keys, found ${keysToBeCachedLength} keys to be cached`);
+    this.metrics.inc("fetchJob_caching_keys", keysToBeCachedLength);
 
     // Otherwise cache the keys
     return keysToBeCached;
-  }
-
-  public async batchFetch(keys: string[]) {
-
-    debug(`Job executed to cache ${keys.length} keys`);
-
-    if (keys.length < this.fetchBatchSize) {
-      return await this.graphAccess.setCacheLastAccess(keys);
-    }
-
-    const batchedKeys = this.arrayToChunks(keys, this.fetchBatchSize);
-
-    for (const batch of batchedKeys) {
-      await this.graphAccess.setCacheLastAccess(batch);
-    }
-
   }
 
   public async init() {

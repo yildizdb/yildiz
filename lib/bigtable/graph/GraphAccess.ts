@@ -53,9 +53,11 @@ export class GraphAccess {
             });
     }
 
-    public async setCacheLastAccess(values: string[]) {
-        const nodeIdentifiers = values.map((value: string) => strToInt(value) + "");
-        await this.buildNodes(nodeIdentifiers);
+    public async setCacheLastAccessFireAndForget(values: string[]) {
+        this.buildNodes(values)
+            .catch((error) => {
+                // Do nothing
+            });
     }
 
     public async getRightNodes(identifiers: string[]) {
@@ -64,6 +66,9 @@ export class GraphAccess {
         // cache will contain an array of object data of resolved right node
         // nocache will contain an array of key of unresolved right node
         const {cache, nocache} = await this.lookupCache.classifyRightNode(identifiers);
+
+        this.metrics.inc("resolvedRightNode_cache_hits", cache.length);
+        this.metrics.inc("resolvedRightNode_cache_miss", nocache.length);
 
         // Return if everything is in cache
         if (!nocache.length) {
@@ -106,9 +111,6 @@ export class GraphAccess {
                 return nodeObj;
             });
 
-        this.metrics.inc("resolvedRightNode_cache_hits", cache.length);
-        this.metrics.inc("resolvedRightNode_cache_miss", nocache.length);
-
         // Set them in cache
         await this.lookupCache.setRightNode(nocacheNodes);
 
@@ -122,7 +124,7 @@ export class GraphAccess {
         const nodes = (await Bluebird
             .map(
                 identifiers,
-                (identifier: string) => this.nodeHandler.getNodeByIdentifier(identifier),
+                (identifier: string) => this.nodeHandler.getNodeByIdentifier(strToInt(identifier) + ""),
                 {
                     concurrency: this.promiseConcurrency,
                 },
@@ -310,6 +312,9 @@ export class GraphAccess {
         const nodeIdentifiers = values.map((value) => strToInt(value) + "");
         const {cache, nocache} = await this.lookupCache.classifyExistence(nodeIdentifiers);
 
+        this.metrics.inc("resolvedNodes_cache_hits", cache.length);
+        this.metrics.inc("resolvedNodes_cache_miss", nocache.length);
+
         // Only get the cache from bigtable if the cache exists after checking in redis
         if (cache.length) {
 
@@ -339,7 +344,6 @@ export class GraphAccess {
                 debug(`Cache in Bigtable does not exist for keys ${errorKeys.join(",")}`);
             }
 
-            this.metrics.inc("resolvedNodes_cache_hits", cache.length);
         }
 
         // If everything is in the cache, just return the cache
@@ -356,8 +360,6 @@ export class GraphAccess {
 
         // Get the uncache node
         const resultArray: YildizSingleSchema[] = await this.buildNodes(nocache);
-
-        this.metrics.inc("resolvedNodes_cache_miss", resultArray.length);
 
         // Concat the resultArray with the one in cache and build expected result
         const result = this.buildResult(
