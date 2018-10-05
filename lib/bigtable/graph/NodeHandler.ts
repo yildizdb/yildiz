@@ -15,6 +15,7 @@ import { DatabaseConfig } from "../../interfaces/ServiceConfig";
 import { GenericObject, AnyObject } from "../../interfaces/Generic";
 import { YildizSingleSchema } from "../../interfaces/Yildiz";
 import { EdgeCache } from "../../interfaces/Graph";
+import { RedisClient } from "../cache/RedisClient";
 
 const debug = Debug("yildiz:nodehandler");
 
@@ -27,13 +28,12 @@ export class NodeHandler {
     private metadata: Metadata;
     private metrics: Metrics;
     private dbConfig: DatabaseConfig;
+    private redisClient: RedisClient;
 
     private nodeTable: Bigtable.Table;
-    private ttlTable: Bigtable.Table;
     private popnodeTable: Bigtable.Table;
     private cacheTable: Bigtable.Table;
     private columnFamilyNode: Bigtable.Family;
-    private columnFamilyTTL: Bigtable.Family;
     private columnFamilyPopnode: Bigtable.Family;
     private columnFamilyCache: Bigtable.Family;
 
@@ -43,28 +43,25 @@ export class NodeHandler {
         this.metadata = this.yildiz.metadata;
         this.metrics = this.yildiz.metrics;
         this.dbConfig = this.yildiz.config.database;
+        this.redisClient = this.yildiz.redisClient;
 
         // Get the Tables and CFs
         const {
             nodeTable,
-            ttlTable,
             popnodeTable,
             cacheTable,
             columnFamilyNode,
-            columnFamilyTTL,
             columnFamilyPopnode,
             columnFamilyCache,
         } = this.yildiz.models;
 
         // Tables
         this.nodeTable = nodeTable;
-        this.ttlTable = ttlTable;
         this.popnodeTable = popnodeTable;
         this.cacheTable = cacheTable;
 
         // Column Families
         this.columnFamilyNode = columnFamilyNode;
-        this.columnFamilyTTL = columnFamilyTTL;
         this.columnFamilyPopnode = columnFamilyPopnode;
         this.columnFamilyCache = columnFamilyCache;
     }
@@ -274,14 +271,7 @@ export class NodeHandler {
             this.metrics.inc("edge_created_leftNode");
 
             if (ttld) {
-                requests.push(this.ttlTable.insert([{
-                    key: `${firstNodeId}-${columnName}_edges`,
-                    data: {
-                        [this.columnFamilyTTL.id] : {
-                            value: "1",
-                        },
-                    },
-                }]));
+                await this.redisClient.setTTL("edge", `${firstNodeId}-${columnName}`);
             }
         }
 
@@ -310,14 +300,7 @@ export class NodeHandler {
                 requests.push(this.yildiz.cache.del(`gnbpf:identifier:${secondNodeId}`));
 
                 if (ttld) {
-                    requests.push(this.ttlTable.insert([{
-                        key: `${secondNodeId}-${columnName}_edges`,
-                        data: {
-                            [this.columnFamilyTTL.id] : {
-                                value: "1",
-                            },
-                        },
-                    }]));
+                    await this.redisClient.setTTL("edge", `${secondNodeId}-${columnName}`);
                 }
 
             } else {
@@ -356,14 +339,7 @@ export class NodeHandler {
                 }
 
                 if (ttld) {
-                    requests.push(this.ttlTable.insert([{
-                        key: key + "_popnodes",
-                        data: {
-                            [this.columnFamilyTTL.id] : {
-                                value: "1",
-                            },
-                        },
-                    }]));
+                    await this.redisClient.setTTL("popnode", key);
                 }
             }
             this.metrics.inc("edge_created_rightNode");
@@ -642,22 +618,17 @@ export class NodeHandler {
                 },
             },
         };
-        const valTTL = {
-            key: `${key}_nodes`,
-            data: {
-                [this.columnFamilyTTL.id] : {
-                    value: "1",
-                },
-            },
-        };
 
-        const requests = [this.nodeTable.insert([val])];
         if (ttld) {
-            requests.push(this.ttlTable.insert([valTTL]));
+            try {
+                await this.redisClient.setTTL("node", key);
+            } catch (error) {
+                debug(error);
+            }
         }
 
         try {
-            await Bluebird.all(requests);
+            await this.nodeTable.insert([val]);
         } catch (error) {
             return error;
         }
@@ -797,14 +768,15 @@ export class NodeHandler {
 
         this.yildiz.metrics.set("get_cache_by_identifier", Date.now() - start);
 
-        const result = cache && cache.value || null;
+        await this.redisClient.setTTL("cache", identifier + "");
 
+        const result = cache && cache.value || null;
         return result;
     }
 
     public async createCache(cache?: YildizSingleSchema) {
 
-        if (!cache) {
+        if (!cache || !cache.identifier) {
             return;
         }
 
@@ -812,15 +784,6 @@ export class NodeHandler {
 
         const row = this.cacheTable.row(cache.identifier + "");
         const cfName = this.columnFamilyCache.id;
-
-        const rowTTL = this.ttlTable.row(`${cache.identifier}_caches`);
-        const cfNameTTL = this.columnFamilyTTL.id;
-        const saveDataTTL = {
-            [cfNameTTL]: {
-                value: "1",
-            },
-        };
-
         const saveData = {
             [cfName]: {
                 value: JSON.stringify(cache),
@@ -828,8 +791,8 @@ export class NodeHandler {
         };
 
         await Bluebird.all([
+            this.redisClient.setTTL("cache", cache.identifier + ""),
             row.save(saveData),
-            rowTTL.save(saveDataTTL),
         ]);
 
         this.yildiz.metrics.set("save_cache_bigtable", Date.now() - start);

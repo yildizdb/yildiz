@@ -1,4 +1,3 @@
-import moment from "moment";
 import Debug from "debug";
 import Bluebird from "bluebird";
 
@@ -6,9 +5,9 @@ import Bigtable from "@google-cloud/bigtable";
 
 import { Yildiz } from "../Yildiz";
 import { Metadata } from "./Metadata";
-import { ServiceConfig, TTLConfig } from "../../interfaces/ServiceConfig";
+import { TTLConfig } from "../../interfaces/ServiceConfig";
 import { Metrics } from "../metrics/Metrics";
-import { YildizSingleSchema } from "../../interfaces/Yildiz";
+import { RedisClient } from "../cache/RedisClient";
 
 const debug = Debug("yildiz:lifetime");
 
@@ -22,8 +21,8 @@ export class Lifetime {
     private configTTL: TTLConfig;
     private metadata: Metadata;
     private metrics: Metrics;
+    private redisClient: RedisClient;
 
-    private ttlTable: Bigtable.Table;
     private nodeTable: Bigtable.Table;
     private popnodeTable: Bigtable.Table;
     private cacheTable: Bigtable.Table;
@@ -39,7 +38,6 @@ export class Lifetime {
         this.yildiz = yildiz;
 
         const {
-            ttlTable,
             nodeTable,
             popnodeTable,
             cacheTable,
@@ -48,9 +46,9 @@ export class Lifetime {
 
         this.metadata = this.yildiz.metadata;
         this.metrics = this.yildiz.metrics;
+        this.redisClient = this.yildiz.redisClient;
 
         this.configTTL = this.yildiz.config.ttl;
-        this.ttlTable = ttlTable;
         this.nodeTable = nodeTable;
         this.popnodeTable = popnodeTable;
         this.cacheTable = cacheTable;
@@ -61,39 +59,8 @@ export class Lifetime {
 
     private getTTLIds(type: string): Bluebird<string[]> {
 
-        return new Bluebird((resolve, reject) => {
-
-            if (!type) {
-                resolve([]);
-            }
-
-            const results: string[] = [];
-
-            const lifetime = type === "caches" ? CACHE_TABLE_TTL : this.lifeTimeInSec;
-
-            this.ttlTable.createReadStream({
-                filter: [{
-                    row: new RegExp(`.*${type}$`),
-                },
-                {
-                    time: {
-                        start: moment().subtract(1, "year").toDate(),
-                        end: moment().subtract(lifetime, "seconds").toDate(),
-                    },
-                }],
-            })
-            .on("error", (error: Error) => {
-                reject(error);
-            })
-            .on("data", (result: YildizSingleSchema) => {
-                if (result.id) {
-                    results.push(result.id as string);
-                }
-            })
-            .on("end", () => {
-                resolve(results);
-            });
-        });
+        const ttlTimestamp = Date.now() - (type === "cache" ? CACHE_TABLE_TTL : this.lifeTimeInSec);
+        return this.redisClient.getTTL(type, ttlTimestamp);
     }
 
     private deleteTable() {
@@ -104,19 +71,17 @@ export class Lifetime {
 
                 const metadataType = type + "s";
 
-                let cleanedKeys = keys;
                 let deletedCounts = [];
 
-                // If it is not ttl, need to get the real key
-                if (type !== "ttl") {
-                    cleanedKeys = keys.map((keyRaw) => keyRaw.split("_")[0]);
+                if (!keys || !keys.length) {
+                    return { success: 0 };
                 }
 
                 // If it is not edge, just delete the row from the table
                 if (type !== "edge") {
 
                     deletedCounts = await Bluebird.map(
-                        cleanedKeys,
+                        keys,
                         (key) => {
 
                             if (type === "node") {
@@ -129,10 +94,6 @@ export class Lifetime {
 
                             if (type === "cache") {
                                 return this.cacheTable.row(key).delete();
-                            }
-
-                            if (type === "ttl") {
-                                return this.ttlTable.row(key).delete();
                             }
                         },
                         {
@@ -147,7 +108,7 @@ export class Lifetime {
                     const cfName = this.columnFamilyNode.id;
 
                     deletedCounts = await Bluebird.map(
-                        cleanedKeys,
+                        keys,
                         (key) => {
                             const nodeKey = key.split("-")[0];
                             const columnKey = key.split("-")[1];
@@ -179,7 +140,6 @@ export class Lifetime {
             node: remove("node"),
             popnode: remove("popnode"),
             edge: remove("edge"),
-            ttl: remove("ttl"),
             cache: remove("cache"),
         };
     }
@@ -231,30 +191,30 @@ export class Lifetime {
 
         const deleteTTLOrigin = this.deleteTable();
 
-        const results = [];
-
-        // Remove Nodes and TTLs
+        // Get all the keys that need to be deleted
         const [ nodeKeys, edgeKeys, popnodeKeys, cacheKeys] =
             await Bluebird.all([
-                this.getTTLIds("nodes"),
-                this.getTTLIds("edges"),
-                this.getTTLIds("popnodes"),
-                this.getTTLIds("caches"),
+                this.getTTLIds("node"),
+                this.getTTLIds("edge"),
+                this.getTTLIds("popnode"),
+                this.getTTLIds("cache"),
             ]);
 
-        results.push(...(await Bluebird.all([
+        // Delete all the keys that are needed to be deleted
+        const results = await Bluebird.all([
             deleteTTLOrigin.node(nodeKeys),
             deleteTTLOrigin.edge(edgeKeys),
             deleteTTLOrigin.popnode(popnodeKeys),
             deleteTTLOrigin.cache(cacheKeys),
-        ])));
+        ]);
 
-        const ttlKeys = nodeKeys
-            .concat(edgeKeys ? edgeKeys : [])
-            .concat(popnodeKeys ? popnodeKeys : [])
-            .concat(cacheKeys ? cacheKeys : []);
-
-        results.push(await deleteTTLOrigin.ttl(ttlKeys));
+        // Delete the keys in redis
+        await Bluebird.all([
+            this.redisClient.clearTTL("node", nodeKeys),
+            this.redisClient.clearTTL("edge", edgeKeys),
+            this.redisClient.clearTTL("popnode", popnodeKeys),
+            this.redisClient.clearTTL("cache", cacheKeys),
+        ]);
 
         return {
             rowCount: results.map((n) => n.success).reduce((a, b) => a + b, 0),

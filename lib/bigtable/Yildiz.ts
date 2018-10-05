@@ -30,12 +30,12 @@ export class Yildiz {
     public fetchJob!: FetchJob;
     public models!: YildizModel;
     public cache!: InMemory;
+    public redisClient!: RedisClient;
 
     private prefix: string;
     private translator: Translator;
     private bigtable!: Bigtable;
     private ttlJob!: Lifetime;
-    private redisClient!: RedisClient;
 
     constructor(prefix: string = "kn", config: ServiceConfig) {
 
@@ -102,7 +102,7 @@ export class Yildiz {
         this.metrics = new Metrics(this.prefix);
         this.cache = new InMemory(this.config, this.metrics);
         this.metadata = new Metadata(this);
-        this.redisClient = new RedisClient(this.config, this.metrics);
+        this.redisClient = new RedisClient(this.config, this.metrics, this.prefix);
 
         try {
             await this.metadata.init();
@@ -300,7 +300,7 @@ export class Yildiz {
             debug("fetch job configuration missing.");
         }
 
-        if (this.config.lookupCache && typeof this.config.fetchJob === "object") {
+        if (this.config.lookupCache && typeof this.config.lookupCache === "object") {
             this.lookupCache.init();
         } else {
             debug("lookup cache job configuration missing.");
