@@ -33,9 +33,11 @@ export class NodeHandler {
     private nodeTable: Bigtable.Table;
     private popnodeTable: Bigtable.Table;
     private cacheTable: Bigtable.Table;
+    private ttlTable: Bigtable.Table;
     private columnFamilyNode: Bigtable.Family;
     private columnFamilyPopnode: Bigtable.Family;
     private columnFamilyCache: Bigtable.Family;
+    private columnFamilyTTL: Bigtable.Family;
 
     constructor(yildiz: Yildiz) {
 
@@ -50,20 +52,24 @@ export class NodeHandler {
             nodeTable,
             popnodeTable,
             cacheTable,
+            ttlTable,
             columnFamilyNode,
             columnFamilyPopnode,
             columnFamilyCache,
+            columnFamilyTTL,
         } = this.yildiz.models;
 
         // Tables
         this.nodeTable = nodeTable;
         this.popnodeTable = popnodeTable;
         this.cacheTable = cacheTable;
+        this.ttlTable = ttlTable;
 
         // Column Families
         this.columnFamilyNode = columnFamilyNode;
         this.columnFamilyPopnode = columnFamilyPopnode;
         this.columnFamilyCache = columnFamilyCache;
+        this.columnFamilyTTL = columnFamilyTTL;
     }
 
     private getParsedValue(value: string) {
@@ -77,6 +83,19 @@ export class NodeHandler {
         }
 
         return result;
+    }
+
+    private setTTL(type: string, identifier: string) {
+        const ttlKey = `ttl#${type}#${Date.now()}`;
+        const ttlInsert = {
+            key: ttlKey,
+            data: {
+                [this.columnFamilyTTL.id] : {
+                    [identifier]: "true",
+                },
+            },
+        };
+        return this.ttlTable.insert([ttlInsert]);
     }
 
     private async getRow(identifier: string | number, table: any, cFName: string): Promise<YildizSingleSchema | null> {
@@ -201,7 +220,8 @@ export class NodeHandler {
             } catch (error) {
                 if (!error.message.startsWith("Unknown row")) {
                     debug("unable to get leftNode", error);
-                }            }
+                }
+            }
         }
 
         if (!result.id.length) {
@@ -271,7 +291,7 @@ export class NodeHandler {
             this.metrics.inc("edge_created_leftNode");
 
             if (ttld) {
-                await this.redisClient.setTTL("edge", `${firstNodeId}-${columnName}`);
+                requests.push(this.setTTL("node", leftNodeId));
             }
         }
 
@@ -300,7 +320,7 @@ export class NodeHandler {
                 requests.push(this.yildiz.cache.del(`gnbpf:identifier:${secondNodeId}`));
 
                 if (ttld) {
-                    await this.redisClient.setTTL("edge", `${secondNodeId}-${columnName}`);
+                    requests.push(this.setTTL("node", rightNodeId));
                 }
 
             } else {
@@ -308,8 +328,8 @@ export class NodeHandler {
 
                 edgeTime = edgeTime || Date.now();
 
-                const key = `${firstNodeId}#${secondNodeId}${depthMode ? "" : "#" + relation}`;
-                const row = this.popnodeTable.row(key);
+                const popnodeKey = `${firstNodeId}#${secondNodeId}${depthMode ? "" : "#" + relation}`;
+                const row = this.popnodeTable.row(popnodeKey);
                 const column = depthMode ? "depth" : "data";
 
                 // If depthmode, we need to call increment and save the edgeTime with two calls
@@ -328,7 +348,7 @@ export class NodeHandler {
                 // Otherwise we just need to run insertion for both columns
                 } else {
                     requests.push(this.popnodeTable.insert([{
-                        key,
+                        key: popnodeKey,
                         data: {
                             [this.columnFamilyPopnode.id] : {
                                 [column]: val,
@@ -339,7 +359,7 @@ export class NodeHandler {
                 }
 
                 if (ttld) {
-                    await this.redisClient.setTTL("popnode", key);
+                    requests.push(this.setTTL("popnode", popnodeKey));
                 }
             }
             this.metrics.inc("edge_created_rightNode");
@@ -608,6 +628,8 @@ export class NodeHandler {
         const ttldVal = ttld + "";
         const key = identifier + "";
 
+        const insertPromises = [];
+
         const val = {
             key,
             data: {
@@ -619,16 +641,14 @@ export class NodeHandler {
             },
         };
 
+        insertPromises.push(this.nodeTable.insert([val]));
+
         if (ttld) {
-            try {
-                await this.redisClient.setTTL("node", key);
-            } catch (error) {
-                debug(error);
-            }
+            insertPromises.push(this.setTTL("node", key));
         }
 
         try {
-            await this.nodeTable.insert([val]);
+            await Promise.all(insertPromises);
         } catch (error) {
             return error;
         }
@@ -768,7 +788,7 @@ export class NodeHandler {
 
         this.yildiz.metrics.set("get_cache_by_identifier", Date.now() - start);
 
-        await this.redisClient.setTTL("cache", identifier + "");
+        await this.setTTL("cache", identifier + "");
 
         const result = cache && cache.value || null;
         return result;
@@ -791,7 +811,7 @@ export class NodeHandler {
         };
 
         await Bluebird.all([
-            this.redisClient.setTTL("cache", cache.identifier + ""),
+            this.setTTL("cache", cache.identifier + ""),
             row.save(saveData),
         ]);
 

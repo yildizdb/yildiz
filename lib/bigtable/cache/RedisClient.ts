@@ -141,29 +141,6 @@ export class RedisClient {
     return this.redis.zadd(`${this.prefix}:${CACHEREFRESH_SET}`, ...params);
   }
 
-  public setTTL(type: string, keys: string | string[]) {
-
-    if (!keys || !keys.length) {
-      return;
-    }
-
-    if (this.redis.status !== "ready") {
-      throw new Error(NOT_CONNECTED);
-    }
-
-    keys = !Array.isArray(keys) ? [keys] : keys;
-
-    const timestamp = Date.now();
-
-    const params: Array<[number, string]> = [];
-
-    keys.map((key: string) => {
-      params.push([timestamp, key]);
-    });
-
-    return this.redis.zadd(`${this.prefix}:${type}:${TTL_SET}`, ...params);
-  }
-
   public setExistence(data: YildizSingleSchema | YildizSingleSchema[]) {
 
     if (this.redis.status !== "ready") {
@@ -219,16 +196,6 @@ export class RedisClient {
       .zrangebyscore(`${this.prefix}:${CACHEREFRESH_SET}`, 0, lastRefresh, "LIMIT", 0, limit);
   }
 
-  public getTTL(type: string, lastAccess: number | string) {
-
-    if (this.redis.status !== "ready") {
-      throw new Error(NOT_CONNECTED);
-    }
-
-    return this.redis
-      .zrangebyscore(`${this.prefix}:${type}:${TTL_SET}`, 0, lastAccess);
-  }
-
   public async mgetExistence(keys: string | string[]) {
 
     if (this.redis.status !== "ready") {
@@ -280,21 +247,6 @@ export class RedisClient {
     members = !Array.isArray(members) ? [members] : members;
 
     return this.redis.zrem(`${this.prefix}:${CACHEREFRESH_SET}`, ...members);
-  }
-
-  public clearTTL(type: string, keys: string | string[]) {
-
-    if (!keys || !keys.length) {
-      return;
-    }
-
-    if (this.redis.status !== "ready") {
-      throw new Error(NOT_CONNECTED);
-    }
-
-    keys = !Array.isArray(keys) ? [keys] : keys;
-
-    return this.redis.zrem(`${this.prefix}:${type}:${TTL_SET}`, ...keys);
   }
 
   public async close() {

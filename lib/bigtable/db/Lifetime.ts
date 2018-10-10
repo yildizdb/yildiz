@@ -1,19 +1,25 @@
 import Debug from "debug";
 import Bluebird from "bluebird";
 
-import Bigtable from "@google-cloud/bigtable";
+import Bigtable, { StreamParam } from "@google-cloud/bigtable";
 
 import { Yildiz } from "../Yildiz";
 import { Metadata } from "./Metadata";
 import { TTLConfig } from "../../interfaces/ServiceConfig";
 import { Metrics } from "../metrics/Metrics";
 import { RedisClient } from "../cache/RedisClient";
+import { GenericObject } from "../../interfaces/Generic";
 
 const debug = Debug("yildiz:lifetime");
 
 const CACHE_TABLE_TTL = 175;
 const DEFAULT_LIFETIME_IN_SEC = 86400;
 const DEFAULT_JOB_INTERVAL_IN_SEC = 120;
+
+export interface ExpiredTTL {
+    ttlKey: string;
+    cellQualifiers: string[];
+  }
 
 export class Lifetime {
 
@@ -26,7 +32,9 @@ export class Lifetime {
     private nodeTable: Bigtable.Table;
     private popnodeTable: Bigtable.Table;
     private cacheTable: Bigtable.Table;
+    private ttlTable: Bigtable.Table;
     private columnFamilyNode: Bigtable.Family;
+    private columnFamilyTTL: Bigtable.Family;
 
     private tov!: NodeJS.Timer | number;
 
@@ -42,6 +50,8 @@ export class Lifetime {
             popnodeTable,
             cacheTable,
             columnFamilyNode,
+            ttlTable,
+            columnFamilyTTL,
         } = this.yildiz.models;
 
         this.metadata = this.yildiz.metadata;
@@ -52,15 +62,58 @@ export class Lifetime {
         this.nodeTable = nodeTable;
         this.popnodeTable = popnodeTable;
         this.cacheTable = cacheTable;
+        this.ttlTable = ttlTable;
 
         this.columnFamilyNode = columnFamilyNode;
+        this.columnFamilyTTL = columnFamilyTTL;
         this.promiseConcurrency = this.yildiz.config.promiseConcurrency || 1000;
     }
 
-    private getTTLIds(type: string): Bluebird<string[]> {
+    private async streamTTL(options: StreamParam, etl: (result: Bigtable.GenericObject) => any) {
+        return new Bluebird((resolve, reject) => {
 
-        const ttlTimestamp = Date.now() - (type === "cache" ? CACHE_TABLE_TTL : this.lifeTimeInSec);
-        return this.redisClient.getTTL(type, ttlTimestamp);
+        const results: GenericObject[] = [];
+
+        this.ttlTable.createReadStream(options)
+            .on("error", (error: Error) => {
+                reject(error);
+            })
+            .on("data", (result: GenericObject) => {
+                if (etl) {
+                    if (etl(result)) {
+                        results.push(etl(result));
+                    }
+                } else {
+                    results.push(result);
+                }
+            })
+            .on("end", () => {
+                resolve(results);
+            });
+        });
+    }
+
+    private async getTTLIds(type: string) {
+
+        const currentTimestamp = Date.now();
+        const ranges = [];
+        const etl = (result: any) => ({
+          ttlKey: result.id,
+          cellQualifiers: Object.keys(result.data[this.columnFamilyTTL.id]),
+        });
+
+        const options: StreamParam = {
+          ranges: [{
+              start: `ttl#${type}#0`,
+              end: `ttl#${type}#${currentTimestamp}`,
+          }],
+          limit: this.promiseConcurrency,
+        };
+
+        const expiredTTLs = await this.streamTTL(options, etl);
+        debug(`Range scan calls takes ${Date.now() - currentTimestamp} ms`);
+
+        return expiredTTLs;
     }
 
     private deleteTable() {
