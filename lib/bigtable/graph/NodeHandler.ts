@@ -291,7 +291,7 @@ export class NodeHandler {
             this.metrics.inc("edge_created_leftNode");
 
             if (ttld) {
-                requests.push(this.setTTL("node", leftNodeId));
+                requests.push(this.setTTL("edge", `${leftNodeId}:${columnName}`));
             }
         }
 
@@ -320,7 +320,7 @@ export class NodeHandler {
                 requests.push(this.yildiz.cache.del(`gnbpf:identifier:${secondNodeId}`));
 
                 if (ttld) {
-                    requests.push(this.setTTL("node", rightNodeId));
+                    requests.push(this.setTTL("edge", `${rightNodeId}:${columnName}`));
                 }
 
             } else {

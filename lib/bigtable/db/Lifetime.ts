@@ -69,27 +69,28 @@ export class Lifetime {
         this.promiseConcurrency = this.yildiz.config.promiseConcurrency || 1000;
     }
 
-    private async streamTTL(options: StreamParam, etl: (result: Bigtable.GenericObject) => any) {
+    private streamTTL(options: StreamParam, etl: (result: Bigtable.GenericObject) => any): Bluebird<any[]> {
+
         return new Bluebird((resolve, reject) => {
 
-        const results: GenericObject[] = [];
+            const results: any[] = [];
 
-        this.ttlTable.createReadStream(options)
-            .on("error", (error: Error) => {
-                reject(error);
-            })
-            .on("data", (result: GenericObject) => {
-                if (etl) {
-                    if (etl(result)) {
-                        results.push(etl(result));
+            this.ttlTable.createReadStream(options)
+                .on("error", (error: Error) => {
+                    reject(error);
+                })
+                .on("data", (result: GenericObject) => {
+                    if (etl) {
+                        if (etl(result)) {
+                            results.push(etl(result));
+                        }
+                    } else {
+                        results.push(result);
                     }
-                } else {
-                    results.push(result);
-                }
-            })
-            .on("end", () => {
-                resolve(results);
-            });
+                })
+                .on("end", () => {
+                    resolve(results);
+                });
         });
     }
 
@@ -116,76 +117,83 @@ export class Lifetime {
         return expiredTTLs;
     }
 
+    private getCellQualifiers(expiredTTLs: ExpiredTTL[]) {
+
+        return ([] as string[])
+            .concat(
+                ...expiredTTLs
+                    .map((expiredTTL: ExpiredTTL) => expiredTTL.cellQualifiers),
+            );
+    }
+
+    private getTTLKeys(expiredTTLs: ExpiredTTL[]) {
+
+        return ([] as string[])
+            .concat(
+                ...expiredTTLs
+                    .map((expiredTTL: ExpiredTTL) => expiredTTL.ttlKey),
+            );
+    }
+
     private deleteTable() {
 
         const remove = (type: string) => {
 
             return async (keys: string[]) => {
 
-                const metadataType = type + "s";
-
-                let deletedCounts = [];
-
                 if (!keys || !keys.length) {
                     return { success: 0 };
                 }
 
-                // If it is not edge, just delete the row from the table
-                if (type !== "edge") {
+                let table: Bigtable.Table | null = null;
+                let family: string | null = null;
 
-                    deletedCounts = await Bluebird.map(
-                        keys,
-                        (key) => {
-
-                            if (type === "node") {
-                                return this.nodeTable.row(key).delete();
-                            }
-
-                            if (type === "popnode") {
-                                return this.popnodeTable.row(key).delete();
-                            }
-
-                            if (type === "cache") {
-                                return this.cacheTable.row(key).delete();
-                            }
-                        },
-                        {
-                            concurrency: this.promiseConcurrency,
-                        },
-                    );
+                switch (type) {
+                    case "node":
+                        table = this.nodeTable;
+                        break;
+                    case "edge":
+                        table = this.nodeTable;
+                        family = this.columnFamilyNode.id;
+                        break;
+                    case "popnode":
+                        table = this.popnodeTable;
+                        break;
+                    case "cache":
+                        table = this.cacheTable;
+                        break;
+                    case "ttl":
+                        table = this.ttlTable;
+                        break;
                 }
 
-                // If it is edge, need to get the nodeKey and remove the cell on the node table
-                if (type === "edge") {
-
-                    const cfName = this.columnFamilyNode.id;
-
-                    deletedCounts = await Bluebird.map(
-                        keys,
-                        (key) => {
-                            const nodeKey = key.split("-")[0];
-                            const columnKey = key.split("-")[1];
-
-                            return this.nodeTable.row(nodeKey).deleteCells([
-                                `${cfName}:${columnKey}`,
-                            ]);
-                        },
-                        {
-                            concurrency: this.promiseConcurrency,
-                        },
-                    );
-
+                if (!table) {
+                    return { success: 0 };
                 }
 
-                if (deletedCounts.length) {
-                    this.metrics.inc(`ttl_${type}_removes`, deletedCounts.length);
-                }
+                const mutateRules = type === "edges" ?
+                    keys
+                        .map((key: string) => ({
+                            method: "delete",
+                            key: key.split(":")[0],
+                            data: [ `${family}:${key.split(":")[1]}` ],
+                        }))
+                    :
+                    keys
+                        .map((key: string) => ({
+                            method: "delete",
+                            key,
+                        }));
+
+                await table.mutate(mutateRules);
+
+                this.metrics.inc(`ttl_${type}_removes`, keys.length);
 
                 if (this.metadata) {
-                    this.metadata.decreaseCount(metadataType, deletedCounts.length);
+                    this.metadata.decreaseCount(type + "s", keys.length);
                 }
 
-                return { success: deletedCounts.length };
+                return { success: keys.length };
             };
         };
 
@@ -194,6 +202,7 @@ export class Lifetime {
             popnode: remove("popnode"),
             edge: remove("edge"),
             cache: remove("cache"),
+            ttl: remove("ttl"),
         };
     }
 
@@ -245,13 +254,18 @@ export class Lifetime {
         const deleteTTLOrigin = this.deleteTable();
 
         // Get all the keys that need to be deleted
-        const [ nodeKeys, edgeKeys, popnodeKeys, cacheKeys] =
+        const [ nodeTTLKeys, edgeTTLKeys, popnodeTTLKeys, cacheTTLKeys] =
             await Bluebird.all([
                 this.getTTLIds("node"),
                 this.getTTLIds("edge"),
                 this.getTTLIds("popnode"),
                 this.getTTLIds("cache"),
             ]);
+
+        const nodeKeys = this.getCellQualifiers(nodeTTLKeys);
+        const edgeKeys = this.getCellQualifiers(edgeTTLKeys);
+        const popnodeKeys = this.getCellQualifiers(popnodeTTLKeys);
+        const cacheKeys = this.getCellQualifiers(cacheTTLKeys);
 
         // Delete all the keys that are needed to be deleted
         const results = await Bluebird.all([
@@ -261,13 +275,14 @@ export class Lifetime {
             deleteTTLOrigin.cache(cacheKeys),
         ]);
 
-        // Delete the keys in redis
-        await Bluebird.all([
-            this.redisClient.clearTTL("node", nodeKeys),
-            this.redisClient.clearTTL("edge", edgeKeys),
-            this.redisClient.clearTTL("popnode", popnodeKeys),
-            this.redisClient.clearTTL("cache", cacheKeys),
-        ]);
+        const ttlKeys = ([] as string[]).concat(
+            this.getTTLKeys(nodeTTLKeys),
+            this.getTTLKeys(edgeTTLKeys),
+            this.getTTLKeys(popnodeTTLKeys),
+            this.getTTLKeys(cacheTTLKeys),
+        );
+
+        await deleteTTLOrigin.ttl(ttlKeys);
 
         return {
             rowCount: results.map((n) => n.success).reduce((a, b) => a + b, 0),
