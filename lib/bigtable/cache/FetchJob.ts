@@ -82,7 +82,9 @@ export class FetchJob {
 
     // Reset the job if the keys need to be cached
     if (!keys || !keys.length) {
+      this.metrics.inc("fetchJob_runs");
       this.metrics.inc("fetchJob_duration", Date.now() - startJob);
+      debug(Date.now() - startJob);
       return this.resetJob();
     }
 

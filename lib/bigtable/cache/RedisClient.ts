@@ -185,7 +185,7 @@ export class RedisClient {
       throw new Error(NOT_CONNECTED);
     }
 
-    const count  = await this.redis.zcount(CACHEREFRESH_SET, "-inf", "+inf");
+    const count  = await this.redis.zcount(`${this.prefix}:${LASTACCESS_SET}`, "-inf", "+inf");
 
     if (count === 0) {
       return this.redis
