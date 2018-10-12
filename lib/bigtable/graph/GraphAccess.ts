@@ -289,6 +289,37 @@ export class GraphAccess {
         return result;
     }
 
+    public async bumpCacheIfExists(values = []) {
+
+        if (!Array.isArray(values)) {
+            throw new Error("values must be an array");
+        }
+
+        if (!values.length) {
+            throw new Error("values should not be empty");
+        }
+
+        const start = Date.now();
+
+        const nodeIdentifiers = values.map((value) => strToInt(value) + "");
+        const {cache, nocache} = await this.lookupCache.classifyExistence(nodeIdentifiers);
+
+        this.metrics.inc("resolvedNodes_cache_hits", cache.length);
+        this.metrics.inc("resolvedNodes_cache_miss", nocache.length);
+
+        if (!cache.length) {
+            return;
+        }
+
+        return await Bluebird.map(
+            cache,
+            (identifier: string) => this.nodeHandler.bumpCacheByIdentifier(identifier),
+            {
+                concurrency: this.promiseConcurrency,
+            },
+        );
+    }
+
     public async edgeInfoForNodesRelatingToTranslateValues(values = []) {
 
         if (!Array.isArray(values)) {

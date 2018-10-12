@@ -9,6 +9,7 @@ export interface TTLConfig {
   active: boolean;
   lifeTimeInSec: number;
   jobIntervalInSec: number;
+  cacheLifeTimeInSec?: number;
 }
 
 export interface DatabaseConfig {

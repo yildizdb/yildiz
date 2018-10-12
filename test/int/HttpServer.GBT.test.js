@@ -699,8 +699,8 @@ describe("HttpServer INT", () => {
     });
 
     it("should be able to await next ttl job execution", function(done){
-        this.timeout(20005);
-        setTimeout(done, 20000);
+        this.timeout(9005);
+        setTimeout(done, 9000);
     });
 
     it("should count zero for nodes after job running", async() => {
@@ -838,7 +838,7 @@ describe("HttpServer INT", () => {
 const reqProm = (path = "/", options = {}, curl = false, description = "Not described", _prefix = undefined) => {
 
     options.url = `http://localhost:${port}${path}`;
-    if (!options.headers) {
+    if (!options.headers) { 
         options.headers = {};
     }
     

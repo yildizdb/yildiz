@@ -29,6 +29,8 @@ export class NodeHandler {
     private metrics: Metrics;
     private dbConfig: DatabaseConfig;
     private redisClient: RedisClient;
+    private lifetime: number;
+    private cacheLifetime: number;
 
     private nodeTable: Bigtable.Table;
     private popnodeTable: Bigtable.Table;
@@ -70,6 +72,9 @@ export class NodeHandler {
         this.columnFamilyPopnode = columnFamilyPopnode;
         this.columnFamilyCache = columnFamilyCache;
         this.columnFamilyTTL = columnFamilyTTL;
+
+        this.lifetime = this.yildiz.config.ttl.lifeTimeInSec || 180;
+        this.cacheLifetime = this.yildiz.config.ttl.cacheLifeTimeInSec || 120;
     }
 
     private getParsedValue(value: string) {
@@ -85,8 +90,8 @@ export class NodeHandler {
         return result;
     }
 
-    private setTTL(type: string, identifier: string) {
-        const ttlKey = `ttl#${type}#${Date.now()}`;
+    private setTTL(type: string, identifier: string, ttlInSec?: number) {
+        const ttlKey = `ttl#${type}#${Date.now() + ((ttlInSec || this.lifetime) * 1000)}`;
         const ttlInsert = {
             key: ttlKey,
             data: {
@@ -780,6 +785,19 @@ export class NodeHandler {
         return await this.metadata.getCount("nodes");
     }
 
+    public async bumpCacheByIdentifier(identifier: string) {
+
+        const key = identifier + "";
+        const cacheExists = await this.cacheTable.row(key).exists();
+        const exists = cacheExists && cacheExists[0];
+
+        if (!exists) {
+            return;
+        }
+
+        await this.setTTL("caches", identifier + "", this.cacheLifetime);
+    }
+
     public async getCacheByIdentifier(identifier: string | number) {
 
         const start = Date.now();
@@ -788,7 +806,7 @@ export class NodeHandler {
 
         this.yildiz.metrics.set("get_cache_by_identifier", Date.now() - start);
 
-        await this.setTTL("caches", identifier + "");
+        await this.setTTL("caches", identifier + "", this.cacheLifetime);
 
         const result = cache && cache.value || null;
         return result;
@@ -811,7 +829,7 @@ export class NodeHandler {
         };
 
         await Bluebird.all([
-            this.setTTL("caches", cache.identifier + ""),
+            this.setTTL("caches", cache.identifier + "", this.cacheLifetime),
             row.save(saveData),
         ]);
 

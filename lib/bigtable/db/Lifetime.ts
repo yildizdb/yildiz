@@ -12,8 +12,6 @@ import { GenericObject } from "../../interfaces/Generic";
 
 const debug = Debug("yildiz:lifetime");
 
-const CACHE_TABLE_TTL = 175;
-const DEFAULT_LIFETIME_IN_SEC = 86400;
 const DEFAULT_JOB_INTERVAL_IN_SEC = 120;
 
 export interface ExpiredTTL {
@@ -97,7 +95,6 @@ export class Lifetime {
     private async getTTLIds(type: string) {
 
         const currentTimestamp = Date.now();
-        const ranges = [];
         const etl = (result: any) => ({
           ttlKey: result.id,
           cellQualifiers: Object.keys(result.data[this.columnFamilyTTL.id]),
@@ -210,7 +207,6 @@ export class Lifetime {
 
         const {
             active = false,
-            lifeTimeInSec = DEFAULT_LIFETIME_IN_SEC,
             jobIntervalInSec = DEFAULT_JOB_INTERVAL_IN_SEC,
         } = this.configTTL || {};
 
@@ -218,10 +214,7 @@ export class Lifetime {
             return debug("ttl job deactivated.");
         }
 
-        this.lifeTimeInSec = lifeTimeInSec;
-
-        debug(`ttl job active running every ${jobIntervalInSec} sec,` +
-            `deleting all ttld flags after ${lifeTimeInSec} sec.`);
+        debug(`ttl job active running every ${jobIntervalInSec} sec`);
 
         this.runJob(jobIntervalInSec);
     }

@@ -88,7 +88,7 @@ export class FetchJob {
     }
 
     try {
-      await this.graphAccess.edgeInfoForNodesRelatingToTranslateValues(keys);
+      await this.graphAccess.bumpCacheIfExists(keys);
     } catch (error) {
       debug("error occurred while caching", error.message);
     }
