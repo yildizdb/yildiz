@@ -60,7 +60,8 @@ export class FetchJob {
     this.tov = setTimeout(async () => {
 
       try {
-        await this.jobAction();
+        const startJob = Date.now();
+        await this.jobAction(startJob);
       } catch (error) {
         debug("error while running job", error);
         this.resetJob();
@@ -69,7 +70,7 @@ export class FetchJob {
     }, this.fetchIntervalInSec * 1000);
   }
 
-  private async jobAction(): Promise<void> {
+  private async jobAction(startJob: number): Promise<void> {
 
     let keys = null;
 
@@ -79,10 +80,9 @@ export class FetchJob {
       debug("error occurred when getting keys", error.message);
     }
 
-    debug(keys);
-
     // Reset the job if the keys need to be cached
     if (!keys || !keys.length) {
+      this.metrics.inc("fetchJob_duration", Date.now() - startJob);
       return this.resetJob();
     }
 
@@ -92,7 +92,7 @@ export class FetchJob {
       debug("error occurred while caching", error.message);
     }
 
-    return await this.jobAction();
+    return await this.jobAction(startJob);
   }
 
   private async getKeysToBeCached() {

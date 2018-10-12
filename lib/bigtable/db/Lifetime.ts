@@ -252,6 +252,7 @@ export class Lifetime {
     private async job() {
 
         const deleteTTLOrigin = this.deleteTable();
+        const fetchStart = Date.now();
 
         // Get all the keys that need to be deleted
         const [ nodeTTLKeys, edgeTTLKeys, popnodeTTLKeys, cacheTTLKeys] =
@@ -267,6 +268,9 @@ export class Lifetime {
         const popnodeKeys = this.getCellQualifiers(popnodeTTLKeys);
         const cacheKeys = this.getCellQualifiers(cacheTTLKeys);
 
+        this.metrics.set("ttl_fetch_duration", Date.now() - fetchStart);
+
+        const executionStart = Date.now();
         // Delete all the keys that are needed to be deleted
         const results = await Bluebird.all([
             deleteTTLOrigin.node(nodeKeys),
@@ -283,6 +287,8 @@ export class Lifetime {
         );
 
         await deleteTTLOrigin.ttl(ttlKeys);
+
+        this.metrics.set("ttl_delete_execution_duration", Date.now() - executionStart);
 
         return {
             rowCount: results.map((n) => n.success).reduce((a, b) => a + b, 0),
