@@ -291,7 +291,7 @@ export class NodeHandler {
             this.metrics.inc("edge_created_leftNode");
 
             if (ttld) {
-                requests.push(this.setTTL("edge", `${leftNodeId}:${columnName}`));
+                requests.push(this.setTTL("edges", `${leftNodeId}:${columnName}`));
             }
         }
 
@@ -320,7 +320,7 @@ export class NodeHandler {
                 requests.push(this.yildiz.cache.del(`gnbpf:identifier:${secondNodeId}`));
 
                 if (ttld) {
-                    requests.push(this.setTTL("edge", `${rightNodeId}:${columnName}`));
+                    requests.push(this.setTTL("edges", `${rightNodeId}:${columnName}`));
                 }
 
             } else {
@@ -359,7 +359,7 @@ export class NodeHandler {
                 }
 
                 if (ttld) {
-                    requests.push(this.setTTL("popnode", popnodeKey));
+                    requests.push(this.setTTL("popnodes", popnodeKey));
                 }
             }
             this.metrics.inc("edge_created_rightNode");
@@ -644,7 +644,7 @@ export class NodeHandler {
         insertPromises.push(this.nodeTable.insert([val]));
 
         if (ttld) {
-            insertPromises.push(this.setTTL("node", key));
+            insertPromises.push(this.setTTL("nodes", key));
         }
 
         try {
@@ -788,7 +788,7 @@ export class NodeHandler {
 
         this.yildiz.metrics.set("get_cache_by_identifier", Date.now() - start);
 
-        await this.setTTL("cache", identifier + "");
+        await this.setTTL("caches", identifier + "");
 
         const result = cache && cache.value || null;
         return result;
@@ -811,7 +811,7 @@ export class NodeHandler {
         };
 
         await Bluebird.all([
-            this.setTTL("cache", cache.identifier + ""),
+            this.setTTL("caches", cache.identifier + ""),
             row.save(saveData),
         ]);
 

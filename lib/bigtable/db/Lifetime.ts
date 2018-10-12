@@ -149,20 +149,20 @@ export class Lifetime {
                 let family: string | null = null;
 
                 switch (type) {
-                    case "node":
+                    case "nodes":
                         table = this.nodeTable;
                         break;
-                    case "edge":
+                    case "edges":
                         table = this.nodeTable;
                         family = this.columnFamilyNode.id;
                         break;
-                    case "popnode":
+                    case "popnodes":
                         table = this.popnodeTable;
                         break;
-                    case "cache":
+                    case "caches":
                         table = this.cacheTable;
                         break;
-                    case "ttl":
+                    case "ttls":
                         table = this.ttlTable;
                         break;
                 }
@@ -190,7 +190,7 @@ export class Lifetime {
                 this.metrics.inc(`ttl_${type}_removes`, keys.length);
 
                 if (this.metadata) {
-                    this.metadata.decreaseCount(type + "s", keys.length);
+                    this.metadata.decreaseCount(type, keys.length);
                 }
 
                 return { success: keys.length };
@@ -198,11 +198,11 @@ export class Lifetime {
         };
 
         return {
-            node: remove("node"),
-            popnode: remove("popnode"),
-            edge: remove("edge"),
-            cache: remove("cache"),
-            ttl: remove("ttl"),
+            node: remove("nodes"),
+            popnode: remove("popnodes"),
+            edge: remove("edges"),
+            cache: remove("caches"),
+            ttl: remove("ttls"),
         };
     }
 
@@ -256,10 +256,10 @@ export class Lifetime {
         // Get all the keys that need to be deleted
         const [ nodeTTLKeys, edgeTTLKeys, popnodeTTLKeys, cacheTTLKeys] =
             await Bluebird.all([
-                this.getTTLIds("node"),
-                this.getTTLIds("edge"),
-                this.getTTLIds("popnode"),
-                this.getTTLIds("cache"),
+                this.getTTLIds("nodes"),
+                this.getTTLIds("edges"),
+                this.getTTLIds("popnodes"),
+                this.getTTLIds("caches"),
             ]);
 
         const nodeKeys = this.getCellQualifiers(nodeTTLKeys);

@@ -92,7 +92,7 @@ export class FetchJob {
       debug("error occurred while caching", error.message);
     }
 
-    return this.jobAction();
+    return await this.jobAction();
   }
 
   private async getKeysToBeCached() {
