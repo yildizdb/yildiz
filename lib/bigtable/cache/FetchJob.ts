@@ -84,7 +84,6 @@ export class FetchJob {
     if (!keys || !keys.length) {
       this.metrics.inc("fetchJob_runs");
       this.metrics.inc("fetchJob_duration", Date.now() - startJob);
-      debug(Date.now() - startJob);
       return this.resetJob();
     }
 
