@@ -15,6 +15,7 @@ import { DatabaseConfig } from "../../interfaces/ServiceConfig";
 import { GenericObject, AnyObject } from "../../interfaces/Generic";
 import { YildizSingleSchema } from "../../interfaces/Yildiz";
 import { EdgeCache } from "../../interfaces/Graph";
+import { RedisClient } from "../cache/RedisClient";
 
 const debug = Debug("yildiz:nodehandler");
 
@@ -27,15 +28,16 @@ export class NodeHandler {
     private metadata: Metadata;
     private metrics: Metrics;
     private dbConfig: DatabaseConfig;
+    private redisClient: RedisClient;
 
     private nodeTable: Bigtable.Table;
-    private ttlTable: Bigtable.Table;
     private popnodeTable: Bigtable.Table;
     private cacheTable: Bigtable.Table;
+    private ttlTable: Bigtable.Table;
     private columnFamilyNode: Bigtable.Family;
-    private columnFamilyTTL: Bigtable.Family;
     private columnFamilyPopnode: Bigtable.Family;
     private columnFamilyCache: Bigtable.Family;
+    private columnFamilyTTL: Bigtable.Family;
 
     constructor(yildiz: Yildiz) {
 
@@ -43,30 +45,31 @@ export class NodeHandler {
         this.metadata = this.yildiz.metadata;
         this.metrics = this.yildiz.metrics;
         this.dbConfig = this.yildiz.config.database;
+        this.redisClient = this.yildiz.redisClient;
 
         // Get the Tables and CFs
         const {
             nodeTable,
-            ttlTable,
             popnodeTable,
             cacheTable,
+            ttlTable,
             columnFamilyNode,
-            columnFamilyTTL,
             columnFamilyPopnode,
             columnFamilyCache,
+            columnFamilyTTL,
         } = this.yildiz.models;
 
         // Tables
         this.nodeTable = nodeTable;
-        this.ttlTable = ttlTable;
         this.popnodeTable = popnodeTable;
         this.cacheTable = cacheTable;
+        this.ttlTable = ttlTable;
 
         // Column Families
         this.columnFamilyNode = columnFamilyNode;
-        this.columnFamilyTTL = columnFamilyTTL;
         this.columnFamilyPopnode = columnFamilyPopnode;
         this.columnFamilyCache = columnFamilyCache;
+        this.columnFamilyTTL = columnFamilyTTL;
     }
 
     private getParsedValue(value: string) {
@@ -80,6 +83,19 @@ export class NodeHandler {
         }
 
         return result;
+    }
+
+    private setTTL(type: string, identifier: string) {
+        const ttlKey = `ttl#${type}#${Date.now()}`;
+        const ttlInsert = {
+            key: ttlKey,
+            data: {
+                [this.columnFamilyTTL.id] : {
+                    [identifier]: "true",
+                },
+            },
+        };
+        return this.ttlTable.insert([ttlInsert]);
     }
 
     private async getRow(identifier: string | number, table: any, cFName: string): Promise<YildizSingleSchema | null> {
@@ -204,7 +220,8 @@ export class NodeHandler {
             } catch (error) {
                 if (!error.message.startsWith("Unknown row")) {
                     debug("unable to get leftNode", error);
-                }            }
+                }
+            }
         }
 
         if (!result.id.length) {
@@ -274,14 +291,7 @@ export class NodeHandler {
             this.metrics.inc("edge_created_leftNode");
 
             if (ttld) {
-                requests.push(this.ttlTable.insert([{
-                    key: `${firstNodeId}-${columnName}_edges`,
-                    data: {
-                        [this.columnFamilyTTL.id] : {
-                            value: "1",
-                        },
-                    },
-                }]));
+                requests.push(this.setTTL("edges", `${leftNodeId}:${columnName}`));
             }
         }
 
@@ -310,14 +320,7 @@ export class NodeHandler {
                 requests.push(this.yildiz.cache.del(`gnbpf:identifier:${secondNodeId}`));
 
                 if (ttld) {
-                    requests.push(this.ttlTable.insert([{
-                        key: `${secondNodeId}-${columnName}_edges`,
-                        data: {
-                            [this.columnFamilyTTL.id] : {
-                                value: "1",
-                            },
-                        },
-                    }]));
+                    requests.push(this.setTTL("edges", `${rightNodeId}:${columnName}`));
                 }
 
             } else {
@@ -325,8 +328,8 @@ export class NodeHandler {
 
                 edgeTime = edgeTime || Date.now();
 
-                const key = `${firstNodeId}#${secondNodeId}${depthMode ? "" : "#" + relation}`;
-                const row = this.popnodeTable.row(key);
+                const popnodeKey = `${firstNodeId}#${secondNodeId}${depthMode ? "" : "#" + relation}`;
+                const row = this.popnodeTable.row(popnodeKey);
                 const column = depthMode ? "depth" : "data";
 
                 // If depthmode, we need to call increment and save the edgeTime with two calls
@@ -345,7 +348,7 @@ export class NodeHandler {
                 // Otherwise we just need to run insertion for both columns
                 } else {
                     requests.push(this.popnodeTable.insert([{
-                        key,
+                        key: popnodeKey,
                         data: {
                             [this.columnFamilyPopnode.id] : {
                                 [column]: val,
@@ -356,14 +359,7 @@ export class NodeHandler {
                 }
 
                 if (ttld) {
-                    requests.push(this.ttlTable.insert([{
-                        key: key + "_popnodes",
-                        data: {
-                            [this.columnFamilyTTL.id] : {
-                                value: "1",
-                            },
-                        },
-                    }]));
+                    requests.push(this.setTTL("popnodes", popnodeKey));
                 }
             }
             this.metrics.inc("edge_created_rightNode");
@@ -632,6 +628,8 @@ export class NodeHandler {
         const ttldVal = ttld + "";
         const key = identifier + "";
 
+        const insertPromises = [];
+
         const val = {
             key,
             data: {
@@ -642,22 +640,15 @@ export class NodeHandler {
                 },
             },
         };
-        const valTTL = {
-            key: `${key}_nodes`,
-            data: {
-                [this.columnFamilyTTL.id] : {
-                    value: "1",
-                },
-            },
-        };
 
-        const requests = [this.nodeTable.insert([val])];
+        insertPromises.push(this.nodeTable.insert([val]));
+
         if (ttld) {
-            requests.push(this.ttlTable.insert([valTTL]));
+            insertPromises.push(this.setTTL("nodes", key));
         }
 
         try {
-            await Bluebird.all(requests);
+            await Promise.all(insertPromises);
         } catch (error) {
             return error;
         }
@@ -797,14 +788,15 @@ export class NodeHandler {
 
         this.yildiz.metrics.set("get_cache_by_identifier", Date.now() - start);
 
-        const result = cache && cache.value || null;
+        await this.setTTL("caches", identifier + "");
 
+        const result = cache && cache.value || null;
         return result;
     }
 
     public async createCache(cache?: YildizSingleSchema) {
 
-        if (!cache) {
+        if (!cache || !cache.identifier) {
             return;
         }
 
@@ -812,15 +804,6 @@ export class NodeHandler {
 
         const row = this.cacheTable.row(cache.identifier + "");
         const cfName = this.columnFamilyCache.id;
-
-        const rowTTL = this.ttlTable.row(`${cache.identifier}_caches`);
-        const cfNameTTL = this.columnFamilyTTL.id;
-        const saveDataTTL = {
-            [cfNameTTL]: {
-                value: "1",
-            },
-        };
-
         const saveData = {
             [cfName]: {
                 value: JSON.stringify(cache),
@@ -828,8 +811,8 @@ export class NodeHandler {
         };
 
         await Bluebird.all([
+            this.setTTL("caches", cache.identifier + ""),
             row.save(saveData),
-            rowTTL.save(saveDataTTL),
         ]);
 
         this.yildiz.metrics.set("save_cache_bigtable", Date.now() - start);

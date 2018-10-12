@@ -13,6 +13,7 @@ const EXIST_KEY = "exist";
 const RIGHTNODE_KEY = "rn";
 const CACHEREFRESH_SET = "cr_set";
 const LASTACCESS_SET = "la_set";
+const TTL_SET = "ttl_set";
 
 export class RedisClient {
 
@@ -22,14 +23,16 @@ export class RedisClient {
   private metrics: Metrics;
   private redis!: Redis;
   private timeoutReadyInMs: number;
+  private prefix: string;
 
-  constructor(config: ServiceConfig, metrics: Metrics) {
+  constructor(config: ServiceConfig, metrics: Metrics, prefix: string) {
 
     this.config = config;
     this.redisConfig = this.config.redis;
     this.ttl = this.config.redis.ttl || 180;
     this.timeoutReadyInMs = (this.config.redis.timeoutReady || 1) * 1000;
     this.metrics = metrics;
+    this.prefix = prefix;
   }
 
   public connect() {
@@ -116,7 +119,7 @@ export class RedisClient {
       params.push([timestamp, key]);
     });
 
-    return this.redis.zadd(LASTACCESS_SET, ...params);
+    return this.redis.zadd(`${this.prefix}:${LASTACCESS_SET}`, ...params);
   }
 
   public setCacheRefresh(keys: string | string[]) {
@@ -135,7 +138,7 @@ export class RedisClient {
       params.push([timestamp, key]);
     });
 
-    return this.redis.zadd(CACHEREFRESH_SET, ...params);
+    return this.redis.zadd(`${this.prefix}:${CACHEREFRESH_SET}`, ...params);
   }
 
   public setExistence(data: YildizSingleSchema | YildizSingleSchema[]) {
@@ -148,7 +151,7 @@ export class RedisClient {
 
     (data as YildizSingleSchema[]).map((node: YildizSingleSchema) => {
       const identifier = node.identifier || node.id;
-      this.redis.set(`${EXIST_KEY}:${identifier}`, true, "EX", this.ttl);
+      this.redis.set(`${this.prefix}:${EXIST_KEY}:${identifier}`, true, "EX", this.ttl);
     });
   }
 
@@ -162,7 +165,7 @@ export class RedisClient {
 
     (data as YildizSingleSchema[]).map((node: YildizSingleSchema) => {
       const identifier = node.identifier || node.id;
-      this.redis.set(`${RIGHTNODE_KEY}:${identifier}`, JSON.stringify(node), "EX", this.ttl);
+      this.redis.set(`${this.prefix}:${RIGHTNODE_KEY}:${identifier}`, JSON.stringify(node), "EX", this.ttl);
     });
   }
 
@@ -173,7 +176,7 @@ export class RedisClient {
     }
 
     return this.redis
-      .zrangebyscore(LASTACCESS_SET, 0, lastAccess, "LIMIT", 0, limit);
+      .zrangebyscore(`${this.prefix}:${LASTACCESS_SET}`, 0, lastAccess, "LIMIT", 0, limit);
   }
 
   public async getCacheRefresh(lastRefresh: number, limit: number) {
@@ -186,11 +189,11 @@ export class RedisClient {
 
     if (count === 0) {
       return this.redis
-        .zrangebyscore(LASTACCESS_SET, 0, lastRefresh, "LIMIT", 0, limit);
+        .zrangebyscore(`${this.prefix}:${LASTACCESS_SET}`, 0, lastRefresh, "LIMIT", 0, limit);
     }
 
     return this.redis
-      .zrangebyscore(CACHEREFRESH_SET, 0, lastRefresh, "LIMIT", 0, limit);
+      .zrangebyscore(`${this.prefix}:${CACHEREFRESH_SET}`, 0, lastRefresh, "LIMIT", 0, limit);
   }
 
   public async mgetExistence(keys: string | string[]) {
@@ -200,7 +203,7 @@ export class RedisClient {
     }
 
     keys = !Array.isArray(keys) ? [keys] : keys;
-    const redisKeys = keys.map((key: string) => `${EXIST_KEY}:${key}`);
+    const redisKeys = keys.map((key: string) => `${this.prefix}:${EXIST_KEY}:${key}`);
 
     return await this.redis.mget(...redisKeys);
   }
@@ -212,7 +215,7 @@ export class RedisClient {
     }
 
     keys = !Array.isArray(keys) ? [keys] : keys;
-    const redisKeys = keys.map((key: string) => `${RIGHTNODE_KEY}:${key}`);
+    const redisKeys = keys.map((key: string) => `${this.prefix}:${RIGHTNODE_KEY}:${key}`);
 
     return await this.redis.mget(...redisKeys);
   }
@@ -232,7 +235,7 @@ export class RedisClient {
       throw new Error(NOT_CONNECTED);
     }
 
-    return this.redis.zremrangebyscore(LASTACCESS_SET, 0, Date.now() - expire);
+    return this.redis.zremrangebyscore(`${this.prefix}:${LASTACCESS_SET}`, 0, Date.now() - expire);
   }
 
   public clearCacheRefresh(members: string | string[]) {
@@ -243,7 +246,7 @@ export class RedisClient {
 
     members = !Array.isArray(members) ? [members] : members;
 
-    return this.redis.zrem(CACHEREFRESH_SET, ...members);
+    return this.redis.zrem(`${this.prefix}:${CACHEREFRESH_SET}`, ...members);
   }
 
   public async close() {

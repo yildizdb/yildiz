@@ -98,6 +98,13 @@ export class Server {
                 return next();
             }
 
+            // Code below is for liveness probe for Kubernetes
+            // const reqUrl = req.url || "";
+
+            // if ((reqUrl === "/" || reqUrl.startsWith("/admin/healthcheck"))) {
+            //     return next(); // skip on default paths
+            // }
+
             this.incStat("toobusy");
             res.statusCode = 503;
             res.end();

@@ -26,7 +26,7 @@ const server = new HttpServer(port, Object.assign(
         ttl: {
             active: true,
             lifeTimeInSec: 2,
-            jobIntervalInSec: 2,
+            jobIntervalInSec: 3,
     },
     procedures: {
         depthTransfer: {
@@ -692,8 +692,8 @@ describe("HttpServer INT", () => {
     });
 
     it("should be able to await next ttl job execution", function(done){
-        this.timeout(5005);
-        setTimeout(done, 5000);
+        this.timeout(2005);
+        setTimeout(done, 2000);
     });
 
     it("should count zero for nodes after job running", async() => {

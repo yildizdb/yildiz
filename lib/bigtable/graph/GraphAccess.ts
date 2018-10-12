@@ -53,13 +53,6 @@ export class GraphAccess {
             });
     }
 
-    public async setCacheLastAccessFireAndForget(values: string[]) {
-        this.buildNodes(values)
-            .catch((error) => {
-                // Do nothing
-            });
-    }
-
     public async getRightNodes(identifiers: string[]) {
 
         // Get the other nodes data
