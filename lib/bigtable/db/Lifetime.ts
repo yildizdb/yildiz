@@ -1,14 +1,14 @@
-import moment from "moment";
 import Debug from "debug";
 import Bluebird from "bluebird";
 
-import Bigtable from "@google-cloud/bigtable";
+import Bigtable, { StreamParam } from "@google-cloud/bigtable";
 
 import { Yildiz } from "../Yildiz";
 import { Metadata } from "./Metadata";
-import { ServiceConfig, TTLConfig } from "../../interfaces/ServiceConfig";
+import { TTLConfig } from "../../interfaces/ServiceConfig";
 import { Metrics } from "../metrics/Metrics";
-import { YildizSingleSchema } from "../../interfaces/Yildiz";
+import { RedisClient } from "../cache/RedisClient";
+import { GenericObject } from "../../interfaces/Generic";
 
 const debug = Debug("yildiz:lifetime");
 
@@ -16,18 +16,25 @@ const CACHE_TABLE_TTL = 175;
 const DEFAULT_LIFETIME_IN_SEC = 86400;
 const DEFAULT_JOB_INTERVAL_IN_SEC = 120;
 
+export interface ExpiredTTL {
+    ttlKey: string;
+    cellQualifiers: string[];
+  }
+
 export class Lifetime {
 
     private yildiz: Yildiz;
     private configTTL: TTLConfig;
     private metadata: Metadata;
     private metrics: Metrics;
+    private redisClient: RedisClient;
 
-    private ttlTable: Bigtable.Table;
     private nodeTable: Bigtable.Table;
     private popnodeTable: Bigtable.Table;
     private cacheTable: Bigtable.Table;
+    private ttlTable: Bigtable.Table;
     private columnFamilyNode: Bigtable.Family;
+    private columnFamilyTTL: Bigtable.Family;
 
     private tov!: NodeJS.Timer | number;
 
@@ -39,61 +46,93 @@ export class Lifetime {
         this.yildiz = yildiz;
 
         const {
-            ttlTable,
             nodeTable,
             popnodeTable,
             cacheTable,
             columnFamilyNode,
+            ttlTable,
+            columnFamilyTTL,
         } = this.yildiz.models;
 
         this.metadata = this.yildiz.metadata;
         this.metrics = this.yildiz.metrics;
+        this.redisClient = this.yildiz.redisClient;
 
         this.configTTL = this.yildiz.config.ttl;
-        this.ttlTable = ttlTable;
         this.nodeTable = nodeTable;
         this.popnodeTable = popnodeTable;
         this.cacheTable = cacheTable;
+        this.ttlTable = ttlTable;
 
         this.columnFamilyNode = columnFamilyNode;
+        this.columnFamilyTTL = columnFamilyTTL;
         this.promiseConcurrency = this.yildiz.config.promiseConcurrency || 1000;
     }
 
-    private getTTLIds(type: string): Bluebird<string[]> {
+    private streamTTL(options: StreamParam, etl: (result: Bigtable.GenericObject) => any): Bluebird<any[]> {
 
         return new Bluebird((resolve, reject) => {
 
-            if (!type) {
-                resolve([]);
-            }
+            const results: any[] = [];
 
-            const results: string[] = [];
-
-            const lifetime = type === "caches" ? CACHE_TABLE_TTL : this.lifeTimeInSec;
-
-            this.ttlTable.createReadStream({
-                filter: [{
-                    row: new RegExp(`.*${type}$`),
-                },
-                {
-                    time: {
-                        start: moment().subtract(1, "year").toDate(),
-                        end: moment().subtract(lifetime, "seconds").toDate(),
-                    },
-                }],
-            })
-            .on("error", (error: Error) => {
-                reject(error);
-            })
-            .on("data", (result: YildizSingleSchema) => {
-                if (result.id) {
-                    results.push(result.id as string);
-                }
-            })
-            .on("end", () => {
-                resolve(results);
-            });
+            this.ttlTable.createReadStream(options)
+                .on("error", (error: Error) => {
+                    reject(error);
+                })
+                .on("data", (result: GenericObject) => {
+                    if (etl) {
+                        if (etl(result)) {
+                            results.push(etl(result));
+                        }
+                    } else {
+                        results.push(result);
+                    }
+                })
+                .on("end", () => {
+                    resolve(results);
+                });
         });
+    }
+
+    private async getTTLIds(type: string) {
+
+        const currentTimestamp = Date.now();
+        const ranges = [];
+        const etl = (result: any) => ({
+          ttlKey: result.id,
+          cellQualifiers: Object.keys(result.data[this.columnFamilyTTL.id]),
+        });
+
+        const options: StreamParam = {
+          ranges: [{
+              start: `ttl#${type}#0`,
+              end: `ttl#${type}#${currentTimestamp}`,
+          }],
+          limit: this.promiseConcurrency,
+        };
+
+        const expiredTTLs = await this.streamTTL(options, etl);
+        debug(`Range scan calls takes ${Date.now() - currentTimestamp} ms`);
+
+        return expiredTTLs;
+    }
+
+    private getCellQualifiers(expiredTTLs: ExpiredTTL[]) {
+
+        return ([] as string[])
+            .concat(
+                ...expiredTTLs
+                    .map((expiredTTL: ExpiredTTL) => expiredTTL.cellQualifiers),
+            );
+    }
+
+    private getTTLKeys(expiredTTLs: ExpiredTTL[]) {
+
+        return ([] as string[])
+            .concat(
+                ...expiredTTLs
+                    .map((expiredTTL: ExpiredTTL) => expiredTTL.ttlKey),
+            );
     }
 
     private deleteTable() {
@@ -102,85 +141,68 @@ export class Lifetime {
 
             return async (keys: string[]) => {
 
-                const metadataType = type + "s";
-
-                let cleanedKeys = keys;
-                let deletedCounts = [];
-
-                // If it is not ttl, need to get the real key
-                if (type !== "ttl") {
-                    cleanedKeys = keys.map((keyRaw) => keyRaw.split("_")[0]);
+                if (!keys || !keys.length) {
+                    return { success: 0 };
                 }
 
-                // If it is not edge, just delete the row from the table
-                if (type !== "edge") {
+                let table: Bigtable.Table | null = null;
+                let family: string | null = null;
 
-                    deletedCounts = await Bluebird.map(
-                        cleanedKeys,
-                        (key) => {
-
-                            if (type === "node") {
-                                return this.nodeTable.row(key).delete();
-                            }
-
-                            if (type === "popnode") {
-                                return this.popnodeTable.row(key).delete();
-                            }
-
-                            if (type === "cache") {
-                                return this.cacheTable.row(key).delete();
-                            }
-
-                            if (type === "ttl") {
-                                return this.ttlTable.row(key).delete();
-                            }
-                        },
-                        {
-                            concurrency: this.promiseConcurrency,
-                        },
-                    );
+                switch (type) {
+                    case "nodes":
+                        table = this.nodeTable;
+                        break;
+                    case "edges":
+                        table = this.nodeTable;
+                        family = this.columnFamilyNode.id;
+                        break;
+                    case "popnodes":
+                        table = this.popnodeTable;
+                        break;
+                    case "caches":
+                        table = this.cacheTable;
+                        break;
+                    case "ttls":
+                        table = this.ttlTable;
+                        break;
                 }
 
-                // If it is edge, need to get the nodeKey and remove the cell on the node table
-                if (type === "edge") {
-
-                    const cfName = this.columnFamilyNode.id;
-
-                    deletedCounts = await Bluebird.map(
-                        cleanedKeys,
-                        (key) => {
-                            const nodeKey = key.split("-")[0];
-                            const columnKey = key.split("-")[1];
-
-                            return this.nodeTable.row(nodeKey).deleteCells([
-                                `${cfName}:${columnKey}`,
-                            ]);
-                        },
-                        {
-                            concurrency: this.promiseConcurrency,
-                        },
-                    );
-
+                if (!table) {
+                    return { success: 0 };
                 }
 
-                if (deletedCounts.length) {
-                    this.metrics.inc(`ttl_${type}_removes`, deletedCounts.length);
-                }
+                const mutateRules = type === "edges" ?
+                    keys
+                        .map((key: string) => ({
+                            method: "delete",
+                            key: key.split(":")[0],
+                            data: [ `${family}:${key.split(":")[1]}` ],
+                        }))
+                    :
+                    keys
+                        .map((key: string) => ({
+                            method: "delete",
+                            key,
+                        }));
+
+                await table.mutate(mutateRules);
+
+                this.metrics.inc(`ttl_${type}_removes`, keys.length);
 
                 if (this.metadata) {
-                    this.metadata.decreaseCount(metadataType, deletedCounts.length);
+                    this.metadata.decreaseCount(type, keys.length);
                 }
 
-                return { success: deletedCounts.length };
+                return { success: keys.length };
             };
         };
 
         return {
-            node: remove("node"),
-            popnode: remove("popnode"),
-            edge: remove("edge"),
-            ttl: remove("ttl"),
-            cache: remove("cache"),
+            node: remove("nodes"),
+            popnode: remove("popnodes"),
+            edge: remove("edges"),
+            cache: remove("caches"),
+            ttl: remove("ttls"),
         };
     }
 
@@ -230,11 +252,10 @@ export class Lifetime {
     private async job() {
 
         const deleteTTLOrigin = this.deleteTable();
+        const fetchStart = Date.now();
 
-        const results = [];
-
-        // Remove Nodes and TTLs
-        const [ nodeKeys, edgeKeys, popnodeKeys, cacheKeys] =
+        // Get all the keys that need to be deleted
+        const [ nodeTTLKeys, edgeTTLKeys, popnodeTTLKeys, cacheTTLKeys] =
             await Bluebird.all([
                 this.getTTLIds("nodes"),
                 this.getTTLIds("edges"),
@@ -242,19 +263,32 @@ export class Lifetime {
                 this.getTTLIds("caches"),
             ]);
 
-        results.push(...(await Bluebird.all([
+        const nodeKeys = this.getCellQualifiers(nodeTTLKeys);
+        const edgeKeys = this.getCellQualifiers(edgeTTLKeys);
+        const popnodeKeys = this.getCellQualifiers(popnodeTTLKeys);
+        const cacheKeys = this.getCellQualifiers(cacheTTLKeys);
+
+        this.metrics.set("ttl_fetch_duration", Date.now() - fetchStart);
+
+        const executionStart = Date.now();
+        // Delete all the keys that are needed to be deleted
+        const results = await Bluebird.all([
             deleteTTLOrigin.node(nodeKeys),
             deleteTTLOrigin.edge(edgeKeys),
             deleteTTLOrigin.popnode(popnodeKeys),
             deleteTTLOrigin.cache(cacheKeys),
-        ])));
+        ]);
 
-        const ttlKeys = nodeKeys
-            .concat(edgeKeys ? edgeKeys : [])
-            .concat(popnodeKeys ? popnodeKeys : [])
-            .concat(cacheKeys ? cacheKeys : []);
+        const ttlKeys = ([] as string[]).concat(
+            this.getTTLKeys(nodeTTLKeys),
+            this.getTTLKeys(edgeTTLKeys),
+            this.getTTLKeys(popnodeTTLKeys),
+            this.getTTLKeys(cacheTTLKeys),
+        );
 
-        results.push(await deleteTTLOrigin.ttl(ttlKeys));
+        await deleteTTLOrigin.ttl(ttlKeys);
+
+        this.metrics.set("ttl_delete_execution_duration", Date.now() - executionStart);
 
         return {
             rowCount: results.map((n) => n.success).reduce((a, b) => a + b, 0),

@@ -55,41 +55,44 @@ export class FetchJob {
     this.limit = limit;
   }
 
-  private runJob() {
+  private resetJob() {
 
     this.tov = setTimeout(async () => {
 
       try {
-        await this.jobAction();
+        const startJob = Date.now();
+        await this.jobAction(startJob);
       } catch (error) {
         debug("error while running job", error);
-        this.runJob();
+        this.resetJob();
       }
 
     }, this.fetchIntervalInSec * 1000);
   }
 
-  private async jobAction(): Promise<void> {
+  private async jobAction(startJob: number): Promise<void> {
 
     let keys = null;
 
     try {
       keys = await this.getKeysToBeCached();
     } catch (error) {
-      debug("error occurred when running job", error.message);
+      debug("error occurred when getting keys", error.message);
     }
 
+    // Reset the job if the keys need to be cached
     if (!keys || !keys.length) {
-      return this.runJob();
+      this.metrics.inc("fetchJob_duration", Date.now() - startJob);
+      return this.resetJob();
     }
 
-    this.graphAccess.setCacheLastAccessFireAndForget(keys);
-
-    if (keys && (keys.length === this.limit)) {
-      return this.jobAction();
+    try {
+      await this.graphAccess.edgeInfoForNodesRelatingToTranslateValues(keys);
+    } catch (error) {
+      debug("error occurred while caching", error.message);
     }
 
-    return this.runJob();
+    return await this.jobAction(startJob);
   }
 
   private async getKeysToBeCached() {
@@ -152,7 +155,7 @@ export class FetchJob {
   public async init() {
     this.graphAccess = await this.yildiz.getGraphAccess();
     debug("Running job to cache nodes");
-    this.runJob();
+    this.resetJob();
   }
 
   public async bumpTTL(key: string | string[]) {

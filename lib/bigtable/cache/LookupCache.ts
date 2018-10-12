@@ -58,8 +58,16 @@ export class LookupCache {
     } catch (error) {
       throw error;
     }
+
     const cacheKeys: string[] = [];
     const nocacheKeys: string[] = [];
+
+    if (!mExistence) {
+      return {
+        cache: cacheKeys,
+        nocache: keys,
+      };
+    }
 
     // if they are null, it means they are not cached
     keys.map((key: string, index) => {
@@ -93,6 +101,13 @@ export class LookupCache {
 
     const cacheNodes: YildizSingleSchema[] = [];
     const nocacheKeys: string[] = [];
+
+    if (!mRightNode) {
+      return {
+        cache: cacheNodes,
+        nocache: keys,
+      };
+    }
 
     // cache will contain an array of object data of resolved right node
     // nocache will contain an array of key of unresolved right node
