@@ -819,7 +819,7 @@ describe("HttpServer INT", () => {
         assert.equal(body.data.foo, "bar");
     });
 
-    xit("should reset tables based on prefix in bigtable", async() => {
+    it("should reset tables based on prefix in bigtable", async() => {
         const {
             status,
             body
