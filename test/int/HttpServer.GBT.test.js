@@ -34,6 +34,13 @@ const server = new HttpServer(port, Object.assign(
             minAgeType: "SECOND"
         }
     },
+    fetchJob: {
+        expireInSec: 86400,
+        fetchIntervalInSec: 7,
+        fetchLastAccess: 60,
+        fetchBatchSize: 250,
+        limit: 2000
+    },
     walker: {
         disable: false,
         interval: 500
@@ -692,8 +699,8 @@ describe("HttpServer INT", () => {
     });
 
     it("should be able to await next ttl job execution", function(done){
-        this.timeout(2005);
-        setTimeout(done, 2000);
+        this.timeout(20005);
+        setTimeout(done, 20000);
     });
 
     it("should count zero for nodes after job running", async() => {
@@ -812,7 +819,7 @@ describe("HttpServer INT", () => {
         assert.equal(body.data.foo, "bar");
     });
 
-    it("should reset tables based on prefix in bigtable", async() => {
+    xit("should reset tables based on prefix in bigtable", async() => {
         const {
             status,
             body
