@@ -141,16 +141,15 @@ export class RedisClient {
     return this.redis.zadd(`${this.prefix}:${CACHEREFRESH_SET}`, ...params);
   }
 
-  public setExistence(data: YildizSingleSchema | YildizSingleSchema[]) {
+  public setExistence(identifiers: string | string[]) {
 
     if (this.redis.status !== "ready") {
       throw new Error(NOT_CONNECTED);
     }
 
-    data = !Array.isArray(data) ? [data] : data;
+    identifiers = !Array.isArray(identifiers) ? [identifiers] : identifiers;
 
-    (data as YildizSingleSchema[]).map((node: YildizSingleSchema) => {
-      const identifier = node.identifier || node.id;
+    (identifiers as string[]).map((identifier: string) => {
       this.redis.set(`${this.prefix}:${EXIST_KEY}:${identifier}`, true, "EX", this.ttl);
     });
   }

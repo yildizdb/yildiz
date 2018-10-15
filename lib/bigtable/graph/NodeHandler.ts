@@ -737,13 +737,16 @@ export class NodeHandler {
         return await row.delete();
     }
 
-    public async getNodeByIdentifier(identifier: string | number): Promise<YildizSingleSchema | null> {
+    public async getNodeByIdentifier(identifier: string | number, noCache?: boolean)
+    : Promise<YildizSingleSchema | null> {
 
         const cacheKey = `gnbpf:identifier:${identifier}`;
-        const cacheResult = await this.yildiz.cache.getNode(cacheKey);
 
-        if (cacheResult) {
-            return cacheResult as YildizSingleSchema;
+        if (!noCache) {
+            const cacheResult = await this.yildiz.cache.getNode(cacheKey);
+            if (cacheResult) {
+                return cacheResult as YildizSingleSchema;
+            }
         }
 
         const start = Date.now();
@@ -754,7 +757,9 @@ export class NodeHandler {
             return null;
         }
 
-        await this.yildiz.cache.setNode(cacheKey, node);
+        if (!noCache) {
+            await this.yildiz.cache.setNode(cacheKey, node);
+        }
 
         this.yildiz.metrics.set("get_node_by_identifier", Date.now() - start);
 
@@ -806,7 +811,14 @@ export class NodeHandler {
 
         this.yildiz.metrics.set("get_cache_by_identifier", Date.now() - start);
 
-        await this.setTTL("caches", identifier + "", this.cacheLifetime);
+        if (!cache || !cache.value) {
+            return null;
+        }
+
+        await Promise.all([
+            this.setTTL("caches", identifier + "", this.cacheLifetime),
+            this.redisClient.setExistence(identifier + ""),
+        ]);
 
         const result = cache && cache.value || null;
         return result;

@@ -53,7 +53,7 @@ export class GraphAccess {
             });
     }
 
-    public async getRightNodes(identifiers: string[]) {
+    public async getRightNodes(identifiers: string[], noMemoryCache?: boolean) {
 
         // Get the other nodes data
         // cache will contain an array of object data of resolved right node
@@ -72,7 +72,7 @@ export class GraphAccess {
         const nocacheNodes = (await Bluebird
                 .map(
                     nocache,
-                    (identifier: string) => this.nodeHandler.getNodeByIdentifier(identifier),
+                    (identifier: string) => this.nodeHandler.getNodeByIdentifier(identifier, noMemoryCache),
                     {
                         concurrency: this.promiseConcurrency,
                     },
@@ -111,13 +111,13 @@ export class GraphAccess {
         return nocacheNodes.concat(cache);
     }
 
-    public async buildNodes(identifiers: string[]): Promise<YildizSingleSchema[]> {
+    public async buildNodes(identifiers: string[], noMemoryCache?: boolean): Promise<YildizSingleSchema[]> {
 
         // Get the nodes from node table
         const nodes = (await Bluebird
             .map(
                 identifiers,
-                (identifier: string) => this.nodeHandler.getNodeByIdentifier(strToInt(identifier) + ""),
+                (identifier: string) => this.nodeHandler.getNodeByIdentifier(strToInt(identifier) + "", noMemoryCache),
                 {
                     concurrency: this.promiseConcurrency,
                 },
@@ -175,7 +175,7 @@ export class GraphAccess {
                     .filter((item, pos) => rawOtherNodeIdentifiers.indexOf (item) === pos);
 
                 // Get the right node from cache or resolve them from node table
-                const otherNodes = await this.getRightNodes(otherNodeIdentifiers);
+                const otherNodes = await this.getRightNodes(otherNodeIdentifiers, noMemoryCache);
 
                 // Set the current node data in object
                 const currentNode: YildizSingleSchema = {
@@ -217,7 +217,7 @@ export class GraphAccess {
             .filter((result) => !!result) as YildizSingleSchema[];
 
         // Set the existence in redis cache
-        await this.lookupCache.setExistence(results);
+        await this.lookupCache.setExistence(identifiers);
 
         // Save the cache in bigtable cache table
         await Bluebird.map(
@@ -310,6 +310,8 @@ export class GraphAccess {
         if (!cache.length) {
             return;
         }
+
+        await this.lookupCache.setExistence(cache);
 
         return await Bluebird.map(
             cache,

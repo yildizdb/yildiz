@@ -45,6 +45,7 @@ export interface FetchJobConfig {
   fetchLastAccess?: number;
   fetchBatchSize?: number;
   limit?: number;
+  resolveNodes?: boolean;
 }
 
 export interface LookupCacheConfig {
@@ -64,6 +65,7 @@ export interface UpsertConfig {
 
 export interface ServiceConfig {
   accessLog: boolean;
+  readinessEndpoint?: boolean;
   enableRaw: boolean;
   noBanner: boolean;
   promiseConcurrency?: number;

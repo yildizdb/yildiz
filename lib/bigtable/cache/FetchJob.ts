@@ -24,6 +24,7 @@ export class FetchJob {
   private fetchIntervalInSec: number;
   private fetchLastAccess: number;
   private limit: number;
+  private resolveNodes: boolean;
 
   private tov!: NodeJS.Timer | number;
   private graphAccess!: GraphAccess;
@@ -40,6 +41,7 @@ export class FetchJob {
       fetchIntervalInSec = DEFAULT_FETCH_INTERV_IN_SEC,
       fetchLastAccess = DEFAULT_FETCH_LAST_ACCESS,
       limit = DEFAULT_FETCH_LIMIT,
+      resolveNodes = false,
     } = this.config.fetchJob || {};
 
     // How long the keys are going to expire in redis
@@ -53,6 +55,8 @@ export class FetchJob {
 
     // Limit in retrieving the lastAccess nodeId from redis
     this.limit = limit;
+
+    this.resolveNodes = resolveNodes;
   }
 
   private resetJob() {
@@ -88,7 +92,11 @@ export class FetchJob {
     }
 
     try {
-      await this.graphAccess.bumpCacheIfExists(keys);
+      if (this.resolveNodes) {
+        await this.graphAccess.buildNodes(keys);
+      } else {
+        await this.graphAccess.bumpCacheIfExists(keys);
+      }
     } catch (error) {
       debug("error occurred while caching", error.message);
     }

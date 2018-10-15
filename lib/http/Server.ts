@@ -32,6 +32,7 @@ export class Server {
 
     private port: number;
     private accessLog: boolean;
+    private readinessEndpoint: boolean;
     private app: fastify.FastifyInstance;
     private accessHandler: AccessHandler;
     private factory: YildizFactory;
@@ -49,9 +50,11 @@ export class Server {
         const {
             maxLag,
             accessLog,
+            readinessEndpoint,
         } = options;
 
         this.accessLog = typeof accessLog === "boolean" ? accessLog : false;
+        this.readinessEndpoint = typeof readinessEndpoint === "boolean" ? true : false;
         toobusy.maxLag(maxLag || 150);
 
         this.app = fastify();
@@ -92,23 +95,18 @@ export class Server {
             next();
         });
 
-        this.app.use((req: IncomingMessage, res: ServerResponse, next: NextFunction) => {
+        if (!this.readinessEndpoint) {
+            this.app.use((req: IncomingMessage, res: ServerResponse, next: NextFunction) => {
 
-            if (!toobusy()) {
-                return next();
-            }
+                if (!toobusy()) {
+                    return next();
+                }
 
-            // Code below is for liveness probe for Kubernetes
-            // const reqUrl = req.url || "";
-
-            // if ((reqUrl === "/" || reqUrl.startsWith("/admin/healthcheck"))) {
-            //     return next(); // skip on default paths
-            // }
-
-            this.incStat("toobusy");
-            res.statusCode = 503;
-            res.end();
-        });
+                this.incStat("toobusy");
+                res.statusCode = 503;
+                res.end();
+            });
+        }
 
         const registerErrorHandler = (error: Error) => {
             if (error) {
@@ -126,7 +124,7 @@ export class Server {
             prefix: "/",
         });
 
-        this.app.register(admin, {
+        this.app.register(admin(this.readinessEndpoint, toobusy()), {
             prefix: "/admin",
         });
 

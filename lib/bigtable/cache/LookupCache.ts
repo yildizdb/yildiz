@@ -129,9 +129,10 @@ export class LookupCache {
     };
   }
 
-  public async setExistence(translatedNodes: YildizSingleSchema | YildizSingleSchema[]) {
+  public async setExistence(identifiers: string | string[]) {
+
     try {
-      await this.redisClient.setExistence(translatedNodes);
+      await this.redisClient.setExistence(identifiers);
     } catch (error) {
       debug(error);
     }
