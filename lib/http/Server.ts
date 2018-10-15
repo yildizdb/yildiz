@@ -124,7 +124,7 @@ export class Server {
             prefix: "/",
         });
 
-        this.app.register(admin(this.readinessEndpoint, toobusy()), {
+        this.app.register(admin(this.readinessEndpoint, toobusy(), this.incStat), {
             prefix: "/admin",
         });
 

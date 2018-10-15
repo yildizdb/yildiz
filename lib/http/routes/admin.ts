@@ -8,7 +8,7 @@ import { Registry } from "prom-client";
 
 const SCHEMES = adminSchema;
 
-const adminRoute = (readinessEndpoint: boolean, tooBusy: boolean) => {
+const adminRoute = (readinessEndpoint: boolean, tooBusy: boolean, incStat: (stat: string) => any) => {
     return (
         instance: FastifyInstance,
         options: RegisterOptions<Server, IncomingMessage, ServerResponse>,
@@ -33,6 +33,7 @@ const adminRoute = (readinessEndpoint: boolean, tooBusy: boolean) => {
                     return;
                 }
 
+                incStat("toobusy");
                 res.code(503).send();
             });
 
@@ -45,6 +46,7 @@ const adminRoute = (readinessEndpoint: boolean, tooBusy: boolean) => {
                     return;
                 }
 
+                incStat("toobusy");
                 res.code(503).send();
             });
         }
