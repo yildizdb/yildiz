@@ -93,7 +93,7 @@ export class FetchJob {
 
     try {
       if (this.resolveNodes) {
-        await this.graphAccess.buildNodes(keys);
+        await this.graphAccess.buildAndCacheNodes(keys);
       } else {
         await this.graphAccess.bumpCacheIfExists(keys);
       }

@@ -44,6 +44,7 @@ declare module "@google-cloud/bigtable" {
 
     export interface StreamParam {
       prefix?: string;
+      keys?: string[];
       ranges?: Array<{
         start: Buffer | string;
         end: Buffer | string;

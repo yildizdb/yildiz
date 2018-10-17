@@ -41,6 +41,95 @@ export class GraphAccess {
         this.promiseConcurrency = this.yildiz.config.promiseConcurrency || 1000;
     }
 
+    private async fullDataResolver(identifier: string, noMemoryCache?: boolean) {
+
+        const node = await this.nodeHandler.getNodeByIdentifier(strToInt(identifier) + "", noMemoryCache);
+
+        if (!node) {
+            return;
+        }
+
+        const edges = [];
+        const rawOtherNodeIdentifiers: string[] = [];
+
+        const nodeKeys = Object.keys(node)
+            .filter((nodeKey: string) => nodeKey.includes("ec") || nodeKey.includes("ed"));
+
+        if (!nodeKeys.length) {
+            return {
+                identifier: node.identifier,
+                value: node.value,
+            };
+        }
+
+        for (const nodeKey of nodeKeys) {
+
+            const rightNodeId = nodeKey.split("#")[1];
+            const relation = nodeKey.split("#")[2];
+
+            const edgeObj: EdgeRaw = {
+                leftNodeId: node.identifier,
+                rightNodeId,
+                data: node[nodeKey],
+            };
+
+            // Improve performance
+            if ((this.upsertConfig as UpsertConfig).getEdgeTime && node.identifier) {
+                edgeObj.edgeTime = await this.nodeHandler
+                    .getEdgeTime(node.identifier, rightNodeId, relation);
+            }
+
+            if (relation) {
+                edgeObj.relation = relation;
+            }
+
+            // Push only if it is edges
+            edges.push(edgeObj);
+
+            rawOtherNodeIdentifiers.push(nodeKey.split("#")[1]);
+        }
+
+        // Remove duplicates of right nodes
+        const otherNodeIdentifiers = rawOtherNodeIdentifiers
+            .filter((item, pos) => rawOtherNodeIdentifiers.indexOf (item) === pos);
+
+        // Get the right node from cache or resolve them from node table
+        const otherNodes = await this.getRightNodes(otherNodeIdentifiers, noMemoryCache);
+
+        // Set the current node data in object
+        const currentNode: YildizSingleSchema = {
+            identifier: node.identifier,
+            value: node.value,
+        };
+
+        // Only put the data if it is not null and not empty object
+        if (node.data) {
+            if (typeof node.data === "object") {
+                if (Object.keys(node.data).length) {
+                    currentNode.data = node.data;
+                }
+            } else {
+                currentNode.data = node.data;
+            }
+        }
+
+        if (node.identifier) {
+            await this.lookupCache.setExistence(node.identifier + "");
+        }
+
+        const result = {
+            identifier: node.identifier,
+            value: node.value,
+            edges,
+            nodes: [currentNode].concat(otherNodes),
+        };
+
+        await this.nodeHandler.createCache(result);
+
+        // Return the result after resolving edges and nodes
+        return result;
+    }
+
     public async init() {
         this.nodeHandler = await this.yildiz.getNodeHandler();
     }
@@ -111,124 +200,35 @@ export class GraphAccess {
         return nocacheNodes.concat(cache);
     }
 
-    public async buildNodes(identifiers: string[], noMemoryCache?: boolean): Promise<YildizSingleSchema[]> {
+    public async buildAndCacheNodes(identifiers: string[]): Promise<void> {
 
-        // Get the nodes from node table
-        const nodes = (await Bluebird
+        const noMemoryCache = true;
+
+        // Resolve all promises as the array will contain Promise as element
+        (await Bluebird
             .map(
                 identifiers,
-                (identifier: string) => this.nodeHandler.getNodeByIdentifier(strToInt(identifier) + "", noMemoryCache),
+                (identifier: string) => this.fullDataResolver(identifier + "", noMemoryCache),
                 {
                     concurrency: this.promiseConcurrency,
                 },
-                )
             )
-            .filter((node) => !!node) as YildizSingleSchema[];
-
-        if (!nodes.length) {
-            return [];
-        }
-
-        const resultsPromise = nodes.map(
-
-            async (node) => {
-
-                const edges = [];
-                const rawOtherNodeIdentifiers: string[] = [];
-
-                const nodeKeys = Object.keys(node);
-
-                // Get the edge data and push the other node identifier to be retrieved later
-                for (const nodeKey of nodeKeys) {
-
-                    if (nodeKey.includes("ec") || nodeKey.includes("ed")) {
-
-                        const rightNodeId = nodeKey.split("#")[1];
-                        const relation = nodeKey.split("#")[2];
-
-                        const edgeObj: EdgeRaw = {
-                            leftNodeId: node.identifier,
-                            rightNodeId,
-                            data: node[nodeKey],
-                        };
-
-                        // Improve performance
-                        if ((this.upsertConfig as UpsertConfig).getEdgeTime && node.identifier) {
-                            edgeObj.edgeTime = await this.nodeHandler
-                                .getEdgeTime(node.identifier, rightNodeId, relation);
-                        }
-
-                        if (relation) {
-                            edgeObj.relation = relation;
-                        }
-
-                        // Push only if it is edges
-                        edges.push(edgeObj);
-
-                        rawOtherNodeIdentifiers.push(nodeKey.split("#")[1]);
-                    }
-
-                }
-
-                // Remove duplicates of right nodes
-                const otherNodeIdentifiers = rawOtherNodeIdentifiers
-                    .filter((item, pos) => rawOtherNodeIdentifiers.indexOf (item) === pos);
-
-                // Get the right node from cache or resolve them from node table
-                const otherNodes = await this.getRightNodes(otherNodeIdentifiers, noMemoryCache);
-
-                // Set the current node data in object
-                const currentNode: YildizSingleSchema = {
-                    identifier: node.identifier,
-                    value: node.value,
-                };
-
-                // Only put the data if it is not null and not empty object
-                if (node.data) {
-                    if (typeof node.data === "object") {
-                        if (Object.keys(node.data).length) {
-                            currentNode.data = node.data;
-                        }
-                    } else {
-                        currentNode.data = node.data;
-                    }
-                }
-
-                // Return the result after resolving edges and nodes
-                return {
-                    identifier: node.identifier,
-                    value: node.value,
-                    edges,
-                    nodes: [currentNode].concat(otherNodes),
-                };
-            },
         );
+    }
+
+    public async getBuiltNodes(identifiers: string[]): Promise<YildizSingleSchema[]> {
 
         // Resolve all promises as the array will contain Promise as element
-        const results = (await Bluebird
+        return (await Bluebird
                 .map(
-                    resultsPromise,
-                    (resultPromise) => resultPromise,
+                    identifiers,
+                    (identifier: string) => this.fullDataResolver(identifier + ""),
                     {
                         concurrency: this.promiseConcurrency,
                     },
                 )
             )
             .filter((result) => !!result) as YildizSingleSchema[];
-
-        // Set the existence in redis cache
-        await this.lookupCache.setExistence(identifiers);
-
-        // Save the cache in bigtable cache table
-        await Bluebird.map(
-            results,
-            (result) => this.nodeHandler.createCache(result),
-            {
-                concurrency: this.promiseConcurrency,
-            },
-        );
-
-        return results;
     }
 
     public buildResult(resultArray?: AnyObject[]) {
@@ -385,7 +385,7 @@ export class GraphAccess {
         }
 
         // Get the uncache node
-        const resultArray: YildizSingleSchema[] = await this.buildNodes(nocache);
+        const resultArray: YildizSingleSchema[] = await this.getBuiltNodes(nocache);
 
         // Concat the resultArray with the one in cache and build expected result
         const result = this.buildResult(

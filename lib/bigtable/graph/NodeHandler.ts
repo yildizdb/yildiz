@@ -22,6 +22,11 @@ const debug = Debug("yildiz:nodehandler");
 const ED = "ed";
 const EC = "ec";
 
+const TYPE_NODES = "nodes";
+const TYPE_EDGES = "edges";
+const TYPE_POPNODES = "popnodes";
+const TYPE_CACHES = "caches";
+
 export class NodeHandler {
 
     private yildiz: Yildiz;
@@ -91,16 +96,30 @@ export class NodeHandler {
     }
 
     private setTTL(type: string, identifier: string, ttlInSec?: number) {
-        const ttlKey = `ttl#${type}#${Date.now() + ((ttlInSec || this.lifetime) * 1000)}`;
-        const ttlInsert = {
-            key: ttlKey,
-            data: {
-                [this.columnFamilyTTL.id] : {
-                    [identifier]: "true",
+        const timestamp = Date.now() + ((ttlInSec || this.lifetime) * 1000);
+        const ttlKey = `ttl#${type}#${timestamp}`;
+        const ttlCrossCheckIdentifier = `ttlIdentifier#${type}$${identifier}`;
+
+        const ttlInserts = [
+            {
+                key: ttlKey,
+                data: {
+                    [this.columnFamilyTTL.id] : {
+                        [identifier]: "true",
+                    },
                 },
             },
-        };
-        return this.ttlTable.insert([ttlInsert]);
+            {
+                key: ttlCrossCheckIdentifier,
+                data: {
+                    [this.columnFamilyTTL.id] : {
+                        ttl: timestamp,
+                    },
+                },
+            },
+        ];
+
+        return this.ttlTable.insert(ttlInserts);
     }
 
     private async getRow(identifier: string | number, table: any, cFName: string): Promise<YildizSingleSchema | null> {
@@ -296,7 +315,7 @@ export class NodeHandler {
             this.metrics.inc("edge_created_leftNode");
 
             if (ttld) {
-                requests.push(this.setTTL("edges", `${leftNodeId}:${columnName}`));
+                requests.push(this.setTTL(TYPE_EDGES, `${leftNodeId}:${columnName}`));
             }
         }
 
@@ -325,7 +344,7 @@ export class NodeHandler {
                 requests.push(this.yildiz.cache.del(`gnbpf:identifier:${secondNodeId}`));
 
                 if (ttld) {
-                    requests.push(this.setTTL("edges", `${rightNodeId}:${columnName}`));
+                    requests.push(this.setTTL(TYPE_EDGES, `${rightNodeId}:${columnName}`));
                 }
 
             } else {
@@ -364,14 +383,14 @@ export class NodeHandler {
                 }
 
                 if (ttld) {
-                    requests.push(this.setTTL("popnodes", popnodeKey));
+                    requests.push(this.setTTL(TYPE_POPNODES, popnodeKey));
                 }
             }
             this.metrics.inc("edge_created_rightNode");
         }
 
         this.metrics.inc("edge_created");
-        this.metadata.increaseCount("edges");
+        this.metadata.increaseCount(TYPE_EDGES);
         await Bluebird.all(requests);
 
         return results;
@@ -410,7 +429,7 @@ export class NodeHandler {
     }
 
     public async getEdgeCount() {
-        return await this.metadata.getCount("edges");
+        return await this.metadata.getCount(TYPE_EDGES);
     }
 
     public async increaseEdgeDepthById(
@@ -600,7 +619,7 @@ export class NodeHandler {
             }
         }
 
-        this.metadata.decreaseCount("edges");
+        this.metadata.decreaseCount(TYPE_EDGES);
 
         return await Bluebird.all(requests);
     }
@@ -649,7 +668,7 @@ export class NodeHandler {
         insertPromises.push(this.nodeTable.insert([val]));
 
         if (ttld) {
-            insertPromises.push(this.setTTL("nodes", key));
+            insertPromises.push(this.setTTL(TYPE_NODES, key));
         }
 
         try {
@@ -658,7 +677,7 @@ export class NodeHandler {
             return error;
         }
 
-        this.metadata.increaseCount("nodes");
+        this.metadata.increaseCount(TYPE_NODES);
         this.metrics.inc("node_created");
         const result = await this.getNodeByIdentifier(key);
 
@@ -680,7 +699,7 @@ export class NodeHandler {
 
         const result = await row.delete();
 
-        this.metadata.decreaseCount("nodes");
+        this.metadata.decreaseCount(TYPE_NODES);
 
         return result;
     }
@@ -718,8 +737,8 @@ export class NodeHandler {
 
         const result = await Bluebird.all(deletion);
 
-        this.metadata.decreaseCount("nodes");
-        this.metadata.decreaseCount("edges", popNodeKeys.length);
+        this.metadata.decreaseCount(TYPE_NODES);
+        this.metadata.decreaseCount(TYPE_EDGES, popNodeKeys.length);
 
         return result;
     }
@@ -787,7 +806,7 @@ export class NodeHandler {
     }
 
     public async getNodeCount() {
-        return await this.metadata.getCount("nodes");
+        return await this.metadata.getCount(TYPE_NODES);
     }
 
     public async bumpCacheByIdentifier(identifier: string) {
@@ -800,7 +819,7 @@ export class NodeHandler {
             return;
         }
 
-        await this.setTTL("caches", identifier + "", this.cacheLifetime);
+        await this.setTTL(TYPE_CACHES, identifier + "", this.cacheLifetime);
     }
 
     public async getCacheByIdentifier(identifier: string | number) {
@@ -816,12 +835,11 @@ export class NodeHandler {
         }
 
         await Promise.all([
-            this.setTTL("caches", identifier + "", this.cacheLifetime),
+            this.setTTL(TYPE_CACHES, identifier + "", this.cacheLifetime),
             this.redisClient.setExistence(identifier + ""),
         ]);
 
-        const result = cache && cache.value || null;
-        return result;
+        return cache.value;
     }
 
     public async createCache(cache?: YildizSingleSchema) {
@@ -841,7 +859,7 @@ export class NodeHandler {
         };
 
         await Bluebird.all([
-            this.setTTL("caches", cache.identifier + "", this.cacheLifetime),
+            this.setTTL(TYPE_CACHES, cache.identifier + "", this.cacheLifetime),
             row.save(saveData),
         ]);
 
