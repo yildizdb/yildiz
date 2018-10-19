@@ -228,13 +228,24 @@ export class RedisClient {
     return await this.redis.dbsize();
   }
 
-  public clearLastAccess(expire: number) {
+  public clearLastAccessByExpiry(expire: number) {
 
     if (this.redis.status !== "ready") {
       throw new Error(NOT_CONNECTED);
     }
 
     return this.redis.zremrangebyscore(`${this.prefix}:${LASTACCESS_SET}`, 0, Date.now() - expire);
+  }
+
+  public clearLastAccess(members: string | string[]) {
+
+    if (this.redis.status !== "ready") {
+      throw new Error(NOT_CONNECTED);
+    }
+
+    members = !Array.isArray(members) ? [members] : members;
+
+    return this.redis.zrem(`${this.prefix}:${LASTACCESS_SET}`, ...members);
   }
 
   public clearCacheRefresh(members: string | string[]) {

@@ -46,6 +46,15 @@ export class GraphAccess {
         const node = await this.nodeHandler.getNodeByIdentifier(strToInt(identifier) + "", noMemoryCache);
 
         if (!node) {
+            // Remove the fetchingJob list if exists
+            try {
+                await Promise.all([
+                    this.yildiz.redisClient.clearCacheRefresh(identifier),
+                    this.yildiz.redisClient.clearLastAccess(identifier),
+                ]);
+            } catch (error) {
+                debug(error);
+            }
             return;
         }
 

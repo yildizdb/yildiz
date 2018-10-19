@@ -14,12 +14,6 @@ const debug = Debug("yildiz:lifetime");
 
 const DEFAULT_JOB_INTERVAL_IN_SEC = 120;
 
-const TYPE_NODES = "nodes";
-const TYPE_EDGES = "edges";
-const TYPE_POPNODES = "popnodes";
-const TYPE_CACHES = "caches";
-const TYPE_TTLS = "ttls";
-
 export interface ExpiredTTL {
     ttlKey: string;
     cellQualifiers: string[];
@@ -37,6 +31,7 @@ export class Lifetime {
     private popnodeTable: Bigtable.Table;
     private cacheTable: Bigtable.Table;
     private ttlTable: Bigtable.Table;
+    private ttlReferenceTable: Bigtable.Table;
     private columnFamilyNode: Bigtable.Family;
     private columnFamilyTTL: Bigtable.Family;
 
@@ -53,8 +48,9 @@ export class Lifetime {
             nodeTable,
             popnodeTable,
             cacheTable,
-            columnFamilyNode,
             ttlTable,
+            ttlReferenceTable,
+            columnFamilyNode,
             columnFamilyTTL,
         } = this.yildiz.models;
 
@@ -67,6 +63,7 @@ export class Lifetime {
         this.popnodeTable = popnodeTable;
         this.cacheTable = cacheTable;
         this.ttlTable = ttlTable;
+        this.ttlReferenceTable = ttlReferenceTable;
 
         this.columnFamilyNode = columnFamilyNode;
         this.columnFamilyTTL = columnFamilyTTL;
@@ -115,44 +112,17 @@ export class Lifetime {
         };
 
         const expiredTTLs = await this.streamTTL(options, etl);
-        this.metrics.set("ttl_fetch_range_scan_duration", Date.now() - currentTimestamp);
 
         return expiredTTLs;
     }
 
-    private async getCellQualifiers(expiredTTLs: ExpiredTTL[], type: string) {
+    private getCellQualifiers(expiredTTLs: ExpiredTTL[]) {
 
-        const currentTimestamp = Date.now();
-
-        const identifiers = ([] as string[])
+        return ([] as string[])
             .concat(
                 ...expiredTTLs
                     .map((expiredTTL: ExpiredTTL) => expiredTTL.cellQualifiers),
             );
-
-        const options: StreamParam = {
-            keys: identifiers.map((identifier: string) => `ttlIdentifier#${type}$${identifier}`),
-        };
-
-        const etl = (result: any) => {
-            let identifier = null;
-            try {
-                const timestamp = result.data[this.columnFamilyTTL.id].ttl[0].value;
-                identifier = currentTimestamp > timestamp ? result.id.split("$")[1] : null;
-            } catch (error) {
-                // Do nothing
-            }
-            return identifier;
-        };
-
-        const expiredIdentifiers = await this.streamTTL(options, etl);
-        this.metrics.set("ttl_fetch_get_expired_ids_duration", Date.now() - currentTimestamp);
-
-        return expiredIdentifiers;
-    }
-
-    private getTTLCrossCheckIdentifiers(identifiers: string[], type: string) {
-        return identifiers.map((identifier: string) => `ttlIdentifier#${type}$${identifier}`);
     }
 
     private getTTLKeys(expiredTTLs: ExpiredTTL[]) {
@@ -162,6 +132,12 @@ export class Lifetime {
                 ...expiredTTLs
                     .map((expiredTTL: ExpiredTTL) => expiredTTL.ttlKey),
             );
+    }
+
+    private getTTLReferenceKeys(type: string, expiredKeys: string[]) {
+
+        return expiredKeys
+            .map((expiredKey) => `reference#${type}#${expiredKey}`);
     }
 
     private deleteTable() {
@@ -178,21 +154,24 @@ export class Lifetime {
                 let family: string | null = null;
 
                 switch (type) {
-                    case TYPE_NODES:
+                    case "nodes":
                         table = this.nodeTable;
                         break;
-                    case TYPE_EDGES:
+                    case "edges":
                         table = this.nodeTable;
                         family = this.columnFamilyNode.id;
                         break;
-                    case TYPE_POPNODES:
+                    case "popnodes":
                         table = this.popnodeTable;
                         break;
-                    case TYPE_CACHES:
+                    case "caches":
                         table = this.cacheTable;
                         break;
-                    case TYPE_TTLS:
+                    case "ttls":
                         table = this.ttlTable;
+                        break;
+                    case "ttlReferences":
+                        table = this.ttlReferenceTable;
                         break;
                 }
 
@@ -200,7 +179,7 @@ export class Lifetime {
                     return { success: 0 };
                 }
 
-                const mutateRules = type === TYPE_EDGES ?
+                const mutateRules = type === "edges" ?
                     keys
                         .map((key: string) => ({
                             method: "delete",
@@ -227,11 +206,12 @@ export class Lifetime {
         };
 
         return {
-            node: remove(TYPE_NODES),
-            popnode: remove(TYPE_POPNODES),
-            edge: remove(TYPE_EDGES),
-            cache: remove(TYPE_CACHES),
-            ttl: remove(TYPE_TTLS),
+            node: remove("nodes"),
+            popnode: remove("popnodes"),
+            edge: remove("edges"),
+            cache: remove("caches"),
+            ttl: remove("ttls"),
+            ttlReference: remove("ttlReferences"),
         };
     }
 
@@ -282,19 +262,16 @@ export class Lifetime {
         // Get all the keys that need to be deleted
         const [ nodeTTLKeys, edgeTTLKeys, popnodeTTLKeys, cacheTTLKeys] =
             await Bluebird.all([
-                this.getTTLIds(TYPE_NODES),
-                this.getTTLIds(TYPE_EDGES),
-                this.getTTLIds(TYPE_POPNODES),
-                this.getTTLIds(TYPE_CACHES),
+                this.getTTLIds("nodes"),
+                this.getTTLIds("edges"),
+                this.getTTLIds("popnodes"),
+                this.getTTLIds("caches"),
             ]);
 
-        const [ nodeKeys, edgeKeys, popnodeKeys, cacheKeys ] =
-            await Bluebird.all([
-                this.getCellQualifiers(nodeTTLKeys, TYPE_NODES),
-                this.getCellQualifiers(edgeTTLKeys, TYPE_EDGES),
-                this.getCellQualifiers(popnodeTTLKeys, TYPE_POPNODES),
-                this.getCellQualifiers(cacheTTLKeys, TYPE_CACHES),
-            ]);
+        const nodeKeys = this.getCellQualifiers(nodeTTLKeys);
+        const edgeKeys = this.getCellQualifiers(edgeTTLKeys);
+        const popnodeKeys = this.getCellQualifiers(popnodeTTLKeys);
+        const cacheKeys = this.getCellQualifiers(cacheTTLKeys);
 
         this.metrics.set("ttl_fetch_duration", Date.now() - fetchStart);
 
@@ -314,16 +291,17 @@ export class Lifetime {
             this.getTTLKeys(cacheTTLKeys),
         );
 
-        const ttlCrossCheckKeys = ([] as string[]).concat(
-            this.getTTLCrossCheckIdentifiers(nodeKeys, TYPE_NODES),
-            this.getTTLCrossCheckIdentifiers(edgeKeys, TYPE_EDGES),
-            this.getTTLCrossCheckIdentifiers(popnodeKeys, TYPE_POPNODES),
-            this.getTTLCrossCheckIdentifiers(cacheKeys, TYPE_CACHES),
+        const ttlReferencekeys = ([] as string[]).concat(
+            this.getTTLReferenceKeys("nodes", nodeKeys),
+            this.getTTLReferenceKeys("edges", edgeKeys),
+            this.getTTLReferenceKeys("popnodes", popnodeKeys),
+            this.getTTLReferenceKeys("caches", cacheKeys),
         );
 
-        const wholeTTLKeys = ttlKeys.concat(ttlCrossCheckKeys);
-
-        await deleteTTLOrigin.ttl(ttlKeys.concat(ttlCrossCheckKeys));
+        await Bluebird.all([
+            deleteTTLOrigin.ttl(ttlKeys),
+            deleteTTLOrigin.ttlReference(ttlReferencekeys),
+        ]);
 
         this.metrics.set("ttl_delete_execution_duration", Date.now() - executionStart);
 

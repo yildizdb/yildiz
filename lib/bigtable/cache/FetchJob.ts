@@ -108,7 +108,7 @@ export class FetchJob {
 
     const lastAccess = Date.now() - (this.fetchLastAccess * 1000);
 
-    const removedCounts = await this.redisClient.clearLastAccess(this.expireInSec * 1000);
+    const removedCounts = await this.redisClient.clearLastAccessByExpiry(this.expireInSec * 1000);
 
     if (removedCounts) {
       debug(`expired keys found from LA_SET, removed ${removedCounts} keys`);

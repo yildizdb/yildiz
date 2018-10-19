@@ -9,12 +9,14 @@ export interface YildizModel {
   metadataTable: Bigtable.Table;
   popnodeTable: Bigtable.Table;
   cacheTable: Bigtable.Table;
+  ttlReferenceTable: Bigtable.Table;
 
   columnFamilyNode: Bigtable.Family;
   columnFamilyTTL: Bigtable.Family;
   columnFamilyMetadata: Bigtable.Family;
   columnFamilyPopnode: Bigtable.Family;
   columnFamilyCache: Bigtable.Family;
+  columnFamilyTTLReference: Bigtable.Family;
 }
 
 export interface YildizSingleSchema {

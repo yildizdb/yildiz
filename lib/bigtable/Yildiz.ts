@@ -170,6 +170,13 @@ export class Yildiz {
             await cacheTable.create(cacheTableName);
         }
 
+        const ttlReferenceTableName = `${this.prefix}_ttl_reference`;
+        const ttlReferenceTable = instance.table(ttlReferenceTableName);
+        const ttlReferenceTableExists = await ttlReferenceTable.exists();
+        if (!ttlReferenceTableExists || !ttlReferenceTableExists[0]) {
+            await ttlReferenceTable.create(ttlReferenceTableName);
+        }
+
         // GENERATE columnFamilies
 
         const rule: FamilyRule = {
@@ -213,6 +220,12 @@ export class Yildiz {
             await columnFamilyCache.create({rule});
         }
 
+        const columnFamilyTTLReference = ttlReferenceTable.family("ttlReference");
+        const columnFamilyTTLReferenceExists = await columnFamilyTTLReference.exists();
+        if (!columnFamilyTTLReferenceExists || !columnFamilyTTLReferenceExists[0]) {
+            await columnFamilyTTLReference.create({rule});
+        }
+
         debug(`Generate table and columnFamily done, took ${(Date.now() - start)} ms`);
 
         return {
@@ -224,12 +237,14 @@ export class Yildiz {
             metadataTable,
             popnodeTable,
             cacheTable,
+            ttlReferenceTable,
 
             columnFamilyNode,
             columnFamilyTTL,
             columnFamilyMetadata,
             columnFamilyPopnode,
             columnFamilyCache,
+            columnFamilyTTLReference,
         };
     }
 

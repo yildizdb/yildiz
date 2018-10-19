@@ -41,10 +41,13 @@ export class NodeHandler {
     private popnodeTable: Bigtable.Table;
     private cacheTable: Bigtable.Table;
     private ttlTable: Bigtable.Table;
+    private ttlReferenceTable: Bigtable.Table;
+
     private columnFamilyNode: Bigtable.Family;
     private columnFamilyPopnode: Bigtable.Family;
     private columnFamilyCache: Bigtable.Family;
     private columnFamilyTTL: Bigtable.Family;
+    private columnFamilyTTLReference: Bigtable.Family;
 
     constructor(yildiz: Yildiz) {
 
@@ -60,10 +63,12 @@ export class NodeHandler {
             popnodeTable,
             cacheTable,
             ttlTable,
+            ttlReferenceTable,
             columnFamilyNode,
             columnFamilyPopnode,
             columnFamilyCache,
             columnFamilyTTL,
+            columnFamilyTTLReference,
         } = this.yildiz.models;
 
         // Tables
@@ -71,12 +76,14 @@ export class NodeHandler {
         this.popnodeTable = popnodeTable;
         this.cacheTable = cacheTable;
         this.ttlTable = ttlTable;
+        this.ttlReferenceTable = ttlReferenceTable;
 
         // Column Families
         this.columnFamilyNode = columnFamilyNode;
         this.columnFamilyPopnode = columnFamilyPopnode;
         this.columnFamilyCache = columnFamilyCache;
         this.columnFamilyTTL = columnFamilyTTL;
+        this.columnFamilyTTLReference = columnFamilyTTLReference;
 
         this.lifetime = this.yildiz.config.ttl.lifeTimeInSec || 180;
         this.cacheLifetime = this.yildiz.config.ttl.cacheLifeTimeInSec || 120;
@@ -95,12 +102,25 @@ export class NodeHandler {
         return result;
     }
 
-    private setTTL(type: string, identifier: string, ttlInSec?: number) {
+    private async checkReferenceAndDeleteTTL(type: string, identifier: string) {
+
+        const referenceTTL = await this.getRow
+            (`reference#${type}#${identifier}`, this.ttlReferenceTable, this.columnFamilyTTLReference.id);
+
+        if (!referenceTTL) {
+            return;
+        }
+
+        const ttlRow = this.ttlTable.row(referenceTTL.ttlKey);
+        await ttlRow.deleteCells([`${this.columnFamilyTTL.id}:${identifier}`]);
+    }
+
+    private async setTTL(type: string, identifier: string, ttlInSec?: number) {
+
         const timestamp = Date.now() + ((ttlInSec || this.lifetime) * 1000);
         const ttlKey = `ttl#${type}#${timestamp}`;
-        const ttlCrossCheckIdentifier = `ttlIdentifier#${type}$${identifier}`;
 
-        const ttlInserts = [
+        const ttlInsertData = [
             {
                 key: ttlKey,
                 data: {
@@ -109,17 +129,24 @@ export class NodeHandler {
                     },
                 },
             },
+        ];
+
+        const ttlReferenceInsertData = [
             {
-                key: ttlCrossCheckIdentifier,
+                key: `reference#${type}#${identifier}`,
                 data: {
-                    [this.columnFamilyTTL.id] : {
-                        ttl: timestamp,
+                    [this.columnFamilyTTLReference.id] : {
+                        ttlKey,
                     },
                 },
             },
         ];
 
-        return this.ttlTable.insert(ttlInserts);
+        await Bluebird.all([
+            this.checkReferenceAndDeleteTTL(type, identifier),
+            this.ttlTable.insert(ttlInsertData),
+            this.ttlReferenceTable.insert(ttlReferenceInsertData),
+        ]);
     }
 
     private async getRow(identifier: string | number, table: any, cFName: string): Promise<YildizSingleSchema | null> {
