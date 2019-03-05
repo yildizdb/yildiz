@@ -142,8 +142,10 @@ export class NodeHandler {
             },
         ];
 
+        // NOTE: This can't be done on parallel to avoid race condition on ttlReferenceTable.insert to be finished first
+        await this.checkReferenceAndDeleteTTL(type, identifier);
+
         await Bluebird.all([
-            this.checkReferenceAndDeleteTTL(type, identifier),
             this.ttlTable.insert(ttlInsertData),
             this.ttlReferenceTable.insert(ttlReferenceInsertData),
         ]);
