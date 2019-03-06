@@ -72,7 +72,10 @@ export class YildizFactory {
 
     private storeInstance(prefix: string, instance: Yildiz) {
 
-        this.cache.put(prefix, instance, CACHE_TIME_MS, () => {
+        const cacheTime = this.baseConfig.instanceTimeoutInSec ? 
+            this.baseConfig.instanceTimeoutInSec * 1000 : CACHE_TIME_MS;
+
+        this.cache.put(prefix, instance, cacheTime, () => {
             try {
                 debug(`factory instance timeout reached for ${prefix}, closing and removing from cache.`);
                 delete this.updated[prefix];

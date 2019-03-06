@@ -369,9 +369,8 @@ export class GraphAccess {
 
                 if (!cacheResult) {
                     errorKeys.push(cache[index]);
+                    nocache.push(cache[index]);
                 }
-
-                nocache.push(cache[index]);
             });
 
             // Throw error if exists
