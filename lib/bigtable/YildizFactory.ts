@@ -123,7 +123,7 @@ export class YildizFactory {
         // Init, set cache and clean-up afterwards
         this.blocked[prefix] = new Bluebird((resolve, reject) => {
             const newInstance = new Yildiz(prefix, this.baseConfig);
-            newInstance.init().then(() => {
+            newInstance.init(this.updated[prefix]).then(() => {
                 this.storeInstance(prefix, newInstance);
                 resolve(newInstance);
             }).catch(reject);

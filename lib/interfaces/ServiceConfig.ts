@@ -66,6 +66,7 @@ export interface UpsertConfig {
 export interface ServiceConfig {
   accessLog: boolean;
   readinessEndpoint?: boolean;
+  readinessPrefixes?: string[];
   enableRaw: boolean;
   noBanner: boolean;
   promiseConcurrency?: number;

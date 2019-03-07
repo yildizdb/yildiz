@@ -8,42 +8,68 @@ import { Registry } from "prom-client";
 
 const SCHEMES = adminSchema;
 
-const adminRoute = (readinessEndpoint: boolean, tooBusy: boolean, incStat: (stat: string) => any) => {
+const adminRoute = (readinessEndpoint: boolean, tooBusy: boolean, incStat: (stat: string) => any, prefixes?: string[]) => {
     return (
         instance: FastifyInstance,
         options: RegisterOptions<Server, IncomingMessage, ServerResponse>,
         next: NextFunction) => {
 
-        instance.get("/health", SCHEMES.HEALTH, (req, res) => {
+        instance.get("/health", SCHEMES.HEALTH, async (req, res) => {
+
+            if (prefixes && prefixes.length) {
+                await Promise.all(
+                    prefixes.map((prefix: string) => instance.factory.get(prefix))
+                );
+            }
+
             res.code(200).send({
                 status: "UP",
             });
         });
 
-        instance.get("/healthcheck", SCHEMES.HEALTH, (req, res) => {
+        instance.get("/healthcheck", SCHEMES.HEALTH, async (req, res) => {
+
+            if (prefixes && prefixes.length) {
+                await Promise.all(
+                    prefixes.map((prefix: string) => instance.factory.get(prefix))
+                );
+            }
+
             res.code(200).send();
         });
 
         if (readinessEndpoint) {
 
-            instance.get("/ready", SCHEMES.HEALTH, (req, res) => {
+            instance.get("/ready", SCHEMES.HEALTH, async (req, res) => {
 
                 if (!tooBusy) {
                     res.code(200).send();
                     return;
                 }
 
+                if (prefixes && prefixes.length) {
+                    await Promise.all(
+                        prefixes.map((prefix: string) => instance.factory.get(prefix))
+                    );
+                }
+
                 incStat("toobusy");
                 res.code(503).send();
             });
 
-            instance.get("/readycheck", SCHEMES.HEALTH, (req, res) => {
+            instance.get("/readycheck", SCHEMES.HEALTH, async (req, res) => {
 
                 if (!tooBusy) {
                     res.code(200).send({
                         status: "READY",
                     });
                     return;
+                }
+
+                if (prefixes && prefixes.length) {
+                    await Promise.all(
+                        prefixes.map((prefix: string) => instance.factory.get(prefix))
+                    );
                 }
 
                 incStat("toobusy");

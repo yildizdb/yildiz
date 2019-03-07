@@ -149,6 +149,7 @@ export class NodeHandler {
             this.ttlTable.insert(ttlInsertData),
             this.ttlReferenceTable.insert(ttlReferenceInsertData),
         ]);
+
     }
 
     private async getRow(identifier: string | number, table: any, cFName: string): Promise<YildizSingleSchema | null> {
@@ -838,35 +839,33 @@ export class NodeHandler {
         return await this.metadata.getCount(TYPE_NODES);
     }
 
-    public async bumpCacheByIdentifier(identifier: string) {
+    public async bumpCacheByIdentifier(identifier: string | number): Promise<any> {
 
         const key = identifier + "";
         const cacheExists = await this.cacheTable.row(key).exists();
         const exists = cacheExists && cacheExists[0];
 
         if (!exists) {
-            return;
+            return new Error(`${identifier} doesn't exist in cache`);
         }
-
-        await this.setTTL(TYPE_CACHES, identifier + "", this.cacheLifetime);
+        
+        this.redisClient.setExistence(identifier + "");
+        this.setTTL(TYPE_CACHES, identifier + "", this.cacheLifetime);
     }
 
     public async getCacheByIdentifier(identifier: string | number) {
 
         const start = Date.now();
-
         const cache = await this.getRow(identifier, this.cacheTable, this.columnFamilyCache.id);
-
+        
         this.yildiz.metrics.set("get_cache_by_identifier", Date.now() - start);
 
         if (!cache || !cache.value) {
             return null;
         }
 
-        await Promise.all([
-            this.setTTL(TYPE_CACHES, identifier + "", this.cacheLifetime),
-            this.redisClient.setExistence(identifier + ""),
-        ]);
+        this.redisClient.setExistence(identifier + "");
+        this.setTTL(TYPE_CACHES, identifier + "", this.cacheLifetime);
 
         return cache.value;
     }
@@ -886,7 +885,8 @@ export class NodeHandler {
                 value: JSON.stringify(cache),
             },
         };
-
+        
+        this.redisClient.setExistence(cache.identifier + "");
         await Bluebird.all([
             this.setTTL(TYPE_CACHES, cache.identifier + "", this.cacheLifetime),
             row.save(saveData),

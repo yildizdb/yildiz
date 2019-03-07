@@ -92,16 +92,18 @@ export class FetchJob {
     }
 
     try {
+      const startBatch = Date.now();
       if (this.resolveNodes) {
         await this.graphAccess.buildAndCacheNodes(keys);
       } else {
         await this.graphAccess.bumpCacheIfExists(keys);
       }
+      this.metrics.inc("resolvingBatch_duration", Date.now() - startBatch);
     } catch (error) {
       debug("error occurred while caching", error.message);
     }
 
-    return await this.jobAction(startJob);
+    return this.jobAction(startJob);
   }
 
   private async getKeysToBeCached() {

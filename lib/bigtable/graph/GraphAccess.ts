@@ -122,10 +122,6 @@ export class GraphAccess {
             }
         }
 
-        if (node.identifier) {
-            await this.lookupCache.setExistence(node.identifier + "");
-        }
-
         const result = {
             identifier: node.identifier,
             value: node.value,
@@ -135,8 +131,18 @@ export class GraphAccess {
 
         await this.nodeHandler.createCache(result);
 
-        // Return the result after resolving edges and nodes
         return result;
+    }
+
+    private resolveOrBump(identifier: string) {
+
+        const noMemoryCache = true;
+
+        // Whatever resolve first should do the caching job
+        return Bluebird.any([
+            this.fullDataResolver(identifier + "", noMemoryCache),
+            this.nodeHandler.bumpCacheByIdentifier(identifier),
+        ]);
     }
 
     public async init() {
@@ -211,13 +217,11 @@ export class GraphAccess {
 
     public async buildAndCacheNodes(identifiers: string[]): Promise<void> {
 
-        const noMemoryCache = true;
-
         // Resolve all promises as the array will contain Promise as element
         (await Bluebird
             .map(
                 identifiers,
-                (identifier: string) => this.fullDataResolver(identifier + "", noMemoryCache),
+                (identifier: string) => this.resolveOrBump(identifier + ""),
                 {
                     concurrency: this.promiseConcurrency,
                 },
@@ -308,8 +312,6 @@ export class GraphAccess {
             throw new Error("values should not be empty");
         }
 
-        const start = Date.now();
-
         const nodeIdentifiers = values.map((value) => strToInt(value) + "");
         const {cache, nocache} = await this.lookupCache.classifyExistence(nodeIdentifiers);
 
@@ -320,15 +322,13 @@ export class GraphAccess {
             return;
         }
 
-        await this.lookupCache.setExistence(cache);
-
         return await Bluebird.map(
             cache,
             (identifier: string) => this.nodeHandler.bumpCacheByIdentifier(identifier),
             {
                 concurrency: this.promiseConcurrency,
             },
-        );
+        ).catch((error) => {/* Ignore the error if it doesn't exist*/});
     }
 
     public async edgeInfoForNodesRelatingToTranslateValues(values = []) {
@@ -382,13 +382,9 @@ export class GraphAccess {
 
         // If everything is in the cache, just return the cache
         if (!nocache.length) {
-
             const resultCache = this.buildResult(cacheResults);
-            const diffCache = Date.now() - start;
-
-            debug(`cached translated edge info took ${diffCache} ms`);
-            this.metrics.set("translated_edge_info_duration", diffCache);
-
+            debug(`cached translated edge info took ${Date.now() - start} ms`);
+            this.metrics.set("translated_edge_info_duration", Date.now() - start);
             return resultCache;
         }
 
@@ -400,13 +396,11 @@ export class GraphAccess {
             resultArray.concat(cacheResults),
         );
 
-        const diff = Date.now() - start;
-
         if ((this.upsertConfig as UpsertConfig).translatedEdgeDebug) {
-            debug(`translated edge info took ${diff} ms`);
+            debug(`translated edge info took ${Date.now() - start} ms`);
         }
 
-        this.metrics.set("translated_edge_info_duration", diff);
+        this.metrics.set("translated_edge_info_duration", Date.now() - start);
 
         return result;
     }

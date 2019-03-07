@@ -78,9 +78,10 @@ export class Yildiz {
         this.metrics.inc(key);
     }
 
-    public async init() {
+    public async init(lastUpdated?: number) {
 
         let { clusters } = this.config.database;
+        const hasRun = lastUpdated ? true : false;
 
         const {
             projectId,
@@ -96,7 +97,7 @@ export class Yildiz {
             keyFilename,
         });
 
-        this.models = await this.generate();
+        this.models = await this.generate(hasRun);
         debug("sync done, ready to do work.");
 
         this.metrics = new Metrics(this.prefix);
@@ -118,7 +119,7 @@ export class Yildiz {
         this.runJobs();
     }
 
-    private async generate() {
+    private async generate(hasRun: boolean) {
 
         const start = Date.now();
 
@@ -129,102 +130,132 @@ export class Yildiz {
         } = this.config.database;
 
         const instance = this.bigtable.instance(instanceName);
-        const instanceExists = await instance.exists();
-        if (!instanceExists || !instanceExists[0]) {
-            await instance.create();
+
+        if (!hasRun) {
+            const instanceExists = await instance.exists();
+            if (!instanceExists || !instanceExists[0]) {
+                await instance.create();
+            }
         }
 
-        // GENERATE tables
         const nodeTableName = `${this.prefix}_nodes`;
         const nodeTable = instance.table(nodeTableName);
-        const nodeTableExists = await nodeTable.exists();
-        if (!nodeTableExists || !nodeTableExists[0]) {
-            await nodeTable.create(nodeTableName);
-        }
 
         const ttlTableName = `${this.prefix}_ttl`;
         const ttlTable = instance.table(ttlTableName);
-        const ttlTableExists = await ttlTable.exists();
-        if (!ttlTableExists || !ttlTableExists[0]) {
-            await ttlTable.create(ttlTableName);
-        }
 
         const metadataTableName = `${this.prefix}_metadata`;
         const metadataTable = instance.table(metadataTableName);
-        const metadataTableExists = await metadataTable.exists();
-        if (!metadataTableExists || !metadataTableExists[0]) {
-            await metadataTable.create(metadataTableName);
-        }
 
         const popnodeTableName = `${this.prefix}_popnodes`;
         const popnodeTable = instance.table(popnodeTableName);
-        const popnodeTableExists = await popnodeTable.exists();
-        if (!popnodeTableExists || !popnodeTableExists[0]) {
-            await popnodeTable.create(popnodeTableName);
-        }
 
         const cacheTableName = `${this.prefix}_caches`;
         const cacheTable = instance.table(cacheTableName);
-        const cacheTableExists = await cacheTable.exists();
-        if (!cacheTableExists || !cacheTableExists[0]) {
-            await cacheTable.create(cacheTableName);
-        }
 
         const ttlReferenceTableName = `${this.prefix}_ttl_reference`;
         const ttlReferenceTable = instance.table(ttlReferenceTableName);
-        const ttlReferenceTableExists = await ttlReferenceTable.exists();
-        if (!ttlReferenceTableExists || !ttlReferenceTableExists[0]) {
-            await ttlReferenceTable.create(ttlReferenceTableName);
-        }
 
-        // GENERATE columnFamilies
+        // GENERATE tables if it wasn't the first run
+        if (!hasRun) {
 
-        const rule: FamilyRule = {
-            versions: 1,
-        };
+            try {
 
-        if (maxAgeSeconds) {
-            rule.age = {
-                seconds: maxAgeSeconds,
-            };
-            rule.union = true;
+                const [
+                    nodeTableExists,
+                    ttlTableExists,
+                    metadataTableExists,
+                    popnodeTableExists,
+                    cacheTableExists,
+                    ttlReferenceTableExists,
+                ] = await Bluebird.all([
+                    nodeTable.exists(),
+                    ttlTable.exists(),
+                    metadataTable.exists(),
+                    popnodeTable.exists(),
+                    cacheTable.exists(),
+                    ttlReferenceTable.exists(),
+                ]);
+    
+                await Bluebird.all([
+                    !nodeTableExists || !nodeTableExists[0] ?
+                        nodeTable.create(nodeTableName) : Bluebird.resolve(),
+                    !ttlTableExists || !ttlTableExists[0] ?
+                        ttlTable.create(ttlTableName) : Bluebird.resolve(),
+                    !metadataTableExists || !metadataTableExists[0] ?
+                        metadataTable.create(metadataTableName) : Bluebird.resolve(),
+                    !popnodeTableExists || !popnodeTableExists[0] ?
+                        popnodeTable.create(popnodeTableName) : Bluebird.resolve(),
+                    !cacheTableExists || !cacheTableExists[0] ?
+                        cacheTable.create(cacheTableName) : Bluebird.resolve(),
+                    !ttlReferenceTableExists || !ttlReferenceTableExists[0] ?
+                        ttlReferenceTable.create(ttlReferenceTableName) : Bluebird.resolve(),
+                ]);
+
+            } catch(error) {
+                debug(error);
+            }
+
         }
 
         const columnFamilyNode = nodeTable.family("nodes");
-        const columnFamilyNodeExists = await columnFamilyNode.exists();
-        if (!columnFamilyNodeExists || !columnFamilyNodeExists[0]) {
-            await columnFamilyNode.create({rule});
-        }
-
         const columnFamilyTTL = ttlTable.family("ttl");
-        const columnFamilyTTLExists = await columnFamilyTTL.exists();
-        if (!columnFamilyTTLExists || !columnFamilyTTLExists[0]) {
-            await columnFamilyTTL.create({rule});
-        }
-
         const columnFamilyMetadata = metadataTable.family("metadata");
-        const columnFamilyMetadataExists = await columnFamilyMetadata.exists();
-        if (!columnFamilyMetadataExists || !columnFamilyMetadataExists[0]) {
-            await columnFamilyMetadata.create({rule});
-        }
-
         const columnFamilyPopnode = popnodeTable.family("popnodes");
-        const columnFamilyPopnodeExists = await columnFamilyPopnode.exists();
-        if (!columnFamilyPopnodeExists || !columnFamilyPopnodeExists[0]) {
-            await columnFamilyPopnode.create({rule});
-        }
-
         const columnFamilyCache = cacheTable.family("caches");
-        const columnFamilyCacheExists = await columnFamilyCache.exists();
-        if (!columnFamilyCacheExists || !columnFamilyCacheExists[0]) {
-            await columnFamilyCache.create({rule});
+        const columnFamilyTTLReference = ttlReferenceTable.family("ttlReference");
+        
+        // GENERATE columnFamilies if it wasn't the first run
+        if (!hasRun) {
+
+            const rule: FamilyRule = {
+                versions: 1,
+            };
+    
+            if (maxAgeSeconds) {
+                rule.age = {
+                    seconds: maxAgeSeconds,
+                };
+                rule.union = true;
+            }
+
+            try {
+                const [
+                    columnFamilyNodeExists,
+                    columnFamilyTTLExists,
+                    columnFamilyMetadataExists,
+                    columnFamilyPopnodeExists,
+                    columnFamilyCacheExists,
+                    columnFamilyTTLReferenceExists,
+                ] = await Bluebird.all([
+                    columnFamilyNode.exists(),
+                    columnFamilyTTL.exists(),
+                    columnFamilyMetadata.exists(),
+                    columnFamilyPopnode.exists(),
+                    columnFamilyCache.exists(),
+                    columnFamilyTTLReference.exists(),
+                ])
+    
+                await Bluebird.all([
+                    !columnFamilyNodeExists || !columnFamilyNodeExists[0] ?
+                        columnFamilyNode.create({rule}) : Bluebird.resolve(),
+                    !columnFamilyTTLExists || !columnFamilyTTLExists[0] ?
+                        columnFamilyTTL.create({rule}) : Bluebird.resolve(),
+                    !columnFamilyMetadataExists || !columnFamilyMetadataExists[0] ?
+                        columnFamilyMetadata.create({rule}) : Bluebird.resolve(),
+                    !columnFamilyPopnodeExists || !columnFamilyPopnodeExists[0] ?
+                        columnFamilyPopnode.create({rule}) : Bluebird.resolve(),
+                    !columnFamilyCacheExists || !columnFamilyCacheExists[0] ?
+                        columnFamilyCache.create({rule}) : Bluebird.resolve(),
+                    !columnFamilyTTLReferenceExists || !columnFamilyTTLReferenceExists[0] ?
+                        columnFamilyTTLReference.create({rule}) : Bluebird.resolve(),
+                ]);
+            } catch(error) {
+                debug(error);
+            }
+
         }
 
-        const columnFamilyTTLReference = ttlReferenceTable.family("ttlReference");
-        const columnFamilyTTLReferenceExists = await columnFamilyTTLReference.exists();
-        if (!columnFamilyTTLReferenceExists || !columnFamilyTTLReferenceExists[0]) {
-            await columnFamilyTTLReference.create({rule});
-        }
 
         debug(`Generate table and columnFamily done, took ${(Date.now() - start)} ms`);
 

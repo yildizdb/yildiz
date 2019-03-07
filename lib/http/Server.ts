@@ -33,6 +33,7 @@ export class Server {
     private port: number;
     private accessLog: boolean;
     private readinessEndpoint: boolean;
+    private readinessPrefixes?: string[];
     private app: fastify.FastifyInstance;
     private accessHandler: AccessHandler;
     private factory: YildizFactory;
@@ -51,10 +52,12 @@ export class Server {
             maxLag,
             accessLog,
             readinessEndpoint,
+            readinessPrefixes,
         } = options;
 
         this.accessLog = typeof accessLog === "boolean" ? accessLog : false;
         this.readinessEndpoint = typeof readinessEndpoint === "boolean" ? true : false;
+        this.readinessPrefixes = readinessPrefixes;
         toobusy.maxLag(maxLag || 150);
 
         this.app = fastify();
@@ -124,9 +127,10 @@ export class Server {
             prefix: "/",
         });
 
-        this.app.register(admin(this.readinessEndpoint, toobusy(), this.incStat), {
-            prefix: "/admin",
-        });
+        this.app.register(
+            admin(this.readinessEndpoint, toobusy(), this.incStat, this.readinessPrefixes), 
+            { prefix: "/admin" }
+        );
 
         // ensure prefix header safety
         this.app.use((req: IncomingMessage, res: ServerResponse, next: NextFunction) => {
