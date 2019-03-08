@@ -48,7 +48,7 @@ export class GraphAccess {
         if (!node) {
             // Remove the fetchingJob list if exists
             try {
-                await Promise.all([
+                await Bluebird.all([
                     this.yildiz.redisClient.clearCacheRefresh(identifier),
                     this.yildiz.redisClient.clearLastAccess(identifier),
                 ]);
@@ -162,6 +162,7 @@ export class GraphAccess {
         // Get the other nodes data
         // cache will contain an array of object data of resolved right node
         // nocache will contain an array of key of unresolved right node
+        const start = Date.now();
         const {cache, nocache} = await this.lookupCache.classifyRightNode(identifiers);
 
         this.metrics.inc("resolvedRightNode_cache_hits", cache.length);
@@ -210,6 +211,9 @@ export class GraphAccess {
 
         // Set them in cache
         await this.lookupCache.setRightNode(nocacheNodes);
+
+        this.metrics.inc("fetch_rightNodes_count");
+        this.metrics.inc("fetch_rightNodes_time", Date.now() - start);
 
         // Concat the result
         return nocacheNodes.concat(cache);
@@ -383,7 +387,6 @@ export class GraphAccess {
         // If everything is in the cache, just return the cache
         if (!nocache.length) {
             const resultCache = this.buildResult(cacheResults);
-            debug(`cached translated edge info took ${Date.now() - start} ms`);
             this.metrics.set("translated_edge_info_duration", Date.now() - start);
             return resultCache;
         }
@@ -429,17 +432,21 @@ export class GraphAccess {
         const presumedNodeRight = strToInt(rightNodeIdentifierVal) + "";
 
         // Check node table from the presumed id from translates table if they exist
-        const nodeLeftExists = await this.nodeHandler.doesNodeExist(presumedNodeLeft);
-        const nodeRightExists = await this.nodeHandler.doesNodeExist(presumedNodeRight);
+        const [
+            nodeLeftExists,
+            nodeRightExists, 
+        ] = await Bluebird.all([
+            this.nodeHandler.doesNodeExist(presumedNodeLeft),
+            this.nodeHandler.doesNodeExist(presumedNodeRight),
+        ]);
 
         // If the nodes don't exist create them
-        if (!nodeLeftExists) {
-            await this.nodeHandler.createNode(presumedNodeLeft, leftNodeData, {}, ttld, leftNodeIdentifierVal);
-        }
-
-        if (!nodeRightExists) {
-            await this.nodeHandler.createNode(presumedNodeRight, rightNodeData, {}, ttld, rightNodeIdentifierVal);
-        }
+        await Bluebird.all([
+            nodeLeftExists ? Promise.resolve() :
+                this.nodeHandler.createNode(presumedNodeLeft, leftNodeData, {}, ttld, leftNodeIdentifierVal),
+            nodeRightExists ? Promise.resolve() :
+                this.nodeHandler.createNode(presumedNodeRight, rightNodeData, {}, ttld, rightNodeIdentifierVal),
+        ]);
 
         // If NOT depthBeforeCreation, simply create a new edge
         let edge = null;

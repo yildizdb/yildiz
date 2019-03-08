@@ -37,13 +37,7 @@ export class RedisClient {
 
   public connect() {
 
-    if (this.redisConfig.cluster) {
-
-      this.redis = new IORedis.Cluster(this.redisConfig.cluster.nodes,
-        Object.assign({ showFriendlyErrorStack: true }, this.redisConfig.cluster.config),
-      );
-
-    } else if (this.redisConfig.single) {
+    if (this.redisConfig.single) {
       this.redisConfig.single.retryStrategy = (times: number) => Math.min(times * 2000, 30000);
       this.redis = new IORedis(this.redisConfig.single);
 

@@ -154,6 +154,7 @@ export class NodeHandler {
 
     private async getRow(identifier: string | number, table: any, cFName: string): Promise<YildizSingleSchema | null> {
 
+        const start = Date.now();
         const result: YildizSingleSchema = { identifier, id: identifier };
         const row = table.row(identifier + "");
         let rowGet = null;
@@ -184,6 +185,8 @@ export class NodeHandler {
             });
         }
 
+        this.metrics.inc("fetch_row_count");
+        this.yildiz.metrics.inc("fetch_row_time", Date.now() - start);
         return result;
     }
 
@@ -196,6 +199,48 @@ export class NodeHandler {
         }];
 
         return await nodeRow.createRules(rules);
+    }
+
+    private async getAnyTypeOfEdges(
+        originNodeId: string | number,
+        destinationNodeId: string | number,
+        relation: string | number,
+        cFName: string) : Promise<any> {
+        
+        let result = null;
+
+        // It will fetch the edges whether it is a depth edge or relation edge
+
+        try {
+            result = (await this.nodeTable.row(originNodeId + "")
+            .get([
+                `${cFName}:${ED}#${destinationNodeId}`,
+                `${cFName}:${EC}#${destinationNodeId}#${relation}`,
+            ]))
+            .filter((resultLeftMember: AnyObject) => !!resultLeftMember)
+            .map((resultLeftMember: AnyObject) => resultLeftMember[cFName]);
+        } catch(error) {
+            if (!error.message.startsWith("Unknown row")) {
+                debug("unable to get leftNode", error);
+            } else {
+                debug(error);
+            }
+        }
+
+        if (!result) {
+            return null;
+        }
+
+        const key = result[0] && Object.keys(result[0])[0];
+        const value = result[0] &&
+            result[0][key] &&
+            result[0][key][0] &&
+            result[0][key][0].value;
+
+        return {
+            key,
+            value,
+        };
     }
 
     /* ### EDGES ### */
@@ -228,54 +273,29 @@ export class NodeHandler {
 
         const cFName = this.columnFamilyNode.id;
 
-        let resultLeft = [];
-        let resultRight = [];
-
         const result: EdgeCache = {
             id: [],
             data: {},
         };
 
-        // firstNode
-        if (this.dbConfig.leftNodeEdge) {
-            try {
-                resultLeft = (await this.nodeTable.row(firstNodeId + "")
-                    .get([
-                        `${cFName}:${ED}#${secondNodeId}`,
-                        `${cFName}:${EC}#${secondNodeId}#${relation}`,
-                    ]))
-                    .filter((resultLeftMember: AnyObject) => !!resultLeftMember)
-                    .map((resultLeftMember: AnyObject) => resultLeftMember[cFName]);
+        const [resultLeft, resultRight] = await Bluebird.all([
+            !this.dbConfig.leftNodeEdge ? Promise.resolve() :
+                this.getAnyTypeOfEdges(firstNodeId, secondNodeId, relation, cFName),
+            !this.dbConfig.leftNodeEdge ? Promise.resolve() :
+                this.getAnyTypeOfEdges(secondNodeId, firstNodeId, relation, cFName),
+        ]);
 
-                const key = Object.keys(resultLeft[0])[0];
-                result.id.push(key);
-                result.data[key] = resultLeft[0][key][0].value;
-            } catch (error) {
-                if (!error.message.startsWith("Unknown row")) {
-                    debug("unable to get leftNode", error);
-                }
-            }
+        const leftKey = resultLeft && resultLeft.key;
+        const rightKey = resultRight && resultRight.key;
+
+        if (leftKey) {
+            result.id.push(leftKey);
+            result.data[leftKey] = resultLeft && resultLeft.value;
         }
 
-        // secondNode
-        if (this.dbConfig.rightNodeEdge) {
-            try {
-                resultRight = (await this.nodeTable.row(secondNodeId + "")
-                .get([
-                    `${cFName}:${ED}#${firstNodeId}`,
-                    `${cFName}:${EC}#${firstNodeId}#${relation}`,
-                ]))
-                .filter((resultRightMember: AnyObject) => !!resultRightMember)
-                .map((resultRightMember: AnyObject) => resultRightMember[cFName]);
-
-                const key = Object.keys(resultRight[0])[0];
-                result.id.push(key);
-                result.data[key] = resultRight[0][key][0].value;
-            } catch (error) {
-                if (!error.message.startsWith("Unknown row")) {
-                    debug("unable to get leftNode", error);
-                }
-            }
+        if (rightKey) {
+            result.id.push(rightKey);
+            result.data[rightKey] = resultRight && resultRight.value;
         }
 
         if (!result.id.length) {
