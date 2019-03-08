@@ -46,6 +46,7 @@ export interface FetchJobConfig {
   fetchBatchSize?: number;
   limit?: number;
   resolveNodes?: boolean;
+  alwaysAwaiting?: boolean;
 }
 
 export interface LookupCacheConfig {

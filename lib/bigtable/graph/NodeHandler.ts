@@ -220,10 +220,10 @@ export class NodeHandler {
             .filter((resultLeftMember: AnyObject) => !!resultLeftMember)
             .map((resultLeftMember: AnyObject) => resultLeftMember[cFName]);
         } catch(error) {
+
+            // Surpress Unknown row error message
             if (!error.message.startsWith("Unknown row")) {
-                debug("unable to get leftNode", error);
-            } else {
-                debug(error);
+                debug("unable to get edge", error);
             }
         }
 

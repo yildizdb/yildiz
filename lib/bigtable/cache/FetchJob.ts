@@ -25,6 +25,7 @@ export class FetchJob {
   private fetchLastAccess: number;
   private limit: number;
   private resolveNodes: boolean;
+  private alwaysAwaiting: boolean;
 
   private tov!: NodeJS.Timer | number;
   private graphAccess!: GraphAccess;
@@ -42,6 +43,7 @@ export class FetchJob {
       fetchLastAccess = DEFAULT_FETCH_LAST_ACCESS,
       limit = DEFAULT_FETCH_LIMIT,
       resolveNodes = false,
+      alwaysAwaiting = false,
     } = this.config.fetchJob || {};
 
     // How long the keys are going to expire in redis
@@ -57,6 +59,7 @@ export class FetchJob {
     this.limit = limit;
 
     this.resolveNodes = resolveNodes;
+    this.alwaysAwaiting = alwaysAwaiting;
   }
 
   private resetJob() {
@@ -101,6 +104,10 @@ export class FetchJob {
       this.metrics.inc("resolvingBatch_duration", Date.now() - startBatch);
     } catch (error) {
       debug("error occurred while caching", error.message);
+    }
+
+    if (this.alwaysAwaiting) {
+      return await this.jobAction(startJob);
     }
 
     return this.jobAction(startJob);
