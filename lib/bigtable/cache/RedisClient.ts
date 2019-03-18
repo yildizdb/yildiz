@@ -172,17 +172,10 @@ export class RedisClient {
       .zrangebyscore(`${this.prefix}:${LASTACCESS_SET}`, 0, lastAccess, "LIMIT", 0, limit);
   }
 
-  public async getCacheRefresh(lastRefresh: number, limit: number) {
+  public getCacheRefresh(lastRefresh: number, limit: number) {
 
     if (this.redis.status !== "ready") {
       throw new Error(NOT_CONNECTED);
-    }
-
-    const count  = await this.redis.zcount(`${this.prefix}:${CACHEREFRESH_SET}`, "-inf", "+inf");
-
-    if (count === 0) {
-      return this.redis
-        .zrangebyscore(`${this.prefix}:${LASTACCESS_SET}`, 0, lastRefresh, "LIMIT", 0, limit);
     }
 
     return this.redis

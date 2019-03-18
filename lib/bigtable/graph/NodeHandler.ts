@@ -36,6 +36,7 @@ export class NodeHandler {
     private redisClient: RedisClient;
     private lifetime: number;
     private cacheLifetime: number;
+    private awaitingSetTTL: boolean;
 
     private nodeTable: Bigtable.Table;
     private popnodeTable: Bigtable.Table;
@@ -87,6 +88,7 @@ export class NodeHandler {
 
         this.lifetime = this.yildiz.config.ttl.lifeTimeInSec || 180;
         this.cacheLifetime = this.yildiz.config.ttl.cacheLifeTimeInSec || 120;
+        this.awaitingSetTTL = this.yildiz.config.ttl.alwaysAwaiting || false;
     }
 
     private getParsedValue(value: string) {
@@ -870,7 +872,12 @@ export class NodeHandler {
         }
         
         this.redisClient.setExistence(identifier + "");
-        this.setTTL(TYPE_CACHES, identifier + "", this.cacheLifetime);
+
+        if (this.awaitingSetTTL) {
+            await this.setTTL(TYPE_CACHES, identifier + "", this.cacheLifetime);
+        } else {
+            this.setTTL(TYPE_CACHES, identifier + "", this.cacheLifetime);
+        }
     }
 
     public async getCacheByIdentifier(identifier: string | number) {
@@ -885,7 +892,12 @@ export class NodeHandler {
         }
 
         this.redisClient.setExistence(identifier + "");
-        this.setTTL(TYPE_CACHES, identifier + "", this.cacheLifetime);
+
+        if (this.awaitingSetTTL) {
+            await this.setTTL(TYPE_CACHES, identifier + "", this.cacheLifetime);
+        } else {
+            this.setTTL(TYPE_CACHES, identifier + "", this.cacheLifetime);
+        }
 
         return cache.value;
     }

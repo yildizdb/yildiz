@@ -1,4 +1,5 @@
 import Debug from "debug";
+import Bluebird from "bluebird";
 
 import { ServiceConfig } from "../../interfaces/ServiceConfig";
 import { Yildiz } from "../Yildiz";
@@ -26,6 +27,7 @@ export class FetchJob {
   private limit: number;
   private resolveNodes: boolean;
   private alwaysAwaiting: boolean;
+  private jobActive: boolean;
 
   private tov!: NodeJS.Timer | number;
   private graphAccess!: GraphAccess;
@@ -36,6 +38,8 @@ export class FetchJob {
     this.yildiz = yildiz;
     this.config = yildiz.config;
     this.metrics = metrics;
+
+    this.jobActive = this.config.fetchJob ? true : false;
 
     const {
       expireInSec = DEFAULT_EXP_IN_SEC,
@@ -91,6 +95,7 @@ export class FetchJob {
     if (!keys || !keys.length) {
       this.metrics.inc("fetchJob_runs");
       this.metrics.inc("fetchJob_duration", Date.now() - startJob);
+      debug(`fetchJob done took ${Date.now() - startJob} ms`);
       return this.resetJob();
     }
 
@@ -108,61 +113,64 @@ export class FetchJob {
 
     if (this.alwaysAwaiting) {
       return await this.jobAction(startJob);
+    } else {
+      return this.jobAction(startJob);
     }
 
-    return this.jobAction(startJob);
   }
 
   private async getKeysToBeCached() {
 
+    // Remove the keys from last LASTACCESS_SET that has expired
     const lastAccess = Date.now() - (this.fetchLastAccess * 1000);
-
-    const removedCounts = await this.redisClient.clearLastAccessByExpiry(this.expireInSec * 1000);
+    const removedCounts = this.redisClient.clearLastAccessByExpiry(this.expireInSec * 1000);
 
     if (removedCounts) {
-      debug(`expired keys found from LA_SET, removed ${removedCounts} keys`);
+      debug(`expired keys found from LASTACCESS_SET, removed ${removedCounts} keys`);
     }
 
-    const keys = await this.redisClient.getCacheRefresh(lastAccess, this.limit);
+    const [refreshKeys, accessedKeys] = await Bluebird.all([
+      this.redisClient.getCacheRefresh(lastAccess, this.limit),
+      this.redisClient.getLastAccess(lastAccess, this.limit),
+    ]);
 
-    if (!keys.length) {
-      return keys;
+    // If there are no keys found, return empty array
+    if ((!refreshKeys || !refreshKeys.length) && (!accessedKeys || !accessedKeys.length)) {
+      return [];
     }
 
-    const accessedKeys = await this.redisClient.getLastAccess(lastAccess, this.limit);
+    // Remove the keys from CACHEREFRESH_SET because if it is not in LASTACCESS_SET it means it is no longer valid
+    if (refreshKeys.length && (!accessedKeys || !accessedKeys.length)) {
+      debug(`expired keys found from CACHEREFRESH_SET, removed ${refreshKeys.length} keys`);
 
-    if (!accessedKeys.length) {
-      // Remove the keys from CACHEREFRESH_SET because if it is not in LASTACCESS_SET it means it is no longer valid
-      debug(`expired keys found from CR_SET, removed ${keys.length} keys`);
-
-      await this.redisClient.clearCacheRefresh(keys);
-      this.metrics.inc("fetchJob_removed_keys", keys.length);
+      this.redisClient.clearCacheRefresh(refreshKeys);
+      this.metrics.inc("fetchJob_removed_keys", refreshKeys.length);
 
       return [];
     }
 
     // Get the intersection
-    // If LA_SET not in CR_SET, add the keys to be cached
+    // If LASTACCESS_SET not in CACHEREFRESH_SET,
+    // add the keys with the keys of CACHEREFRESH_SET to be cachedg
     const keysToBeCached = accessedKeys
-      .filter((value: string) => keys.indexOf(value) === -1)
-      .concat(keys);
+      .concat(refreshKeys || [])
+      .filter((value: string) => refreshKeys.indexOf(value) === -1);
+    if (!keysToBeCached || !keysToBeCached.length) {
+      return [];
+    }
+    this.redisClient.setCacheRefresh(keysToBeCached);
 
-    await this.redisClient.setCacheRefresh(keysToBeCached);
 
-    // If CR_SET not in LA_SET, remove the keys from CR_SET
-    const keysToBeRemoved = keys
+    // If CACHEREFRESH_SET not in LASTACCESS_SET, remove the keys from CACHEREFRESH_SET
+    const keysToBeRemoved = refreshKeys
       .filter((value: string) => accessedKeys.indexOf(value) === -1);
-
-    // If it is not there, remove the keys from CACHEREFRESH_SET
     if (keysToBeRemoved.length) {
-      debug(`expired keys found from CR_SET, removed ${keysToBeRemoved.length} keys`);
-
-      await this.redisClient.clearCacheRefresh(keysToBeRemoved);
+      debug(`expired keys found from CACHEREFRESH_SET, removed ${keysToBeRemoved.length} keys`);
+      this.redisClient.clearCacheRefresh(keysToBeRemoved);
       this.metrics.inc("fetchJob_removed_keys", keysToBeRemoved.length);
     }
 
     const keysToBeCachedLength = keysToBeCached.length;
-
     debug(`scanning keys, found ${keysToBeCachedLength} keys to be cached`);
     this.metrics.inc("fetchJob_caching_keys", keysToBeCachedLength);
 
@@ -171,8 +179,15 @@ export class FetchJob {
   }
 
   public async init() {
+
+    if (!this.jobActive) {
+      return;
+    }
+
     this.graphAccess = await this.yildiz.getGraphAccess();
-    debug("Running job to cache nodes");
+    debug(`Running job to cache nodes every ${this.fetchIntervalInSec} seconds`);
+    debug(`Job awaiting to complete is set to ${this.alwaysAwaiting}`);
+    debug(`Resolving Full Node is set to ${this.resolveNodes}`);
     this.resetJob();
   }
 
