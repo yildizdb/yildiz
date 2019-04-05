@@ -160,7 +160,7 @@ export class RedisClient {
 
     data = !Array.isArray(data) ? [data] : data;
 
-    if (!data || !data.length) {
+    if (!data || !(data as YildizSingleSchema[]).length) {
       return;
     }
 
