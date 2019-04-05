@@ -871,12 +871,16 @@ export class NodeHandler {
             return new Error(`${identifier} doesn't exist in cache`);
         }
         
-        this.redisClient.setExistence(identifier + "");
-
         if (this.awaitingSetTTL) {
-            await this.setTTL(TYPE_CACHES, identifier + "", this.cacheLifetime);
+            await Bluebird.all([
+                this.redisClient.setExistence(identifier + ""),
+                this.setTTL(TYPE_CACHES, identifier + "", this.cacheLifetime),
+            ]);
         } else {
-            this.setTTL(TYPE_CACHES, identifier + "", this.cacheLifetime);
+            Bluebird.all([
+                this.redisClient.setExistence(identifier + ""),
+                this.setTTL(TYPE_CACHES, identifier + "", this.cacheLifetime),
+            ]);
         }
     }
 
@@ -891,12 +895,16 @@ export class NodeHandler {
             return null;
         }
 
-        this.redisClient.setExistence(identifier + "");
-
         if (this.awaitingSetTTL) {
-            await this.setTTL(TYPE_CACHES, identifier + "", this.cacheLifetime);
+            await Bluebird.all([
+                this.redisClient.setExistence(identifier + ""),
+                this.setTTL(TYPE_CACHES, identifier + "", this.cacheLifetime),
+            ]);
         } else {
-            this.setTTL(TYPE_CACHES, identifier + "", this.cacheLifetime);
+            Bluebird.all([
+                this.redisClient.setExistence(identifier + ""),
+                this.setTTL(TYPE_CACHES, identifier + "", this.cacheLifetime),
+            ]);
         }
 
         return cache.value;
@@ -918,8 +926,8 @@ export class NodeHandler {
             },
         };
         
-        this.redisClient.setExistence(cache.identifier + "");
         await Bluebird.all([
+            this.redisClient.setExistence(cache.identifier + ""),
             this.setTTL(TYPE_CACHES, cache.identifier + "", this.cacheLifetime),
             row.save(saveData),
         ]);

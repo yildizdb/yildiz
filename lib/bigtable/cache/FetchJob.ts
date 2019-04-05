@@ -123,7 +123,7 @@ export class FetchJob {
 
     // Remove the keys from last LASTACCESS_SET that has expired
     const lastAccess = Date.now() - (this.fetchLastAccess * 1000);
-    const removedCounts = this.redisClient.clearLastAccessByExpiry(this.expireInSec * 1000);
+    const removedCounts = await this.redisClient.clearLastAccessByExpiry(this.expireInSec * 1000);
 
     if (removedCounts) {
       debug(`expired keys found from LASTACCESS_SET, removed ${removedCounts} keys`);
@@ -143,7 +143,7 @@ export class FetchJob {
     if (refreshKeys.length && (!accessedKeys || !accessedKeys.length)) {
       debug(`expired keys found from CACHEREFRESH_SET, removed ${refreshKeys.length} keys`);
 
-      this.redisClient.clearCacheRefresh(refreshKeys);
+      await this.redisClient.clearCacheRefresh(refreshKeys);
       this.metrics.inc("fetchJob_removed_keys", refreshKeys.length);
 
       return [];
@@ -158,15 +158,14 @@ export class FetchJob {
     if (!keysToBeCached || !keysToBeCached.length) {
       return [];
     }
-    this.redisClient.setCacheRefresh(keysToBeCached);
-
+    await this.redisClient.setCacheRefresh(keysToBeCached);
 
     // If CACHEREFRESH_SET not in LASTACCESS_SET, remove the keys from CACHEREFRESH_SET
     const keysToBeRemoved = refreshKeys
       .filter((value: string) => accessedKeys.indexOf(value) === -1);
     if (keysToBeRemoved.length) {
       debug(`expired keys found from CACHEREFRESH_SET, removed ${keysToBeRemoved.length} keys`);
-      this.redisClient.clearCacheRefresh(keysToBeRemoved);
+      await this.redisClient.clearCacheRefresh(keysToBeRemoved);
       this.metrics.inc("fetchJob_removed_keys", keysToBeRemoved.length);
     }
 

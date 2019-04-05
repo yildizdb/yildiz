@@ -143,9 +143,13 @@ export class RedisClient {
 
     identifiers = !Array.isArray(identifiers) ? [identifiers] : identifiers;
 
-    (identifiers as string[]).map((identifier: string) => {
-      this.redis.set(`${this.prefix}:${EXIST_KEY}:${identifier}`, true, "EX", this.ttl);
-    });
+    if (!identifiers || !identifiers.length) {
+      return;
+    }
+
+    return (identifiers as string[]).map((identifier: string) => 
+      this.redis.set(`${this.prefix}:${EXIST_KEY}:${identifier}`, true, "EX", this.ttl)
+    );
   }
 
   public setRightNode(data: YildizSingleSchema | YildizSingleSchema[]) {
@@ -156,9 +160,13 @@ export class RedisClient {
 
     data = !Array.isArray(data) ? [data] : data;
 
-    (data as YildizSingleSchema[]).map((node: YildizSingleSchema) => {
+    if (!data || !data.length) {
+      return;
+    }
+
+    return (data as YildizSingleSchema[]).map((node: YildizSingleSchema) => {
       const identifier = node.identifier || node.id;
-      this.redis.set(`${this.prefix}:${RIGHTNODE_KEY}:${identifier}`, JSON.stringify(node), "EX", this.ttl);
+      return this.redis.set(`${this.prefix}:${RIGHTNODE_KEY}:${identifier}`, JSON.stringify(node), "EX", this.ttl);
     });
   }
 
@@ -191,7 +199,7 @@ export class RedisClient {
     keys = !Array.isArray(keys) ? [keys] : keys;
     const redisKeys = keys.map((key: string) => `${this.prefix}:${EXIST_KEY}:${key}`);
 
-    return await this.redis.mget(...redisKeys);
+    return this.redis.mget(...redisKeys);
   }
 
   public async mgetRightNode(keys: string | string[]) {
@@ -203,7 +211,7 @@ export class RedisClient {
     keys = !Array.isArray(keys) ? [keys] : keys;
     const redisKeys = keys.map((key: string) => `${this.prefix}:${RIGHTNODE_KEY}:${key}`);
 
-    return await this.redis.mget(...redisKeys);
+    return this.redis.mget(...redisKeys);
   }
 
   public async getSize() {
