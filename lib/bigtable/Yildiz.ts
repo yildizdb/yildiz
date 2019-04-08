@@ -281,8 +281,6 @@ export class Yildiz {
 
     public async resetTables() {
 
-        const start = Date.now();
-
         const { instanceName } = this.config.database;
 
         const instance = this.bigtable.instance(instanceName);
@@ -300,6 +298,14 @@ export class Yildiz {
             const ttlTableName = `${this.prefix}_ttl`;
             const ttlTable = instance.table(ttlTableName);
             await ttlTable.delete();
+        } catch (error) {
+            // Ignore if the table does not exist
+        }
+
+        try {
+            const ttlTableReferenceName = `${this.prefix}_ttl_reference`;
+            const ttlTableReference = instance.table(ttlTableReferenceName);
+            await ttlTableReference.delete();
         } catch (error) {
             // Ignore if the table does not exist
         }
@@ -328,7 +334,7 @@ export class Yildiz {
             // Ignore if the table does not exist
         }
 
-        this.close();
+        return this.close();
     }
 
     private runJobs() {

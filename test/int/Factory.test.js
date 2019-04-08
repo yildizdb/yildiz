@@ -39,4 +39,12 @@ describe("Factory INT", () => {
         assert.ok(yildiz);
     }); 
 
+    it("should remove the tables created", async () => {
+
+        const yildiz = await factory.get(prefix);
+        await yildiz.resetTables();
+
+        assert.ok(true);
+    }); 
+
 });

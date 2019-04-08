@@ -129,9 +129,10 @@ export class FetchJob {
       debug(`expired keys found from LASTACCESS_SET, removed ${removedCounts} keys`);
     }
 
-    const [refreshKeys, accessedKeys] = await Bluebird.all([
+    const [refreshKeys, accessedKeys, recentlyRefreshedKeys] = await Bluebird.all([
       this.redisClient.getCacheRefresh(lastAccess, this.limit),
       this.redisClient.getLastAccess(lastAccess, this.limit),
+      this.redisClient.getRecentCacheRefresh(lastAccess, this.limit),
     ]);
 
     // If there are no keys found, return empty array
@@ -150,18 +151,20 @@ export class FetchJob {
     }
 
     // Get the intersection
-    // If LASTACCESS_SET not in CACHEREFRESH_SET,
-    // add the keys with the keys of CACHEREFRESH_SET to be cachedg
+    // If LASTACCESS_SET not in CACHEREFRESH_SET and recentlyRefreshedKeys (not recently refreshed)
     const keysToBeCached = accessedKeys
       .concat(refreshKeys || [])
-      .filter((value: string) => refreshKeys.indexOf(value) === -1);
+      .filter((value: string) => refreshKeys.indexOf(value) === -1)
+      .filter((value: string) => recentlyRefreshedKeys.indexOf(value) === -1);
     if (!keysToBeCached || !keysToBeCached.length) {
       return [];
     }
+
+    // add the keys with the keys of CACHEREFRESH_SET to be cached
     await this.redisClient.setCacheRefresh(keysToBeCached);
 
     // If CACHEREFRESH_SET not in LASTACCESS_SET, remove the keys from CACHEREFRESH_SET
-    const keysToBeRemoved = refreshKeys
+    const keysToBeRemoved = keysToBeCached
       .filter((value: string) => accessedKeys.indexOf(value) === -1);
     if (keysToBeRemoved.length) {
       debug(`expired keys found from CACHEREFRESH_SET, removed ${keysToBeRemoved.length} keys`);

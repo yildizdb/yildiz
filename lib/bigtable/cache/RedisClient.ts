@@ -190,6 +190,16 @@ export class RedisClient {
       .zrangebyscore(`${this.prefix}:${CACHEREFRESH_SET}`, 0, lastRefresh, "LIMIT", 0, limit);
   }
 
+  public getRecentCacheRefresh(lastRefresh: number, limit: number) {
+
+    if (this.redis.status !== "ready") {
+      throw new Error(NOT_CONNECTED);
+    }
+
+    return this.redis
+      .zrangebyscore(`${this.prefix}:${CACHEREFRESH_SET}`, lastRefresh, Date.now(), "LIMIT", 0, limit);
+  }
+
   public async mgetExistence(keys: string | string[]) {
 
     if (this.redis.status !== "ready") {
