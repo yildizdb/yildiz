@@ -134,15 +134,15 @@ export class GraphAccess {
         return result;
     }
 
-    private resolveOrBump(identifier: string) {
+    private async resolveOrBump(identifier: string) {
 
         const noMemoryCache = true;
 
-        // Whatever resolve first should do the caching job
-        return Bluebird.any([
-            this.fullDataResolver(identifier + "", noMemoryCache),
-            this.nodeHandler.bumpCacheByIdentifier(identifier),
-        ]);
+        const bumped = await this.nodeHandler.bumpCacheByIdentifier(identifier);
+
+        if (!bumped) {
+            return this.fullDataResolver(identifier + "", noMemoryCache);
+        }
     }
 
     public async init() {

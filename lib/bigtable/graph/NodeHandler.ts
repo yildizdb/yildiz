@@ -868,7 +868,7 @@ export class NodeHandler {
         const exists = cacheExists && cacheExists[0];
 
         if (!exists) {
-            return new Error(`${identifier} doesn't exist in cache`);
+            return false;
         }
         
         if (this.awaitingSetTTL) {
@@ -882,6 +882,7 @@ export class NodeHandler {
                 this.setTTL(TYPE_CACHES, identifier + "", this.cacheLifetime),
             ]);
         }
+        return true;
     }
 
     public async getCacheByIdentifier(identifier: string | number) {
