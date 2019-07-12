@@ -197,6 +197,7 @@ export class Metadata {
           }
 
           this.runIntervalSave(saveMetadataInSec);
+
       }, saveMetadataInSec * 1000);
     }
 
@@ -219,6 +220,12 @@ export class Metadata {
 
     public async close() {
 
+      try {
+        await this.save();
+      } catch(error) {
+        debug(error);
+      }
+
       if (this.tov) {
         clearTimeout(this.tov as NodeJS.Timer);
       }
@@ -226,7 +233,5 @@ export class Metadata {
       if (this.tovGetCount) {
         clearTimeout(this.tovGetCount as NodeJS.Timer);
       }
-
-      await this.save();
     }
 }

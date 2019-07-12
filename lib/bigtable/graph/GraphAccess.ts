@@ -64,10 +64,31 @@ export class GraphAccess {
         const nodeKeys = Object.keys(node)
             .filter((nodeKey: string) => nodeKey.includes("ec") || nodeKey.includes("ed"));
 
+        // If no other nodeKeys found just return the current node
         if (!nodeKeys.length) {
+
+            // Only put the data if it is not null and not empty object
+            if (node.data) {
+                if (typeof node.data === "object") {
+                    if (Object.keys(node.data).length) {
+                        node.data = node.data;
+                    } else {
+                        delete node.data;
+                    }
+                } else {
+                    // If number of string put it as data field
+                    node.data = node.data;
+                }
+            } else {
+                delete node.data;
+            }
+
+            delete node.ttld;
+
             return {
                 identifier: node.identifier,
                 value: node.value,
+                nodes: node
             };
         }
 
@@ -118,9 +139,12 @@ export class GraphAccess {
                     currentNode.data = node.data;
                 }
             } else {
+                // If number of string put it as data field
                 currentNode.data = node.data;
             }
         }
+
+        debug(currentNode);
 
         const result = {
             identifier: node.identifier,
@@ -248,7 +272,7 @@ export class GraphAccess {
             .filter((result) => !!result) as YildizSingleSchema[];
     }
 
-    public buildResult(resultArray?: AnyObject[]) {
+    private buildResult(resultArray?: AnyObject[]) {
 
         if (!resultArray || !resultArray.length) {
             return;
@@ -278,7 +302,7 @@ export class GraphAccess {
             .map((flattenResults) => flattenResults.nodes))
             .filter((singleResult: YildizSingleSchema) => {
 
-                if (!singleResult.identifier) {
+                if (!singleResult || !singleResult.identifier) {
                     return;
                 }
 
@@ -294,6 +318,10 @@ export class GraphAccess {
         result.edges = [].concat(...filteredResultArray
             .map((flattenResults) => flattenResults.edges))
             .filter((singleResult: YildizSingleSchema) => {
+
+                if (!singleResult) {
+                    return;
+                }
 
                 const key = `${singleResult.leftNodeId}_${singleResult.rightNodeId}_${singleResult.relation}`;
                 const exists = seenEdges[key];

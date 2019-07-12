@@ -683,9 +683,7 @@ export class NodeHandler {
         }
 
         const identifier = relation ? `${firstNodeId}#${secondNodeId}#${relation}` : `${firstNodeId}#${secondNodeId}`;
-
         const edge = await this.getRow(identifier, this.popnodeTable, this.columnFamilyPopnode.id);
-
         const timestamp = edge && edge.edgeTime || null;
 
         return timestamp;
@@ -756,7 +754,7 @@ export class NodeHandler {
         return result;
     }
 
-    public async removeNodeComplete(identifier: string | number) {
+    public async removeNodeComplete(identifier: string | number, isRightNode?: boolean) {
 
         const row = this.nodeTable.row(identifier + "");
 

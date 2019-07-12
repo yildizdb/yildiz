@@ -72,7 +72,7 @@ export class FetchJob {
 
       try {
         const startJob = Date.now();
-        await this.jobAction(startJob);
+        await this.jobAction(startJob, 0);
       } catch (error) {
         debug("error while running job", error);
         this.resetJob();
@@ -81,7 +81,7 @@ export class FetchJob {
     }, this.fetchIntervalInSec * 1000);
   }
 
-  private async jobAction(startJob: number): Promise<void> {
+  private async jobAction(startJob: number, keysTotal: number): Promise<void> {
 
     let keys = null;
 
@@ -95,9 +95,11 @@ export class FetchJob {
     if (!keys || !keys.length) {
       this.metrics.inc("fetchJob_runs");
       this.metrics.inc("fetchJob_duration", Date.now() - startJob);
-      debug(`fetchJob done took ${Date.now() - startJob} ms`);
+      debug(`fetchJob done cached ${keysTotal} keys, took ${Date.now() - startJob} ms`);
       return this.resetJob();
     }
+
+    keysTotal +=  keys.length;
 
     try {
       const startBatch = Date.now();
@@ -112,9 +114,9 @@ export class FetchJob {
     }
 
     if (this.alwaysAwaiting) {
-      return await this.jobAction(startJob);
+      return await this.jobAction(startJob, keysTotal);
     } else {
-      return this.jobAction(startJob);
+      return this.jobAction(startJob, keysTotal);
     }
 
   }
@@ -130,10 +132,10 @@ export class FetchJob {
       debug(`expired keys found from LASTACCESS_SET, removed ${removedCounts} keys`);
     }
 
-    const [refreshKeys, accessedKeys, recentlyRefreshedKeys] = await Bluebird.all([
-      this.redisClient.getCacheRefresh(lastAccess, this.limit),
+    const [accessedKeys, refreshKeys, recentlyRefreshedKeys] = await Bluebird.all([
       this.redisClient.getLastAccess(lastAccess, this.limit),
-      this.redisClient.getRecentCacheRefresh(lastAccess, this.limit),
+      this.redisClient.getCacheRefresh(lastAccess, this.limit),
+      this.redisClient.getRecentCacheRefresh(lastAccess),
     ]);
 
     // If there are no keys found, return empty array
@@ -152,11 +154,12 @@ export class FetchJob {
     }
 
     // Get the intersection
-    // If LASTACCESS_SET not in CACHEREFRESH_SET and recentlyRefreshedKeys (not recently refreshed)
+    // If LASTACCESS_SET union CACHEREFRESH_SET and not in recentlyRefreshedKeys (not recently refreshed)
+    // and curb the limit
     const keysToBeCached = accessedKeys
       .concat(refreshKeys || [])
-      .filter((value: string) => refreshKeys.indexOf(value) === -1)
-      .filter((value: string) => recentlyRefreshedKeys.indexOf(value) === -1);
+      .filter((value: string) => recentlyRefreshedKeys.indexOf(value) === -1)
+      .slice(0, this.limit);
     if (!keysToBeCached || !keysToBeCached.length) {
       return [];
     }
@@ -174,7 +177,7 @@ export class FetchJob {
     }
 
     const keysToBeCachedLength = keysToBeCached.length;
-    debug(`scanning keys, found ${keysToBeCachedLength} keys to be cached`);
+    debug("fetchJob_caching_keys", keysToBeCachedLength);
     this.metrics.inc("fetchJob_caching_keys", keysToBeCachedLength);
 
     // Otherwise cache the keys

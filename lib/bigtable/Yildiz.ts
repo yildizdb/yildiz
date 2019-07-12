@@ -36,11 +36,13 @@ export class Yildiz {
     private translator: Translator;
     private bigtable!: Bigtable;
     private ttlJob!: Lifetime;
+    private stage: string;
 
     constructor(prefix: string = "kn", config: ServiceConfig) {
 
         this.prefix = prefix;
         this.config = config;
+        this.stage = process.env["STAGE"] || "PROD";
         this.translator = new Translator();
     }
 
@@ -129,12 +131,16 @@ export class Yildiz {
             maxAgeSeconds,
         } = this.config.database;
 
-        const instance = this.bigtable.instance(instanceName);
+        const instance = this.bigtable.instance(instanceName); 
 
-        if (!hasRun) {
+        if (!hasRun && this.stage !== "LOCAL") {
             const instanceExists = await instance.exists();
             if (!instanceExists || !instanceExists[0]) {
+                debug("Instance", instanceName, "does not exist, creating..");
                 await instance.create();
+                debug("Instance", instanceName, "created.");
+            } else {
+                debug(`instance ${instanceName} exists`);
             }
         }
 
@@ -375,14 +381,6 @@ export class Yildiz {
 
         if (this.fetchJob) {
             this.fetchJob.close();
-        }
-
-        if (this.redisClient) {
-            await this.redisClient.close();
-        }
-
-        if (this.redisClient) {
-            await this.redisClient.close();
         }
 
         if (this.redisClient) {

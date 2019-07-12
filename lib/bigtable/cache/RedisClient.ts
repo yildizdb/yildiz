@@ -13,7 +13,6 @@ const EXIST_KEY = "exist";
 const RIGHTNODE_KEY = "rn";
 const CACHEREFRESH_SET = "cr_set";
 const LASTACCESS_SET = "la_set";
-const TTL_SET = "ttl_set";
 
 export class RedisClient {
 
@@ -190,14 +189,14 @@ export class RedisClient {
       .zrangebyscore(`${this.prefix}:${CACHEREFRESH_SET}`, 0, lastRefresh, "LIMIT", 0, limit);
   }
 
-  public getRecentCacheRefresh(lastRefresh: number, limit: number) {
+  public getRecentCacheRefresh(lastRefresh: number) {
 
     if (this.redis.status !== "ready") {
       throw new Error(NOT_CONNECTED);
     }
 
     return this.redis
-      .zrangebyscore(`${this.prefix}:${CACHEREFRESH_SET}`, lastRefresh, Date.now(), "LIMIT", 0, limit);
+      .zrangebyscore(`${this.prefix}:${CACHEREFRESH_SET}`, lastRefresh, Date.now());
   }
 
   public async mgetExistence(keys: string | string[]) {

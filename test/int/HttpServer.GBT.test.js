@@ -3,8 +3,8 @@
 const assert = require("assert");
 const request = require("request");
 const uuid = require("uuid");
-const fs = require("fs");
-const path = require("path");
+
+const {spawn, spawnSync} = require("child_process");
 
 const {
     HttpServer
@@ -49,6 +49,8 @@ const server = new HttpServer(port, Object.assign(
 
 const prefix = "http_test";
 
+let emulatorProcess;
+
 describe("HttpServer INT", () => {
 
     let transValue = uuid.v4();
@@ -65,12 +67,61 @@ describe("HttpServer INT", () => {
     let upsertNode3 = null;
     let upsertNode4 = null;
 
-    before(async() => {
+    before("start the BigTable emulator", () => {
+        process.env["BIGTABLE_EMULATOR_HOST"] = "127.0.0.1:8086";
+        emulatorProcess = spawn("sh", [
+            "-c",
+            "gcloud beta emulators bigtable start",
+        ]);
+    });
+
+    before("starting server", async() => {
+        process.env["STAGE"] = "LOCAL";
         await server.listen();
     });
 
-    after(async() => {
-        await server.close();
+    before("check if redis is up", async() => {
+        const redisTest = spawnSync("sh", [
+            "-c",
+            "redis-cli ping",
+        ]);
+
+        if (redisTest.status) {
+            throw Error("Redis is not up");
+        }
+    });
+
+    after("stopping server", async() => {
+        try {
+            await server.close();
+        } catch(error) {
+            console.log(error);
+        }
+    });
+
+    after("flushing redis db", async() => {
+        const redisFlush = spawnSync("sh", [
+            "-c",
+            "redis-cli flushdb",
+        ]);
+
+        if (redisFlush.status) {
+            throw Error("Redis is not flushed");
+        }
+    });
+    
+    after("stop the BigTable emulator", () => {
+
+        if (emulatorProcess) {
+            emulatorProcess.kill("SIGINT");
+        }
+    
+        spawnSync("sh", [
+            "-c",
+            "kill $(ps aux | grep '[c]btemulator' | awk '{print $2}')",
+        ]);
+    
+        delete process.env["BIGTABLE_EMULATOR_HOST"];
     });
 
     it("should be able to see root version", async() => {

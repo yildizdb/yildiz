@@ -317,8 +317,13 @@ export class Server {
         });
     }
 
-    public close() {
+    public async close() {
 
+        try {
+            await this.factory.closeAll();
+        } catch(error) {
+            debug(error);
+        }
         return new Bluebird((resolve) => {
             this.app.close(resolve);
         });
