@@ -144,8 +144,6 @@ export class GraphAccess {
             }
         }
 
-        debug(currentNode);
-
         const result = {
             identifier: node.identifier,
             value: node.value,

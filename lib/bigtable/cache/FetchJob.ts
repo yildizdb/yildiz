@@ -28,6 +28,7 @@ export class FetchJob {
   private resolveNodes: boolean;
   private alwaysAwaiting: boolean;
   private jobActive: boolean;
+  private fullDebug: boolean;
 
   private tov!: NodeJS.Timer | number;
   private graphAccess!: GraphAccess;
@@ -48,6 +49,7 @@ export class FetchJob {
       limit = DEFAULT_FETCH_LIMIT,
       resolveNodes = false,
       alwaysAwaiting = false,
+      fullDebug = false,
     } = this.config.fetchJob || {};
 
     // How long the keys are going to expire in redis
@@ -64,6 +66,7 @@ export class FetchJob {
 
     this.resolveNodes = resolveNodes;
     this.alwaysAwaiting = alwaysAwaiting;
+    this.fullDebug = fullDebug;
   }
 
   private resetJob() {
@@ -95,7 +98,9 @@ export class FetchJob {
     if (!keys || !keys.length) {
       this.metrics.inc("fetchJob_runs");
       this.metrics.inc("fetchJob_duration", Date.now() - startJob);
-      debug(`fetchJob done cached ${keysTotal} keys, took ${Date.now() - startJob} ms`);
+      if (this.fullDebug) {
+        debug(`fetchJob done cached ${keysTotal} keys, took ${Date.now() - startJob} ms`);
+      }
       return this.resetJob();
     }
 
@@ -177,7 +182,10 @@ export class FetchJob {
     }
 
     const keysToBeCachedLength = keysToBeCached.length;
-    debug("fetchJob_caching_keys", keysToBeCachedLength);
+
+    if (this.fullDebug) {
+      debug("fetchJob_caching_keys", keysToBeCachedLength);
+    }
     this.metrics.inc("fetchJob_caching_keys", keysToBeCachedLength);
 
     // Otherwise cache the keys

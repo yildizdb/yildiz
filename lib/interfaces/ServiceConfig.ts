@@ -48,6 +48,7 @@ export interface FetchJobConfig {
   limit?: number;
   resolveNodes?: boolean;
   alwaysAwaiting?: boolean;
+  fullDebug?: boolean;
 }
 
 export interface LookupCacheConfig {
