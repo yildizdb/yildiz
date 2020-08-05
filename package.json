@@ -59,7 +59,7 @@
     "commander": "~2.15.1",
     "cors": "~2.8.4",
     "debug": "~3.1.0",
-    "fastify": "~1.5.0",
+    "fastify": "~2.15.1",
     "ioredis": "~3.2.2",
     "memory-cache": "~0.2.0",
     "moment": "~2.22.2",
