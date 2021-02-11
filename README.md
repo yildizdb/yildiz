@@ -7,6 +7,8 @@
 </p>
 
 [![Build Status][build-badge]][build] [![Version][version-badge]][package] [![MIT License][license-badge]][license] ![node][node-badge] [![Swagger][swagger-badge]][swagger-url]
+[![Mentioned in Awesome Bigtable](https://awesome.re/mentioned-badge-flat.svg)](https://github.com/zrosenbauer/awesome-bigtable)
+
 
 ## Intro
 
