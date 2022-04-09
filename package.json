@@ -62,7 +62,7 @@
     "fastify": "~1.5.0",
     "ioredis": "~3.2.2",
     "memory-cache": "~0.2.0",
-    "moment": "~2.22.2",
+    "moment": "~2.29.2",
     "murmurhash": "~0.0.2",
     "prom-client": "~11.0.0",
     "toobusy-js": "^0.5.1",
